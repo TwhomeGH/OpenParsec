@@ -4,10 +4,18 @@ import Foundation
 
 struct ParsecStatusBar : View {
 	@Binding var showMenu : Bool
-	@State var metricInfo:String = "Loading..."
-	@Binding var showDCAlert:Bool
-	@Binding var DCAlertText:String
+	@State var metricInfo: String = "Loading..."
+	@Binding var showDCAlert: Bool
+	@Binding var DCAlertText: String
+	@State var parsecViewController: ParsecViewController?
 	let timer = Timer.publish(every: 0.2, on: .main, in: .common).autoconnect()
+
+	init(showMenu: Binding<Bool>, showDCAlert: Binding<Bool>, DCAlertText: Binding<String>, parsecViewController: ParsecViewController) {
+		_showMenu = showMenu
+		_showDCAlert = showDCAlert
+		_DCAlertText = DCAlertText
+		self.parsecViewController = parsecViewController
+	}
 	
 	var body: some View {
 		// Overlay elements
@@ -59,41 +67,73 @@ struct ParsecStatusBar : View {
 			let str = String.fromBuffer(&pcs.decoder.0.name.0, length:16)
 			metricInfo = "Decode \(String(format:"%.2f", pcs.`self`.metrics.0.decodeLatency))ms    Encode \(String(format:"%.2f", pcs.`self`.metrics.0.encodeLatency))ms    Network \(String(format:"%.2f", pcs.`self`.metrics.0.networkLatency))ms    Bitrate \(String(format:"%.2f", pcs.`self`.metrics.0.bitrate))Mbps    \(pcs.decoder.0.h265 ? "H265" : "H264") \(pcs.decoder.0.width)x\(pcs.decoder.0.height) \(pcs.decoder.0.color444 ? "4:4:4" : "4:2:0") \(str)"
 		}
+
+		if let pc = parsecViewController {
+			// Logic handled in ParsecViewController.scrollView
+		}
 	}
 }
 
-struct ParsecView:View
+// CRITICAL: This class exists to PERSIST the ParsecViewController instance across SwiftUI view updates.
+// Do not remove or change to a struct. If ParsecViewController is recreated, the keyboard responder chain breaks.
+class ParsecSession: ObservableObject {
+    let controller: ParsecViewController
+    
+    init() {
+        self.controller = ParsecViewController()
+    }
+}
+
+struct ParsecView: View
 {
 	var controller:ContentView?
 	
-	@State var showDCAlert:Bool = false
-	@State var DCAlertText:String = "Disconnected (reason unknown)"
-    @State var metricInfo:String = "Loading..."
+	@State var showDCAlert: Bool = false
+	@State var DCAlertText: String = "Disconnected (reason unknown)"
+    @State var metricInfo: String = "Loading..."
 	
-	@State var hideOverlay:Bool = false
-	@State var showMenu:Bool = false
+	@State var hideOverlay: Bool = false
+	@State var showMenu: Bool = false
 
-	@State var muted:Bool = false
-    @State var preferH265:Bool = true
+	@State var showKeyboard: Bool = false
+
+	@State var muted: Bool = false
+    @State var preferH265: Bool = true
 	@State var constantFps = false
 	
-	@State var resolutions : [ParsecResolution]
-	@State var bitrates : [Int]
+	@State var resolutions: [ParsecResolution]
+	@State var bitrates: [Int]
 	
-	var parsecViewController : ParsecViewController!
+    // Persist the VC across view updates using StateObject.
+    // CRITICAL: Changing this to @State or a simple var will break the keyboard after menu interactions.
+	@StateObject var session = ParsecSession()
+    
+    // Observer shared state for updates
+    @ObservedObject var dataModel = DataManager.model
+    
+    // Computed property for convenience refactoring
+    var parsecViewController: ParsecViewController {
+        return session.controller
+    }
 	
 	
-	//@State var showDisplays:Bool = false
+	//@State var showDisplays: Bool = false
 	
 	init(_ controller:ContentView?)
 	{
 		self.controller = controller
-		parsecViewController = ParsecViewController()
+		// parsecViewController logic moved to ParsecSession
+        
 		_resolutions = State(initialValue: ParsecResolution.resolutions)
 		_bitrates = State(initialValue: ParsecResolution.bitrates)
-	}
+	
+    }
+    
+    // We need to set up the callback somewhere safer than init.
+    // 'onAppear' is a good place, or inside the init of ParsecSession if possible (but it doesn't have access to binding).
+    // Let's use onAppear/post.
 
-	var body:some View
+	var body: some View
 	{
 		ZStack()
 		{
@@ -102,7 +142,7 @@ struct ParsecView:View
 				.zIndex(1)
 				.prefersPersistentSystemOverlaysHidden()
 			
-			ParsecStatusBar(showMenu: $showMenu, showDCAlert: $showDCAlert, DCAlertText: $DCAlertText)
+			ParsecStatusBar(showMenu: $showMenu, showDCAlert: $showDCAlert, DCAlertText: $DCAlertText, parsecViewController: parsecViewController)
 			
 			VStack()
 			{
@@ -131,6 +171,23 @@ struct ParsecView:View
 						.edgesIgnoringSafeArea(.all)
 						Spacer()
 					}
+					HStack()
+					{
+						Button(action: toggleKeyboard)
+						{
+							Image(systemName: "keyboard")
+								.resizable()
+								.aspectRatio(contentMode: .fit)
+								.frame(width:32, height:32)
+								.foregroundColor(Color("Foreground"))
+								.padding(8)
+								.background(Rectangle().fill(Color("BackgroundPrompt").opacity(showKeyboard ? 0.75 : 0.5)))
+								.cornerRadius(8)
+						}
+						.padding(.leading)
+						.edgesIgnoringSafeArea(.all)
+						Spacer()
+					}
 				}
 				if showMenu
 				{	
@@ -145,7 +202,7 @@ struct ParsecView:View
 									.frame(maxWidth:.infinity)
 									.multilineTextAlignment(.center)
 							}
-							Button(action:toggleMute)
+							Button(action: toggleMute)
 							{
 								Text("Sound: \(muted ? "OFF" : "ON")")
 									.padding(8)
@@ -154,8 +211,14 @@ struct ParsecView:View
 							}
 							Menu() {
 								ForEach(resolutions, id: \.self) { resolution in
-									Button(resolution.desc) {
+									Button(action: {
 										changeResolution(res: resolution)
+									}) {
+										if resolution.width == dataModel.resolutionX && resolution.height == dataModel.resolutionY {
+											Label(resolution.desc, systemImage: "checkmark")
+										} else {
+											Text(resolution.desc)
+										}
 									}
 								}
 							} label: {
@@ -166,8 +229,14 @@ struct ParsecView:View
 							}
 							Menu() {
 								ForEach(bitrates, id: \.self) { bitrate in
-									Button("\(bitrate) Mbps") {
+									Button(action: {
 										changeBitRate(bitrate: bitrate)
+									}) {
+                                        if bitrate == dataModel.bitrate {
+                                            Label("\(bitrate) Mbps", systemImage: "checkmark")
+                                        } else {
+                                            Text("\(bitrate) Mbps")
+                                        }
 									}
 								}
 							} label: {
@@ -194,9 +263,16 @@ struct ParsecView:View
 								}
 							}
 
-							Button(action:toggleConstantFps)
+							Button(action: toggleConstantFps)
 							{
 								Text("Constant FPS: \(constantFps ? "ON" : "OFF")")
+									.padding(8)
+									.frame(maxWidth:.infinity)
+									.multilineTextAlignment(.center)
+							}
+							Button(action: toggleKeyboard)
+							{
+								Text("Keyboard: \(showKeyboard ? "ON" : "OFF")")
 									.padding(8)
 									.frame(maxWidth:.infinity)
 									.multilineTextAlignment(.center)
@@ -230,7 +306,7 @@ struct ParsecView:View
 		.statusBarHidden(SettingsHandler.hideStatusBar)
 		.alert(isPresented:$showDCAlert)
 		{
-			Alert(title:Text(DCAlertText), dismissButton:.default(Text("Close"), action:disconnect))
+			Alert(title: Text(DCAlertText), dismissButton:.default(Text("Close"), action:disconnect))
 		}
 		.onAppear(perform:post)
 		.edgesIgnoringSafeArea(.all)
@@ -241,16 +317,23 @@ struct ParsecView:View
 	{
 		CParsec.applyConfig()
 		CParsec.setMuted(muted)
-		
+
 		// set client resolution
 		let screenSize: CGSize = self.parsecViewController.view.frame.size
 		let scaleFactor = UIScreen.main.nativeScale
 		ParsecResolution.resolutions[1].width = Int(screenSize.width * scaleFactor)
 		ParsecResolution.resolutions[1].height = Int(screenSize.height * scaleFactor)
-		
+
 		getHostUserData()
-		
+
 		hideOverlay = SettingsHandler.noOverlay
+
+        // Setup callback to update local state
+        parsecViewController.onKeyboardVisibilityChanged = { visible in
+            showKeyboard = visible
+        }
+
+		parsecViewController.setKeyboardVisible(showKeyboard)
 	}
 	
 	
@@ -277,7 +360,7 @@ struct ParsecView:View
 		{
 			return withUnsafePointer(to:output.device)
 			{
-				$0.withMemoryRebound(to:UInt8.self, capacity:MemoryLayout.size(ofValue:$0))
+				$0.withMemoryRebound(to: UInt8.self, capacity:MemoryLayout.size(ofValue:$0))
 				{
 					String(cString:$0)
 				}
@@ -288,13 +371,16 @@ struct ParsecView:View
 		{ i, output in
 			Alert.Button.default(Text("\(i) - \(getDeviceName(output))"), action:{print("Selected device \(i)")})
 		}
-		return ActionSheet(title:Text("Select a Display:"), buttons:buttons + [Alert.Button.cancel()])
+		return ActionSheet(title: Text("Select a Display:"), buttons:buttons + [Alert.Button.cancel()])
 	}*/
 	
 	func disconnect()
 	{
 		CParsec.disconnect()
 		self.parsecViewController.glkView.cleanUp()
+		
+		parsecViewController.scrollView.zoomScale = 1.0
+		parsecViewController.scrollView.contentOffset = .zero
 
 		if let c = controller
 		{
@@ -303,25 +389,47 @@ struct ParsecView:View
 	}
 	
 	func changeResolution(res: ParsecResolution) {
-		DataManager.model.resolutionX = res.width
-		DataManager.model.resolutionY = res.height
-		CParsec.updateHostVideoConfig()
+        // Save to SettingsHandler for persistence
+        SettingsHandler.resolution = res
+        SettingsHandler.save()
+
+		DispatchQueue.main.async {
+			DataManager.model.resolutionX = res.width
+			DataManager.model.resolutionY = res.height
+			CParsec.updateHostVideoConfig()
+		}
 	}
 
 	func changeBitRate(bitrate: Int) {
-		DataManager.model.bitrate = bitrate
-		CParsec.updateHostVideoConfig()
+		SettingsHandler.bitrate = bitrate
+		SettingsHandler.save()
+
+		DispatchQueue.main.async {
+			DataManager.model.bitrate = bitrate
+			CParsec.updateHostVideoConfig()
+		}
 	}
 	
 	func toggleConstantFps() {
-		DataManager.model.constantFps.toggle()
-		constantFps = DataManager.model.constantFps
-		CParsec.updateHostVideoConfig()
+		DispatchQueue.main.async {
+			DataManager.model.constantFps.toggle()
+			constantFps = DataManager.model.constantFps
+			CParsec.updateHostVideoConfig()
+		}
+	}
+
+	func toggleKeyboard() {
+		DispatchQueue.main.async {
+			showKeyboard.toggle()
+			parsecViewController.setKeyboardVisible(showKeyboard)
+		}
 	}
 	
 	func changeDisplay(displayId: String) {
-		DataManager.model.output = displayId
-		CParsec.updateHostVideoConfig()
+		DispatchQueue.main.async {
+			DataManager.model.output = displayId
+			CParsec.updateHostVideoConfig()
+		}
 	}
 	
 	func getHostUserData() {

@@ -5,17 +5,18 @@ import UIKit
 class TouchController
 {
 	let viewController: UIViewController
+
 	init(viewController: UIViewController) {
 		self.viewController = viewController
 	}
 	
-	func onTouch(typeOfTap:Int, location:CGPoint, state:UIGestureRecognizer.State)
-	{
+	func onTouch(typeOfTap:Int, location:CGPoint, state: UIGestureRecognizer.State) {
+
 		let x = Int32(location.x)
 		let y = Int32(location.y)
 
 		// Send the mouse input to the host
-		let parsecTap = ParsecMouseButton(rawValue:UInt32(typeOfTap))
+		let parsecTap = ParsecMouseButton(rawValue: UInt32(typeOfTap))
 		switch state
 		{
 			case .began:
@@ -29,9 +30,10 @@ class TouchController
 		}
 	}
 
-	func onTap(typeOfTap:Int, location:CGPoint)
-	{
-		let parsecTap = ParsecMouseButton(rawValue:UInt32(typeOfTap))
+	func onTap(typeOfTap:Int, location:CGPoint) {
+
+		let parsecTap = ParsecMouseButton(rawValue: UInt32(typeOfTap))
+
 		if SettingsHandler.cursorMode == .direct {
 			let x = Int32(location.x)
 			let y = Int32(location.y)
@@ -49,17 +51,8 @@ class TouchController
 				CParsec.sendMouseClickMessage(parsecTap, false)
 			}
 		}
-
 	}
 
-	public func viewDidLoad()
-	{
+	public func viewDidLoad() { }
 
-
-		
-	}
-
-
-
-	
 }

@@ -2,30 +2,32 @@ import SwiftUI
 
 struct SettingsView:View
 {
-	@Binding var visible:Bool
+	@Binding var visible: Bool
 
 	//@State var renderer:RendererType = SettingsHandler.renderer
-	@State var decoder:DecoderPref = SettingsHandler.decoder
-	@State var cursorMode:CursorMode = SettingsHandler.cursorMode
-	@State var rightClickPosition:RightClickPosition = SettingsHandler.rightClickPosition
+	@State var decoder: DecoderPref = SettingsHandler.decoder
+	@State var cursorMode: CursorMode = SettingsHandler.cursorMode
+	@State var rightClickPosition: RightClickPosition = SettingsHandler.rightClickPosition
 	@State var resolution : ParsecResolution = SettingsHandler.resolution
-	@State var cursorScale:Float = SettingsHandler.cursorScale
+	@State var cursorScale: Float = SettingsHandler.cursorScale
 	@State var mouseSensitivity:Float = SettingsHandler.mouseSensitivity
-	@State var noOverlay:Bool = SettingsHandler.noOverlay
-	@State var hideStatusBar:Bool = SettingsHandler.hideStatusBar
-	
-	let resolutionChoices : [Choice<ParsecResolution>]
+	@State var noOverlay: Bool = SettingsHandler.noOverlay
+	@State var hideStatusBar: Bool = SettingsHandler.hideStatusBar
+	@State var preferredFramesPerSecond: Int = SettingsHandler.preferredFramesPerSecond
+	@State var decoderCompatibility: Bool = SettingsHandler.decoderCompatibility
+
+	let resolutionChoices: [Choice<ParsecResolution>]
 
 	init(visible: Binding<Bool>) {
 		_visible = visible
-		var tmp : [Choice<ParsecResolution>] = []
+		var tmp: [Choice<ParsecResolution>] = []
 		for res in ParsecResolution.resolutions {
 			tmp.append(Choice(res.desc, res))
 		}
 		resolutionChoices = tmp
 	}
 	
-	var body:some View
+	var body: some View
 	{
 		ZStack()
 		{
@@ -57,7 +59,7 @@ struct SettingsView:View
 						{
 							HStack()
 							{
-								Button(action:saveAndExit, label:{ Image(systemName:"xmark").scaleEffect(x:-1) })
+								Button(action: saveAndExit, label:{ Image(systemName:"xmark").scaleEffect(x:-1) })
 								 .padding()
 								Spacer()
 							}
@@ -120,16 +122,31 @@ struct SettingsView:View
                             }*/
 							CatItem("Default Resolution")
 							{
-								MultiPicker(selection:$resolution, options:resolutionChoices)
+								MultiPicker(selection: $resolution, options:resolutionChoices)
 							}
                             CatItem("Decoder")
                             {
-								MultiPicker(selection:$decoder, options:
+								MultiPicker(selection: $decoder, options:
 								[
 									Choice("H.264", DecoderPref.h264),
 									Choice("Prefer H.265", DecoderPref.h265)
 								])
                             }
+							CatItem("Frame Rate")
+							{
+								MultiPicker(selection: $preferredFramesPerSecond, options:
+								[
+									Choice("Auto (Device Max)", 0),
+									Choice("120 FPS", 120),
+									Choice("60 FPS", 60),
+									Choice("30 FPS", 30)
+								])
+							}
+							CatItem("Decoder Compatibility")
+							{
+								Toggle("", isOn:$decoderCompatibility)
+									.frame(width:80)
+							}
                         }
                         CatTitle("Misc")
                         CatList()
@@ -174,17 +191,19 @@ struct SettingsView:View
 		SettingsHandler.noOverlay = noOverlay
 		SettingsHandler.hideStatusBar = hideStatusBar
 		SettingsHandler.mouseSensitivity = mouseSensitivity
+		SettingsHandler.preferredFramesPerSecond = preferredFramesPerSecond
+		SettingsHandler.decoderCompatibility = decoderCompatibility
 		SettingsHandler.save()
-		
+
 		visible = false
 	}
 }
 
 struct SettingsView_Previews:PreviewProvider
 {
-	@State static var value:Bool = true
+	@State static var value: Bool = true
 
-	static var previews:some View
+	static var previews: some View
 	{
 		SettingsView(visible:$value)
 	}

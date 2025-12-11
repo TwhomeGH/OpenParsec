@@ -1,7 +1,7 @@
 /*import SwiftUI
 import MetalKit
 
-struct ParsecMetalViewController:UIViewRepresentable
+struct ParsecMetalViewController: UIViewRepresentable
 {
 	let onBeforeRender:() -> Void
 	
@@ -10,7 +10,7 @@ struct ParsecMetalViewController:UIViewRepresentable
 		ParsecMetalRenderer(self, onBeforeRender)
 	}
 	
-	func makeUIView(context:UIViewRepresentableContext<ParsecMetalViewController>) -> MTKView
+	func makeUIView(context: UIViewRepresentableContext<ParsecMetalViewController>) -> MTKView
 	{
 		let metalView = MTKView()
 		metalView.delegate = context.coordinator
@@ -27,5 +27,5 @@ struct ParsecMetalViewController:UIViewRepresentable
 		return metalView
 	}
 	
-	func updateUIView(_ uiView:MTKView, context:UIViewRepresentableContext<ParsecMetalViewController>) { }
+	func updateUIView(_ uiView:MTKView, context: UIViewRepresentableContext<ParsecMetalViewController>) { }
 }*/

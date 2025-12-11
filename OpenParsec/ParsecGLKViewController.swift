@@ -1,7 +1,7 @@
 //import SwiftUI
 //import GLKit
 //
-//struct ParsecGLKViewController:UIViewControllerRepresentable
+//struct ParsecGLKViewController: UIViewControllerRepresentable
 //{
 //	let glkView = GLKView()
 //	let glkViewController = GLKViewController()
@@ -12,7 +12,7 @@
 //		ParsecGLKRenderer(glkView, glkViewController, onBeforeRender)
 //	}
 //
-//	func makeUIViewController(context:UIViewControllerRepresentableContext<ParsecGLKViewController>) -> GLKViewController
+//	func makeUIViewController(context: UIViewControllerRepresentableContext<ParsecGLKViewController>) -> GLKViewController
 //	{
 //		glkView.context = EAGLContext(api:.openGLES3)!
 //		glkViewController.view = glkView
@@ -20,7 +20,7 @@
 //		return glkViewController
 //	}
 //
-//	func updateUIViewController(_ uiViewController:GLKViewController, context:UIViewControllerRepresentableContext<ParsecGLKViewController>) { }
+//	func updateUIViewController(_ uiViewController:GLKViewController, context: UIViewControllerRepresentableContext<ParsecGLKViewController>) { }
 //}
 
 import UIKit
@@ -52,7 +52,16 @@ class ParsecGLKViewController : ParsecPlayground {
 	private func setupGLKViewController() {
 		glkView.context = EAGLContext(api: .openGLES3)!
 		glkViewController.view = glkView
-		glkViewController.preferredFramesPerSecond = 60
+
+		// Use configured FPS or device max (for ProMotion displays)
+		let fps = SettingsHandler.preferredFramesPerSecond
+		if fps == 0 {
+			// Use device's maximum refresh rate (120Hz on ProMotion iPads)
+			glkViewController.preferredFramesPerSecond = Int(UIScreen.main.maximumFramesPerSecond)
+		} else {
+			glkViewController.preferredFramesPerSecond = fps
+		}
+
 		self.viewController.addChild(glkViewController)
 		self.viewController.view.addSubview(glkViewController.view)
 		self.glkViewController.didMove(toParent: self.viewController)

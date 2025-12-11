@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-var appScheme:ColorScheme = .dark
+var appScheme: ColorScheme = .dark
 
 struct GLBData
 {
@@ -15,7 +15,7 @@ class GLBDataModel
 
 extension String
 {
-	static func fromBuffer(_ ptr:UnsafeMutablePointer<CChar>, length len:Int) -> String
+	static func fromBuffer(_ ptr: UnsafeMutablePointer<CChar>, length len:Int) -> String
 	{
 		// convert C char bytes using the UTF8 encoding
 		let nsstr = NSString(bytes:ptr, length:len, encoding:NSUTF8StringEncoding)
@@ -75,7 +75,7 @@ class SharedModel: ObservableObject {
 	@Published var bitrate = 0
 	@Published var constantFps = false
 	@Published var output = "none"
-	@Published var displayConfigs : [ParsecDisplayConfig] = []
+	@Published var displayConfigs: [ParsecDisplayConfig] = []
 	
 }
 

@@ -369,7 +369,7 @@ class KeyCodeTranslators {
 		}
 	}
 
-	static func parsecKeyCodeTranslator(_ str:String) -> ParsecKeycode?
+	static func parsecKeyCodeTranslator(_ str: String) -> ParsecKeycode?
 	{
 		switch str
 		{
@@ -399,6 +399,7 @@ class KeyCodeTranslators {
 			case "X": return ParsecKeycode(27)
 			case "Y": return ParsecKeycode(28)
 			case "Z": return ParsecKeycode(29)
+            case "Ñ": return ParsecKeycode(51)
 			case "1": return ParsecKeycode(30)
 			case "2": return ParsecKeycode(31)
 			case "3": return ParsecKeycode(32)

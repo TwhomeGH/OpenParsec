@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-struct UIViewControllerWrapper<Wrapped:UIViewController>:UIViewControllerRepresentable
+struct UIViewControllerWrapper<Wrapped: UIViewController>: UIViewControllerRepresentable
 {
 	typealias UIViewControllerType = Wrapped
 

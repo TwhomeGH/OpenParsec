@@ -1,10 +1,3 @@
-//
-//  KeyBoardTest.swift
-//  OpenParsec
-//
-//  Created by s s on 2024/5/10.
-//
-
 import Foundation
 import ParsecSDK
 import UIKit
@@ -20,7 +13,7 @@ struct TestView : View {
 		self.controller = controller
 	}
 	
-	var body:some View
+	var body: some View
 	{
 			
 			UIViewControllerWrapper(KeyboardTestController())
@@ -28,7 +21,7 @@ struct TestView : View {
 	}
 }
 
-class KeyboardTestController:UIViewController
+class KeyboardTestController: UIViewController
 {
 	var id = 0
 	

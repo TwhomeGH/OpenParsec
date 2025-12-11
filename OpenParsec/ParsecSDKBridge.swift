@@ -2,25 +2,25 @@ import ParsecSDK
 import MetalKit
 import UIKit
 
-enum RendererType:Int
+enum RendererType: Int
 {
 	case opengl
     case metal
 }
 
-enum DecoderPref:Int
+enum DecoderPref: Int
 {
     case h264
     case h265
 }
 
-enum CursorMode:Int
+enum CursorMode: Int
 {
     case touchpad
     case direct
 }
 
-enum RightClickPosition:Int
+enum RightClickPosition: Int
 {
 	case firstFinger
 	case middle
@@ -39,20 +39,20 @@ class ParsecSDKBridge: ParsecService
 	var hostHeight: Float = 1080
 	
 	
-	static let PARSEC_VER:UInt32 = UInt32((PARSEC_VER_MAJOR << 16) | PARSEC_VER_MINOR)
+	static let PARSEC_VER: UInt32 = UInt32((PARSEC_VER_MAJOR << 16) | PARSEC_VER_MINOR)
 	
-	private var _parsec:OpaquePointer!
-	private var _audio:OpaquePointer!
-	private let _audioPtr:UnsafeRawPointer
+	private var _parsec: OpaquePointer!
+	private var _audio: OpaquePointer!
+	private let _audioPtr: UnsafeRawPointer
 	
 	private var isVirtualShiftOn = false
 	
-	public var clientWidth:Float = 1920
-	public var clientHeight:Float = 1080
+	public var clientWidth: Float = 1920
+	public var clientHeight: Float = 1080
 	
-	public var netProtocol:Int32 = 1
-	public var mediaContainer:Int32 = 0
-	public var pngCursor:Bool = false
+	public var netProtocol: Int32 = 1
+	public var mediaContainer: Int32 = 0
+	public var pngCursor: Bool = false
 	var backgroundTaskRunning = true
 	var didSetResolution = false
 	
@@ -86,60 +86,59 @@ class ParsecSDKBridge: ParsecService
 
 	}
 	
-	deinit
-	{
-		
+	deinit {
 		ParsecDestroy(_parsec)
 		audio_destroy(&_audio)
 	}
 	
-	func connect(_ peerID:String) -> ParsecStatus
-	{
+	func connect(_ peerID: String) -> ParsecStatus {
+
 		var parsecClientCfg = ParsecClientConfig()
 		parsecClientCfg.video.0.decoderIndex = 1
-		parsecClientCfg.video.0.resolutionX = 0
-		parsecClientCfg.video.0.resolutionY = 0
-		parsecClientCfg.video.0.decoderCompatibility = false
-		parsecClientCfg.video.0.decoderH265 = true
-		
+        // Use saved resolution from SettingsHandler
+		parsecClientCfg.video.0.resolutionX = Int32(SettingsHandler.resolution.width)
+		parsecClientCfg.video.0.resolutionY = Int32(SettingsHandler.resolution.height)
+		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.decoderCompatibility
+		parsecClientCfg.video.0.decoderH265 = SettingsHandler.decoder == .h265
+
 		parsecClientCfg.video.1.decoderIndex = 1
-		parsecClientCfg.video.1.resolutionX = 0
-		parsecClientCfg.video.1.resolutionY = 0
-		parsecClientCfg.video.1.decoderCompatibility = false
-		parsecClientCfg.video.1.decoderH265 = true
-		
+		parsecClientCfg.video.1.resolutionX = Int32(SettingsHandler.resolution.width)
+		parsecClientCfg.video.1.resolutionY = Int32(SettingsHandler.resolution.height)
+		parsecClientCfg.video.1.decoderCompatibility = SettingsHandler.decoderCompatibility
+		parsecClientCfg.video.1.decoderH265 = SettingsHandler.decoder == .h265
+
 		parsecClientCfg.mediaContainer = 0
 		parsecClientCfg.protocol = 1
 		//parsecClientCfg.secret = ""
 		parsecClientCfg.pngCursor = false
-		
+
 		self.startBackgroundTask()
-		
+
 		return ParsecClientConnect(_parsec, &parsecClientCfg, NetworkHandler.clinfo?.session_id, peerID)
 	}
 	
-	func disconnect()
-	{
+	func disconnect() {
+		
 		audio_clear(&_audio)
 		ParsecClientDisconnect(_parsec)
 		backgroundTaskRunning = false
 	}
 	
-	func getStatus() -> ParsecStatus
-	{
+	func getStatus() -> ParsecStatus {
+		
 		return ParsecClientGetStatus(_parsec, nil)
 	}
 	
-	func getStatusEx(_ pcs:inout ParsecClientStatus) -> ParsecStatus
-	{
+	func getStatusEx(_ pcs:inout ParsecClientStatus) -> ParsecStatus {
+		
 		self.hostHeight = Float(pcs.decoder.0.height)
 		self.hostWidth = Float(pcs.decoder.0.width)
 		return ParsecClientGetStatus(_parsec, &pcs)
 		
 	}
 	
-	func setFrame(_ width:CGFloat, _ height:CGFloat, _ scale:CGFloat)
-	{
+	func setFrame(_ width:CGFloat, _ height:CGFloat, _ scale: CGFloat) {
+		
 		ParsecClientSetDimensions(_parsec, UInt8(DEFAULT_STREAM), UInt32(width), UInt32(height), Float(scale))
 		
 		clientWidth = Float(width)
@@ -148,17 +147,18 @@ class ParsecSDKBridge: ParsecService
 		mouseInfo.mouseY = Int32(height / 2)
 	}
 	
-	func renderGLFrame(timeout:UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
-	{
+	// timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
+	func renderGLFrame(timeout: UInt32 = 16) {
+		
 		ParsecClientGLRenderFrame(_parsec, UInt8(DEFAULT_STREAM), nil, nil, timeout)
 	}
 	
-	/*static func renderMetalFrame(_ queue:inout MTLCommandQueue, _ texturePtr:UnsafeMutablePointer<UnsafeMutableRawPointer?>, timeout:UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
+	/*static func renderMetalFrame(_ queue:inout MTLCommandQueue, _ texturePtr: UnsafeMutablePointer<UnsafeMutableRawPointer?>, timeout: UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	 {
 	 ParsecClientMetalRenderFrame(_parsec, UInt8(DEFAULT_STREAM), &queue, texturePtr, nil, nil, timeout)
 	 }*/
 	
-	func pollAudio(timeout:UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
+	func pollAudio(timeout: UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	{
 		ParsecClientPollAudio(_parsec, audio_cb, timeout, _audioPtr)
 	}
@@ -166,7 +166,7 @@ class ParsecSDKBridge: ParsecService
 	var getFirstCursor = false
 	var mousePositionRelative = false
 	
-	func pollEvent(timeout:UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
+	func pollEvent(timeout: UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	{
 		var e: ParsecClientEvent!
 		var _event = ParsecClientEvent()
@@ -186,6 +186,7 @@ class ParsecSDKBridge: ParsecService
 	}
 	
 	func handleUserDataEvent(event: ParsecClientUserDataEvent) {
+		
 		let pointer = ParsecGetBuffer(_parsec, event.key)
 		switch event.id {
 		case 11:
@@ -193,13 +194,14 @@ class ParsecSDKBridge: ParsecService
 				let decoder = JSONDecoder()
 				let config = try decoder.decode(ParsecUserDataVideoConfig.self, from: Data(bytesNoCopy: pointer!, count: strlen(pointer!), deallocator: .none))
 				let videoConfig = config.video[0]
-				DataManager.model.resolutionX = videoConfig.resolutionX
-				DataManager.model.resolutionY = videoConfig.resolutionY
-				DataManager.model.bitrate = videoConfig.encoderMaxBitrate
-				DataManager.model.constantFps = videoConfig.fullFPS
-				if !didSetResolution {
-					didSetResolution = true
-					DispatchQueue.main.async {
+
+				DispatchQueue.main.async {
+					DataManager.model.resolutionX = videoConfig.resolutionX
+					DataManager.model.resolutionY = videoConfig.resolutionY
+					DataManager.model.bitrate = videoConfig.encoderMaxBitrate
+					DataManager.model.constantFps = videoConfig.fullFPS
+					if !self.didSetResolution {
+						self.didSetResolution = true
 						DataManager.model.resolutionX = SettingsHandler.resolution.width
 						DataManager.model.resolutionY = SettingsHandler.resolution.height
 						self.updateHostVideoConfig()
@@ -213,14 +215,18 @@ class ParsecSDKBridge: ParsecService
 			do {
 				let decoder = JSONDecoder()
 				let config = try decoder.decode(Array<ParsecDisplayConfig>.self, from: Data(bytesNoCopy: pointer!, count: strlen(pointer!), deallocator: .none))
-				DataManager.model.displayConfigs = config
+				DispatchQueue.main.async {
+					DataManager.model.displayConfigs = config
+				}
 			} catch {
 				print("error while parsing user data: \(error.localizedDescription)")
 			}
 		default:
 			break
 		}
+		
 		ParsecFree(pointer)
+		
 	}
 	
 	func handleCursorEvent(event: ParsecClientCursorEvent) {
@@ -240,7 +246,7 @@ class ParsecSDKBridge: ParsecService
 			let height = event.cursor.height
 			mouseInfo.cursorWidth = Int(width)
 			mouseInfo.cursorHeight = Int(height)
-			// 之前隐藏现在不隐藏了就更新
+			
 			if prevHidden && !event.cursor.hidden {
 				mouseInfo.mouseX = Int32(event.cursor.positionX)
 				mouseInfo.mouseY = Int32(event.cursor.positionY)
@@ -262,36 +268,35 @@ class ParsecSDKBridge: ParsecService
 		}
 	}
 	
-	func setMuted(_ muted:Bool)
-	{
+	func setMuted(_ muted: Bool) {
 		audio_mute(muted, _audioPtr)
 	}
 	
-	func applyConfig()
-	{
+	func applyConfig() {
+
 		var parsecClientCfg = ParsecClientConfig()
-		
+
 		parsecClientCfg.video.0.decoderIndex = 1
 		parsecClientCfg.video.0.resolutionX = 0
 		parsecClientCfg.video.0.resolutionY = 0
-		parsecClientCfg.video.0.decoderCompatibility = false
+		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.decoderCompatibility
 		parsecClientCfg.video.0.decoderH265 = SettingsHandler.decoder == .h265
-		
+
 		parsecClientCfg.video.1.decoderIndex = 1
 		parsecClientCfg.video.1.resolutionX = 0
 		parsecClientCfg.video.1.resolutionY = 0
-		parsecClientCfg.video.1.decoderCompatibility = false
+		parsecClientCfg.video.1.decoderCompatibility = SettingsHandler.decoderCompatibility
 		parsecClientCfg.video.1.decoderH265 = SettingsHandler.decoder == .h265
-		
+
 		parsecClientCfg.mediaContainer = mediaContainer
 		parsecClientCfg.protocol = netProtocol
 		//parsecClientCfg.secret = ""
 		parsecClientCfg.pngCursor = pngCursor
-		
+
 		ParsecClientSetConfig(_parsec, &parsecClientCfg);
 	}
 	
-	func sendMouseMessage(_ button:ParsecMouseButton, _ x:Int32, _ y:Int32, _ pressed:Bool)
+	func sendMouseMessage(_ button:ParsecMouseButton, _ x:Int32, _ y:Int32, _ pressed: Bool)
 	{
 		// Send the mouse position
 		sendMousePosition(x, y)
@@ -304,7 +309,7 @@ class ParsecSDKBridge: ParsecService
 		ParsecClientSendMessage(_parsec, &buttonMessage)
 	}
 	
-	func sendMouseClickMessage(_ button:ParsecMouseButton, _ pressed:Bool) {
+	func sendMouseClickMessage(_ button:ParsecMouseButton, _ pressed: Bool) {
 		var buttonMessage = ParsecMessage()
 		buttonMessage.type = MESSAGE_MOUSE_BUTTON
 		buttonMessage.mouseButton.button = button
@@ -435,7 +440,7 @@ class ParsecSDKBridge: ParsecService
 		ParsecClientSendMessage(_parsec, &keyboardMessagePress)
 	}
 	
-	func sendGameControllerButtonMessage(controllerId:UInt32, _ button:ParsecGamepadButton, pressed:Bool)
+	func sendGameControllerButtonMessage(controllerId: UInt32, _ button:ParsecGamepadButton, pressed: Bool)
 	{
 		var pmsg = ParsecMessage()
 		pmsg.type = MESSAGE_GAMEPAD_BUTTON
@@ -445,7 +450,7 @@ class ParsecSDKBridge: ParsecService
 		ParsecClientSendMessage(_parsec, &pmsg)
 	}
 	
-	/*static func sendGameControllerTriggerButtonMessage(controllerId:UInt32, _ button:ParsecGamepadAxis, pressed:Bool)
+	/*static func sendGameControllerTriggerButtonMessage(controllerId: UInt32, _ button:ParsecGamepadAxis, pressed: Bool)
 	{
 	    var pmsg = ParsecMessage()
 		pmsg.type = MESSAGE_GAMEPAD_AXIS
@@ -455,7 +460,7 @@ class ParsecSDKBridge: ParsecService
 		ParsecClientSendMessage(_parsec, &pmsg)
 	}*/
 	
-	func sendGameControllerAxisMessage(controllerId:UInt32, _ button:ParsecGamepadAxis, _ value: Int16)
+	func sendGameControllerAxisMessage(controllerId: UInt32, _ button:ParsecGamepadAxis, _ value: Int16)
 	{
 	    var pmsg = ParsecMessage()
 		pmsg.type = MESSAGE_GAMEPAD_AXIS
@@ -465,7 +470,7 @@ class ParsecSDKBridge: ParsecService
 		ParsecClientSendMessage(_parsec, &pmsg)
 	}
 	
-	func sendGameControllerUnplugMessage(controllerId:UInt32)
+	func sendGameControllerUnplugMessage(controllerId: UInt32)
 	{
 	    var pmsg = ParsecMessage()
 		pmsg.type = MESSAGE_GAMEPAD_UNPLUG;
@@ -505,7 +510,9 @@ class ParsecSDKBridge: ParsecService
 	}
 	
 	func sendUserData(type: ParsecUserDataType, message: Data) {
-		message.withUnsafeBytes { ptr in
+        var nullTerminatedMessage = message
+        nullTerminatedMessage.append(0)
+		nullTerminatedMessage.withUnsafeBytes { ptr in
 			let ptr2 = ptr.baseAddress?.assumingMemoryBound(to: CChar.self)
 			ParsecClientSendUserData(_parsec, type.rawValue, ptr2)
 		}

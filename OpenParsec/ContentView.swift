@@ -14,7 +14,7 @@ struct ContentView:View
 
 	let defaultTransition = AnyTransition.move(edge:.trailing)
 
-	var body:some View
+	var body: some View
 	{
 		ZStack()
 		{
@@ -90,7 +90,7 @@ struct ContentView:View
 
 struct ContentView_Previews:PreviewProvider
 {
-	static var previews:some View
+	static var previews: some View
 	{
 		ContentView()
 	}

@@ -45,7 +45,7 @@ class ParsecResolution : Hashable {
 
 
 struct MouseInfo {
-	var pngCursor:Bool = false
+	var pngCursor: Bool = false
 	var mouseX:Int32 = 1
 	var mouseY:Int32 = 1
 	var cursorWidth = 0
@@ -121,7 +121,7 @@ class CParsec
 		
 	}
 
-	static func connect(_ peerID:String) -> ParsecStatus
+	static func connect(_ peerID: String) -> ParsecStatus
 	{
 		parsecImpl.connect(peerID)
 	}
@@ -141,17 +141,17 @@ class CParsec
 		return parsecImpl.getStatusEx(&pcs)
 	}
 	
-	static func setFrame(_ width:CGFloat, _ height:CGFloat, _ scale:CGFloat )
+	static func setFrame(_ width:CGFloat, _ height:CGFloat, _ scale: CGFloat )
 	{
 		parsecImpl.setFrame(width, height, scale)
 	}
 
-	static func renderGLFrame(timeout:UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
+	static func renderGLFrame(timeout: UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	{
 		parsecImpl.renderGLFrame(timeout: timeout)
 	}
 	
-	static func setMuted(_ muted:Bool)
+	static func setMuted(_ muted: Bool)
 	{
 		parsecImpl.setMuted(muted)
 	}
@@ -165,12 +165,12 @@ class CParsec
 		parsecImpl.updateHostVideoConfig()
 	}
 
-	static func sendMouseMessage(_ button:ParsecMouseButton, _ x:Int32, _ y:Int32, _ pressed:Bool)
+	static func sendMouseMessage(_ button:ParsecMouseButton, _ x:Int32, _ y:Int32, _ pressed: Bool)
 	{
 		parsecImpl.sendMouseMessage(button, x, y, pressed)
 	}
 	
-	static func sendMouseClickMessage(_ button:ParsecMouseButton, _ pressed:Bool) {
+	static func sendMouseClickMessage(_ button:ParsecMouseButton, _ pressed: Bool) {
 		parsecImpl.sendMouseClickMessage(button, pressed)
 	}
 	
@@ -196,18 +196,18 @@ class CParsec
 		parsecImpl.sendVirtualKeyboardInput(text: text, isOn: isOn)
 	}
 	
-	static func sendGameControllerButtonMessage(controllerId:UInt32, _ button:ParsecGamepadButton, pressed:Bool)
+	static func sendGameControllerButtonMessage(controllerId: UInt32, _ button:ParsecGamepadButton, pressed: Bool)
 	{
 		parsecImpl.sendGameControllerButtonMessage(controllerId: controllerId, button, pressed: pressed)
 	}
 	
 	
-	static func sendGameControllerAxisMessage(controllerId:UInt32, _ button:ParsecGamepadAxis, _ value: Int16)
+	static func sendGameControllerAxisMessage(controllerId: UInt32, _ button:ParsecGamepadAxis, _ value: Int16)
 	{
 		parsecImpl.sendGameControllerAxisMessage(controllerId: controllerId, button, value)
 	}
 	
-	static func sendGameControllerUnplugMessage(controllerId:UInt32)
+	static func sendGameControllerUnplugMessage(controllerId: UInt32)
 	{
 		parsecImpl.sendGameControllerUnplugMessage(controllerId: controllerId)
 	}

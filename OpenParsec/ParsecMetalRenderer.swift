@@ -8,7 +8,7 @@ class ParsecMetalRenderer:NSObject, MTKViewDelegate
 	var metalDevice:MTLDevice!
 	var metalCommandQueue:MTLCommandQueue!
 	var metalTexture:MTLTexture!
-	var metalTexturePtr:UnsafeMutableRawPointer?
+	var metalTexturePtr: UnsafeMutableRawPointer?
 	
 	var lastWidth:CGFloat = 1.0
 
@@ -27,7 +27,7 @@ class ParsecMetalRenderer:NSObject, MTKViewDelegate
 		super.init()
 	}
 	
-	func mtkView(_ view:MTKView, drawableSizeWillChange size:CGSize) { }
+	func mtkView(_ view:MTKView, drawableSizeWillChange size: CGSize) { }
 	
 	func draw(in view:MTKView)
 	{

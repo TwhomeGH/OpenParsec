@@ -1,35 +1,38 @@
 import Foundation
 
-struct SettingsHandler
-{
+struct SettingsHandler {
 	//public static var renderer:RendererType = .opengl
-	public static var resolution : ParsecResolution = ParsecResolution.resolutions[1]
-	public static var decoder:DecoderPref = .h264
-	public static var cursorMode:CursorMode = .touchpad
-	public static var cursorScale:Float = 0.5
-	public static var mouseSensitivity : Float = 1.0
-	public static var noOverlay:Bool = false
-	public static var hideStatusBar:Bool = true
-	public static var rightClickPosition:RightClickPosition = .firstFinger
+	public static var resolution: ParsecResolution = ParsecResolution.resolutions[1]
+	public static var bitrate: Int = 0
+	public static var decoder: DecoderPref = .h264
+	public static var cursorMode: CursorMode = .touchpad
+	public static var cursorScale: Float = 0.5
+	public static var mouseSensitivity: Float = 1.0
+	public static var noOverlay: Bool = false
+	public static var hideStatusBar: Bool = true
+	public static var rightClickPosition: RightClickPosition = .firstFinger
+	public static var preferredFramesPerSecond: Int = 60 // 0 = use device max (ProMotion)
+	public static var decoderCompatibility: Bool = false // Enable for stutter issues on some devices
 	
-	public static func load()
-	{
+	public static func load() {
 		//if UserDefaults.standard.exists(forKey:"renderer")
-		//	{ renderer = RendererType(rawValue:UserDefaults.standard.integer(forKey:"renderer"))! }
+		//	{ renderer = RendererType(rawValue: UserDefaults.standard.integer(forKey:"renderer"))! }
 		if UserDefaults.standard.exists(forKey:"decoder")
-			{ decoder = DecoderPref(rawValue:UserDefaults.standard.integer(forKey:"decoder"))! }
+			{ decoder = DecoderPref(rawValue: UserDefaults.standard.integer(forKey:"decoder"))! }
 		if UserDefaults.standard.exists(forKey:"cursorMode")
-			{ cursorMode = CursorMode(rawValue:UserDefaults.standard.integer(forKey:"cursorMode"))! }
+			{ cursorMode = CursorMode(rawValue: UserDefaults.standard.integer(forKey:"cursorMode"))! }
 		if UserDefaults.standard.exists(forKey:"rightClickPosition")
-			{ rightClickPosition = RightClickPosition(rawValue:UserDefaults.standard.integer(forKey:"rightClickPosition"))! }
+			{ rightClickPosition = RightClickPosition(rawValue: UserDefaults.standard.integer(forKey:"rightClickPosition"))! }
 		if UserDefaults.standard.exists(forKey:"cursorScale")
 			{ cursorScale = UserDefaults.standard.float(forKey:"cursorScale") }
 		if UserDefaults.standard.exists(forKey:"mouseSensitivity")
-		{ mouseSensitivity = UserDefaults.standard.float(forKey:"mouseSensitivity") }
+			{ mouseSensitivity = UserDefaults.standard.float(forKey:"mouseSensitivity") }
 		if UserDefaults.standard.exists(forKey:"noOverlay")
 			{ noOverlay = UserDefaults.standard.bool(forKey:"noOverlay") }
 		if UserDefaults.standard.exists(forKey:"hideStatusBar")
-		{ hideStatusBar = UserDefaults.standard.bool(forKey:"hideStatusBar") }
+			{ hideStatusBar = UserDefaults.standard.bool(forKey:"hideStatusBar") }
+		if UserDefaults.standard.exists(forKey:"bitrate")
+			{ bitrate = UserDefaults.standard.integer(forKey:"bitrate") }
 		
 		if UserDefaults.standard.exists(forKey:"resolution") {
 			for res in ParsecResolution.resolutions {
@@ -39,6 +42,10 @@ struct SettingsHandler
 				}
 			}
 		}
+		if UserDefaults.standard.exists(forKey:"preferredFramesPerSecond")
+			{ preferredFramesPerSecond = UserDefaults.standard.integer(forKey:"preferredFramesPerSecond") }
+		if UserDefaults.standard.exists(forKey:"decoderCompatibility")
+			{ decoderCompatibility = UserDefaults.standard.bool(forKey:"decoderCompatibility") }
 	}
 	
 	public static func save()
@@ -52,15 +59,17 @@ struct SettingsHandler
 		UserDefaults.standard.set(noOverlay, forKey:"noOverlay")
 		UserDefaults.standard.set(resolution.desc, forKey:"resolution")
 		UserDefaults.standard.set(hideStatusBar, forKey: "hideStatusBar")
+		UserDefaults.standard.set(bitrate, forKey: "bitrate")
+		UserDefaults.standard.set(preferredFramesPerSecond, forKey: "preferredFramesPerSecond")
+		UserDefaults.standard.set(decoderCompatibility, forKey: "decoderCompatibility")
 	}
 }
 
-extension UserDefaults
-{
+extension UserDefaults {
 	/**
 	 * Checks if a specified key exists within this UserDefaults.
 	 */
-	func exists(forKey:String) -> Bool
+	func exists(forKey: String) -> Bool
 	{
 		return object(forKey:forKey) != nil
 	}

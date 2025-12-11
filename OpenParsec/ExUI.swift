@@ -14,7 +14,7 @@ struct CatTitle:View
 		self.text = text
 	}
 
-	var body:some View
+	var body: some View
 	{
 		HStack()
 		{
@@ -41,7 +41,7 @@ struct CatList<Content:View>:View
 		self.content = content
 	}
 	
-	var body:some View
+	var body: some View
 	{
 		VStack(content:content)
 			.padding(.vertical, 10)
@@ -67,7 +67,7 @@ struct CatItem<Content:View>:View
 		self.content = content
 	}
 	
-	var body:some View
+	var body: some View
 	{
 		HStack()
 		{
@@ -104,18 +104,18 @@ struct Choice<T: Hashable>
  */
 struct SegmentPicker<SelectionValue:Hashable>:View
 {
-	var selection:Binding<SelectionValue>
+	var selection: Binding<SelectionValue>
 	var options:[Choice<SelectionValue>]
 	
-	init(selection:Binding<SelectionValue>, options:[Choice<SelectionValue>])
+	init(selection: Binding<SelectionValue>, options:[Choice<SelectionValue>])
 	{
 		self.selection = selection
 		self.options = options
 	}
 	
-	var body:some View
+	var body: some View
 	{
-		Picker("", selection:selection)
+		Picker("", selection: selection)
 		{
 			ForEach(options.indices, id:\.self)
 			{ i in
@@ -133,23 +133,23 @@ struct SegmentPicker<SelectionValue:Hashable>:View
  */
 struct MultiPicker<SelectionValue:Hashable>:View
 {
-	var selection:Binding<SelectionValue>
+	var selection: Binding<SelectionValue>
 	var options:[Choice<SelectionValue>]
 	
-	@State var showChoices:Bool = false
+	@State var showChoices: Bool = false
 	@State var valueText:String = "Choose..."
 	
-	init(selection:Binding<SelectionValue>, options:[Choice<SelectionValue>])
+	init(selection: Binding<SelectionValue>, options:[Choice<SelectionValue>])
 	{
 		self.selection = selection
 		self.options = options
 	}
 	
-	var body:some View
+	var body: some View
 	{
 		if #available(iOS 15, *)
 		{
-			Picker("", selection:selection)
+			Picker("", selection: selection)
 			{
 				ForEach(options.indices, id:\.self)
 				{ i in
@@ -212,7 +212,7 @@ struct ExUI_Previews:PreviewProvider
 	@State static var value1 = false
 	@State static var value2 = true
 	
-	static var previews:some View
+	static var previews: some View
 	{
 		VStack()
 		{

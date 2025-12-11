@@ -38,10 +38,17 @@ class ParsecGLKRenderer:NSObject, GLKViewDelegate, GLKViewControllerDelegate
 		    CParsec.setFrame(view.frame.size.width, view.frame.size.height, view.contentScaleFactor)
 	        lastWidth = view.frame.size.width
 		}
-		CParsec.renderGLFrame(timeout:16)
-		
+
+		// Calculate timeout based on configured/device frame rate
+		// timeout in ms: 16ms = ~60fps, 8ms = ~120fps
+		let fps = SettingsHandler.preferredFramesPerSecond == 0
+			? UIScreen.main.maximumFramesPerSecond
+			: SettingsHandler.preferredFramesPerSecond
+		let timeout = UInt32(max(1000 / fps, 8)) // minimum 8ms for 120Hz
+
+		CParsec.renderGLFrame(timeout: timeout)
+
 		updateImage()
-		
 
 //		glFinish()
 		//glFlush()

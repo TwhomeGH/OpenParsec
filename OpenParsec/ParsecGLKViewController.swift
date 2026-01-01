@@ -38,6 +38,36 @@ final class ParsecRenderCenter {
 	func currentFPS() -> Int {
         return glkController?.glkViewController.framesPerSecond ?? 60
     }
+
+	    // MARK: - 實際送出 FPS 計算
+    private var startTime: CFTimeInterval = CACurrentMediaTime()
+    private var lastFramesDisplayed: Int = 0
+
+    /// 從開始到現在的平均實際 FPS
+    func actualFPS() -> Double {
+        guard let glk = glkController?.glkViewController else { return 0 }
+        let now = CACurrentMediaTime()
+        let elapsed = now - startTime
+        guard elapsed > 0 else { return 0 }
+
+        let frames = Double(glk.framesDisplayed)
+        return frames / elapsed
+    }
+
+    /// 從上次呼叫到現在的增量 FPS（可每秒更新顯示）
+    func deltaFPS() -> Double {
+        guard let glk = glkController?.glkViewController else { return 0 }
+        let now = CACurrentMediaTime()
+        let elapsed = now - startTime
+        guard elapsed > 0 else { return 0 }
+
+        let deltaFrames = Double(glk.framesDisplayed - lastFramesDisplayed)
+        lastFramesDisplayed = glk.framesDisplayed
+        startTime = now
+
+        return deltaFrames / elapsed
+    }
+
 }
 
 class ParsecGLKViewController : ParsecPlayground {

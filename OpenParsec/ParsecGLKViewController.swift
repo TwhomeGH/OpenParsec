@@ -36,7 +36,7 @@ final class ParsecRenderCenter {
         glkController?.glkViewController.preferredFramesPerSecond = fps
     }
 	func currentFPS() {
-        return glkController?.glkViewController.currentFPS
+        return glkController?.glkViewController.framesPerSecond
     }
 }
 

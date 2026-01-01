@@ -71,6 +71,12 @@ struct ParsecStatusBar : View {
 			// ✅ 新增 FPS 參數（舉例，你的 GLK FPS）
 			let glkFPS = SettingsHandler.fpsPerFrame
             let glkCFPS = ParsecRenderCenter.shared.currentFPS()
+			// 查平均實際 FPS
+			let avgFPS = ParsecRenderCenter.shared.actualFPS()
+			// 查增量實際 FPS（可每秒刷新）
+			let deltaFPS = ParsecRenderCenter.shared.deltaFPS()
+
+
 
 			
 
@@ -82,7 +88,9 @@ struct ParsecStatusBar : View {
 			    "\(codec) \(resolution) \(colorFormat)",
 			    decoderName,
 			    "\nCFPS \(glkCFPS ?? 60)",   // 如果 glkCFPS 是 optional
-			    "GLK FPS \(glkFPS)"
+			    "GLK FPS \(glkFPS)",
+				"avgFPS \(avgFPS)",
+				"deltaFPS \(deltaFPS)",
 			]
 
 			metricInfo = metricsArray.joined(separator: " ")

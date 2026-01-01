@@ -148,12 +148,27 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.package.outputs.artifact }}
+
+
+      # ✅ 新增 Step：產生打包時間
+      - name: Set Build Timestamp
+        id: timestamp
+        run: |
+          BUILD_TIME=$(date +"%p%I:%M")
+          BUILD_TIME="${BUILD_TIME/AM/上午}"
+          BUILD_TIME="${BUILD_TIME/PM/下午}"
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+
+
       - name: Nightly Release
         uses: andelf/nightly-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           body: |
-            This is a nightly release [created automatically with GitHub Actions workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}).
+            This is a nightly release created at ${{ steps.timestamp.outputs.build_time }}.
+            [Workflow link](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}).
+
+          
           files: |
             ${{ needs.package.outputs.artifact }}

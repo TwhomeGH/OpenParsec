@@ -155,11 +155,16 @@ jobs:
       - name: Set Build Timestamp
         id: timestamp
         run: |
-          # 設定台北時間 (UTC+8)
-          BUILD_TIME=$(TZ="Asia/Taipei" date +"%p%I:%M")
-          BUILD_TIME="${BUILD_TIME/AM/上午}"
-          BUILD_TIME="${BUILD_TIME/PM/下午}"
-          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+            # 設定台北時間 (UTC+8)
+            DATE=$(TZ="Asia/Taipei" date +"%Y/%-m/%-d")   # 2026/1/2
+            TIME=$(TZ="Asia/Taipei" date +"%I:%M")       # 04:49
+            PERIOD=$(TZ="Asia/Taipei" date +"%p")        # AM/PM
+            PERIOD="${PERIOD/AM/上午}"
+            PERIOD="${PERIOD/PM/下午}"
+            
+            BUILD_TIME="$DATE $PERIOD$TIME"
+            
+            echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
 
 
       - name: Nightly Release

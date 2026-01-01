@@ -52,11 +52,16 @@ class ParsecGLKViewController : ParsecPlayground {
 	private func setupGLKViewController() {
 		glkView.context = EAGLContext(api: .openGLES3)!
 		glkViewController.view = glkView
-		glkViewController.preferredFramesPerSecond = 60
+		glkViewController.preferredFramesPerSecond = SettingsHandler.fpsPerFrame
 		self.viewController.addChild(glkViewController)
 		self.viewController.view.addSubview(glkViewController.view)
 		self.glkViewController.didMove(toParent: self.viewController)
+		
 	}
+
+	func updateFPS(_ fps: Int) {
+        glkViewController.preferredFramesPerSecond = fps
+    }
 	
 	func cleanUp() {
 		

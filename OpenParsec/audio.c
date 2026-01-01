@@ -256,7 +256,6 @@ void audio_destroy(struct audio **ctx_out)
 void audio_clear(struct audio **ctx_out)
 {
 
-	if (!ctx->q) return;
 	
     if (!ctx_out || !*ctx_out)
         return;
@@ -265,6 +264,7 @@ void audio_clear(struct audio **ctx_out)
     struct audio *ctx = *ctx_out;
     if (ctx->q)
         AudioQueueStop(ctx->q, true);
+	else return;
     
 	//rcTraverse = ctx->rcm.rc;
 	for (int32_t x = 0; x < NUM_AUDIO_BUF; x++) {
@@ -317,7 +317,7 @@ void audio_cb(const int16_t *pcm, uint32_t frames, void *opaque)
 	ctx->rcm.first = ctx->rcm.first->next;
 	//ctx->rcm.last_use = find_idle;
 	
-	ctx->in_use += frames;
+	ctx->in_use += frames *4;
 	//if (!isStart && (ctx->in_use > 1600))
 	if (ctx->in_use > 1000)
 	{

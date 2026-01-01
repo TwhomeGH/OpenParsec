@@ -8,7 +8,7 @@ on:
       release__nightly:
         description: Create a nightly release
         type: boolean
-        required: false
+        required: true
 
 jobs:
   build:

@@ -70,7 +70,7 @@ struct ParsecStatusBar : View {
 			
 			// ✅ 新增 FPS 參數（舉例，你的 GLK FPS）
 			let glkFPS = SettingsHandler.fpsPerFrame
-
+            let glkCFPS = ParsecRenderCenter.shared.currentFPS()
 			// 組合 metricInfo
 			metricInfo = """
 			Decode \(decodeLatency)ms 
@@ -79,6 +79,7 @@ struct ParsecStatusBar : View {
 			Bitrate \(bitrate)Mbps 
 			\(codec) \(resolution) \(colorFormat) 
 			\(decoderName) 
+			CFPS \(glkCFPS) 
 			GLK FPS \(glkFPS)
 			"""
 		}

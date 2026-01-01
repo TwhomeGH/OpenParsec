@@ -81,7 +81,7 @@ struct ParsecStatusBar : View {
 			    "Bitrate \(bitrate)Mbps",
 			    "\(codec) \(resolution) \(colorFormat)",
 			    decoderName,
-			    "CFPS \(glkCFPS ?? 60)",   // 如果 glkCFPS 是 optional
+			    "\nCFPS \(glkCFPS ?? 60)",   // 如果 glkCFPS 是 optional
 			    "GLK FPS \(glkFPS)"
 			]
 

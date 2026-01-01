@@ -11,6 +11,8 @@ struct SettingsHandler
 	public static var noOverlay:Bool = false
 	public static var hideStatusBar:Bool = true
 	public static var rightClickPosition:RightClickPosition = .firstFinger
+
+	public static var fpsPerFrame: Int = 60
 	
 	public static func load()
 	{
@@ -39,6 +41,11 @@ struct SettingsHandler
 				}
 			}
 		}
+
+		if UserDefaults.standard.exists(forKey: "FPSPerFrame") {
+          fpsPerFrame = UserDefaults.standard.integer(forKey: "FPSPerFrame")
+        }
+		
 	}
 	
 	public static func save()

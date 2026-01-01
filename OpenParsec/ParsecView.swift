@@ -16,10 +16,10 @@ struct ParsecStatusBar : View {
 			VStack()
 			{
 				Text(metricInfo)
-					.frame(minWidth:200, maxWidth:.infinity, maxHeight:20)
+					.frame(minWidth:200, maxWidth:.infinity)
 					.multilineTextAlignment(.leading)
 					.font(.system(size: 10))
-					.lineSpacing(20)
+					.lineSpacing(4)
 					.lineLimit(nil)
 			}
 			.background(Rectangle().fill(Color("BackgroundPrompt").opacity(0.75)))

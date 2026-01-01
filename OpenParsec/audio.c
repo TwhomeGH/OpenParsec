@@ -57,7 +57,7 @@ static void audio_queue_callback(void *opaque, AudioQueueRef queue, AudioQueueBu
     if(buffer != silence_buf)
 	{
 		buffer->mAudioDataByteSize = FAKE_SIZE;
-		lastbuf = *((int *)(buffer->mUserData));	
+		intptr_t lastbuf = (intptr_t)(buffer->mUserData));	
 	}
 	else
 	{
@@ -68,8 +68,10 @@ static void audio_queue_callback(void *opaque, AudioQueueRef queue, AudioQueueBu
 	
 	if (isMuted) return;
 	
-	deltaBuf = *((int *)((*ctx->rcm.first->curt)->mUserData));
-	deltaBuf = deltaBuf - lastbuf - 1;
+	
+	intptr_t firstIndex = (intptr_t)((*ctx->rcm.first->curt)->mUserData);
+	deltaBuf = (int)(firstIndex - lastbuf - 1);
+	
 	if (deltaBuf < 0) deltaBuf += NUM_AUDIO_BUF;
 	
 	while(ctx->rcm.last_to_queue->next != ctx->rcm.first)
@@ -164,7 +166,7 @@ void audio_init(struct audio **ctx_out)
     format.mBytesPerFrame = 4;
     
     // Create and audio playback queue
-    AudioQueueNewOutput(&format, audio_queue_callback, (void *) ctx, nil, nil, 0, &ctx->q);
+    AudioQueueNewOutput(&format, audio_queue_callback, (void *) ctx, NULL, NULL, 0, &ctx->q);
 
 	//ctx->rcm.first = ctx->audio_buf[0];
 	//ctx->rcm.first  = ctx->audio_buf[NUM_AUDIO_BUF-1];
@@ -212,8 +214,11 @@ void audio_destroy(struct audio **ctx_out)
     for (int32_t x = 0; x < NUM_AUDIO_BUF; x++) {
         if (ctx->audio_buf[x])
             AudioQueueFreeBuffer(ctx->q, ctx->audio_buf[x]);
+		
     }
-    
+    AudioQueueFreeBuffer(ctx->q, silence_buf);
+	AudioQueueDispose(ctx->q, true);
+	
     if (ctx->q)
         AudioQueueDispose(ctx->q, true);
 

@@ -150,11 +150,13 @@ jobs:
           name: ${{ needs.package.outputs.artifact }}
 
 
-      # ✅ 新增 Step：產生打包時間
+      #設定打包📦時間
+      
       - name: Set Build Timestamp
         id: timestamp
         run: |
-          BUILD_TIME=$(date +"%p%I:%M")
+          # 設定台北時間 (UTC+8)
+          BUILD_TIME=$(TZ="Asia/Taipei" date +"%p%I:%M")
           BUILD_TIME="${BUILD_TIME/AM/上午}"
           BUILD_TIME="${BUILD_TIME/PM/下午}"
           echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT

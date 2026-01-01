@@ -1,6 +1,7 @@
 #include "audio.h"
 
 #include <stdlib.h>
+#include <stdint.h>
 
 #include <AudioToolbox/AudioToolbox.h>
 

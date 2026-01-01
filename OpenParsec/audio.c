@@ -12,7 +12,7 @@
 #define LOWEST_NUM_BUFFER 3
 bool isMuted = false;
 bool isStart = false;
-int lastbuf = 0;
+intptr_t lastbuf = 0;
 
 unsigned int silence_inqueue = 0;
 unsigned int silence_outqueue = 0;
@@ -42,9 +42,11 @@ struct audio {
 static void audio_queue_callback(void *opaque, AudioQueueRef queue, AudioQueueBufferRef buffer)
 {
     
-	if (!ctx || ctx->isStopping) return;
-	
+		
 	struct audio *ctx = (struct audio *) opaque;
+
+	if (!ctx || ctx->isStopping) return;
+
     int deltaBuf = 0;
 	//int silence_use_count = (int)(silence_buf->mUserData);
 	
@@ -216,34 +218,31 @@ void audio_destroy(struct audio **ctx_out)
     // 1️⃣ 明確標記「正在銷毀」，避免 callback 再做事
     ctx->isStopping = true;
 
-    // 2️⃣ 先停 queue（同步等待 callback 結束）
+    // 2️⃣ 停掉 queue（同步等待 callback 完成）
     if (ctx->q) {
         AudioQueueStop(ctx->q, true);
-    }
 
-    // 3️⃣ Dispose queue（系統內部清理、不再回調）
-    if (ctx->q) {
+        // 3️⃣ 釋放所有 AudioQueueBuffer
+        for (int i = 0; i < NUM_AUDIO_BUF; i++)
+            if (ctx->audio_buf[i])
+                AudioQueueFreeBuffer(ctx->q, ctx->audio_buf[i]);
+
+        if (silence_buf)
+            AudioQueueFreeBuffer(ctx->q, silence_buf);
+
+        // 4️⃣ Dispose queue
         AudioQueueDispose(ctx->q, true);
         ctx->q = NULL;
     }
 
-    // 4️⃣ 釋放 AudioQueue buffers（現在才安全）
-    for (int32_t x = 0; x < NUM_AUDIO_BUF; x++) {
-        if (ctx->audio_buf[x]) {
-            AudioQueueFreeBuffer(ctx->q, ctx->audio_buf[x]);
-            ctx->audio_buf[x] = NULL;
-        }
-    }
 
-    // silence buffer（如果是 AudioQueueAllocateBuffer 出來的）
-    if (silence_buf) {
-        AudioQueueFreeBuffer(ctx->q, silence_buf);
-        silence_buf = NULL;
+    
+    
+    // 5️⃣ 釋放 RecycleChain
+    if (ctx->rcm.rc) {
+        free(ctx->rcm.rc);
+        ctx->rcm.rc = NULL;
     }
-
-    // 5️⃣ 釋放你自己 malloc / calloc 的資料
-    free(ctx->rcm.rc);
-    ctx->rcm.rc = NULL;
 
     // 6️⃣ 最後釋放 ctx 本身
     free(ctx);

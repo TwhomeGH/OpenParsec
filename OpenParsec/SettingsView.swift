@@ -13,6 +13,8 @@ struct SettingsView:View
 	@State var mouseSensitivity:Float = SettingsHandler.mouseSensitivity
 	@State var noOverlay:Bool = SettingsHandler.noOverlay
 	@State var hideStatusBar:Bool = SettingsHandler.hideStatusBar
+
+	@AppStorage("FPSPerFrame") var fpsPerFrame = 60
 	
 	let resolutionChoices : [Choice<ParsecResolution>]
 
@@ -130,6 +132,18 @@ struct SettingsView:View
 									Choice("Prefer H.265", DecoderPref.h265)
 								])
                             }
+							CatItem("FPS") {
+							    MultiPicker(selection:$fpsPerFrame, options:
+								[
+									Choice("144", 144  ),
+									Choice("120", 120 ),
+									Choice("90", 90  ),
+									Choice("60", 60  ),
+									Choice("30", 30  ),
+									Choice("15 [For Test]", 15  ),
+								])
+							}
+							
                         }
                         CatTitle("Misc")
                         CatList()

@@ -141,11 +141,12 @@ struct SettingsView:View
 									Choice("60", 60  ),
 									Choice("30", 30  ),
 									Choice("15 [For Test]", 15  ),
-								])
-							}.onChange(of: fpsPerFrame) { newValue in
-                                SettingsHandler.fpsPerFrame = newValue
-                                ParsecRenderCenter.shared.updateFPS(newValue)
-                            }
+								]).onChange(of: fpsPerFrame) { newValue in
+                               	 	SettingsHandler.fpsPerFrame = newValue
+                             	    ParsecRenderCenter.shared.updateFPS(newValue)
+                                }
+								
+							}
 							
                         }
                         CatTitle("Misc")

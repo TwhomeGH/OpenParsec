@@ -167,7 +167,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          title: "Nightly Release @ ${{ steps.timestamp.outputs.build_time }}"
+          name: "Nightly Release @ ${{ steps.timestamp.outputs.build_time }}"
           
           body: |
             This is a nightly release created at ${{ steps.timestamp.outputs.build_time }}.

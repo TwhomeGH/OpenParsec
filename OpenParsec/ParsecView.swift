@@ -73,12 +73,12 @@ struct ParsecStatusBar : View {
 
 			// 組合 metricInfo
 			metricInfo = """
-			Decode \(decodeLatency)ms    \
-			Encode \(encodeLatency)ms    \
-			Network \(networkLatency)ms    \
-			Bitrate \(bitrate)Mbps    \
-			\(codec) \(resolution) \(colorFormat)    \
-			\(decoderName)    \
+			Decode \(decodeLatency)ms 
+			Encode \(encodeLatency)ms 
+			Network \(networkLatency)ms 
+			Bitrate \(bitrate)Mbps 
+			\(codec) \(resolution) \(colorFormat) 
+			\(decoderName) 
 			GLK FPS \(glkFPS)
 			"""
 		}

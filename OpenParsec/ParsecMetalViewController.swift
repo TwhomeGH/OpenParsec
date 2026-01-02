@@ -3,12 +3,28 @@ import SwiftUI
 import MetalKit
 import UIKit
 
-class ParsecMetalViewControllerWrapper {
+class ParsecMetalViewControllerWrapper : ParsecRenderController {
     let viewController: UIViewController
     var mtkView: MTKView!
     var renderer: ParsecMetalRenderer!
     
     let updateImage: () -> Void
+
+	private var framesDisplayedCounter: Int = 0
+    
+    var preferredFPS: Int {
+        get { mtkView.preferredFramesPerSecond }
+        set { mtkView.preferredFramesPerSecond = newValue }
+    }
+    
+    func drawFrameCompleted() {
+        framesDisplayedCounter += 1
+    }
+    
+    func getFramesDisplayed() -> Int {
+        return framesDisplayedCounter
+    }
+
     
     init(viewController: UIViewController, updateImage: @escaping () -> Void) {
         self.viewController = viewController

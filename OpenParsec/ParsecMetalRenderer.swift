@@ -23,13 +23,19 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
             CParsec.setFrame(view.frame.size.width, view.frame.size.height, view.contentScaleFactor)
             lastWidth = view.frame.size.width
         }
+
+	    guard let commandQueue = view.device?.makeCommandQueue(),
+          let commandBuffer = commandQueue.makeCommandBuffer(),
+          let drawable = view.currentDrawable else { return }
+
         
-        guard let queue = view.device?.makeCommandQueue(),
-              let drawable = view.currentDrawable else { return }
         
-        var texturePtr: UnsafeMutableRawPointer? = nil
-        // 這裡把 drawable.texture 的指針傳給 SDK
-        CParsec.renderMetalFrame(&queue, &texturePtr)
+        // 呼叫 Parsec Metal Render
+		CParsec.renderMetalFrame(commandBuffer, drawable.texture)
+	
+		commandBuffer.present(drawable)
+		commandBuffer.commit()
+
 		metalController.drawFrameCompleted()
 		
         updateImage()

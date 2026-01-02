@@ -1,7 +1,7 @@
 import UIKit
 import GLKit
 
-protocol ParsecRenderController {
+protocol ParsecRenderController : AnyObject {
     var preferredFPS: Int { get set }
     func getFramesDisplayed() -> Int
 }

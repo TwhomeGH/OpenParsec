@@ -1,48 +1,63 @@
 import UIKit
 import GLKit
 
+protocol ParsecRenderController {
+    var preferredFPS: Int { get set }
+    func getFramesDisplayed() -> Int
+}
+
+extension ParsecGLKViewController: ParsecRenderController {
+    var preferredFPS: Int {
+        get { glkViewController.preferredFramesPerSecond }
+        set { glkViewController.preferredFramesPerSecond = newValue }
+    }
+    
+    func getFramesDisplayed() -> Int {
+        return glkViewController.framesDisplayed
+    }
+}
 
 final class ParsecRenderCenter {
     static let shared = ParsecRenderCenter()
-
-    weak var glkController: ParsecGLKViewController?  // 弱引用避免循環
-
+    
+    weak var renderController: ParsecRenderController?  // 不再直接綁 GLK
+    
     func updateFPS(_ fps: Int) {
-        glkController?.glkViewController.preferredFramesPerSecond = fps
+        renderController?.preferredFPS = fps
     }
-	func currentFPS() -> Int {
-        return glkController?.glkViewController.framesPerSecond ?? 60
+    
+    func currentFPS() -> Int {
+        return renderController?.preferredFPS ?? 60
     }
 
-	    // MARK: - 實際送出 FPS 計算
+    // MARK: - 實際送出 FPS 計算
     private var startTime: CFTimeInterval = CACurrentMediaTime()
     private var lastFramesDisplayed: Int = 0
 
     /// 從開始到現在的平均實際 FPS
     func actualFPS() -> Double {
-        guard let glk = glkController?.glkViewController else { return 0 }
+        guard let controller = renderController else { return 0 }
         let now = CACurrentMediaTime()
         let elapsed = now - startTime
         guard elapsed > 0 else { return 0 }
 
-        let frames = Double(glk.framesDisplayed)
+        let frames = Double(controller.getFramesDisplayed())
         return frames / elapsed
     }
 
     /// 從上次呼叫到現在的增量 FPS（可每秒更新顯示）
     func deltaFPS() -> Double {
-        guard let glk = glkController?.glkViewController else { return 0 }
+        guard let controller = renderController else { return 0 }
         let now = CACurrentMediaTime()
         let elapsed = now - startTime
         guard elapsed > 0 else { return 0 }
 
-        let deltaFrames = Double(glk.framesDisplayed - lastFramesDisplayed)
-        lastFramesDisplayed = glk.framesDisplayed
+        let deltaFrames = Double(controller.getFramesDisplayed() - lastFramesDisplayed)
+        lastFramesDisplayed = controller.getFramesDisplayed()
         startTime = now
 
         return deltaFrames / elapsed
     }
-
 }
 
 class ParsecGLKViewController : ParsecPlayground {

@@ -158,7 +158,7 @@ class ParsecSDKBridge: ParsecService
 	 ParsecClientMetalRenderFrame(_parsec, UInt8(DEFAULT_STREAM), &queue, texturePtr, nil, nil, timeout)
 	 }*/
 
-	func renderMetalFrame(commandBuffer: MTLCommandBuffer, texture: MTLTexture, timeout: UInt32 = 16) {
+	func renderMetalFrame(_ commandBuffer: MTLCommandBuffer, _ texture: MTLTexture, timeout: UInt32 = 16) {
 	    // 取得指針
 	    let commandBufferPtr = Unmanaged.passUnretained(commandBuffer).toOpaque()
 	    let texturePtr = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: 1)

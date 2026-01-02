@@ -1,3 +1,41 @@
+import MetalKit
+import ParsecSDK
+
+class ParsecMetalRenderer: NSObject, MTKViewDelegate {
+    var mtkView: MTKView
+    var updateImage: () -> Void
+    var lastWidth: CGFloat = 1.0
+    
+    init(_ view: MTKView, updateImage: @escaping () -> Void) {
+        self.mtkView = view
+        self.updateImage = updateImage
+        super.init()
+        view.delegate = self
+    }
+    
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        // 可以根據大小改變 Metal 的 framebuffer，如果需要
+    }
+    
+    func draw(in view: MTKView) {
+        let deltaWidth = view.frame.size.width - lastWidth
+        if abs(deltaWidth) > 0.1 {
+            CParsec.setFrame(view.frame.size.width, view.frame.size.height, view.contentScaleFactor)
+            lastWidth = view.frame.size.width
+        }
+        
+        guard let queue = view.device?.makeCommandQueue(),
+              let drawable = view.currentDrawable else { return }
+        
+        var texturePtr: UnsafeMutableRawPointer? = nil
+        // 這裡把 drawable.texture 的指針傳給 SDK
+        ParsecSDKBridge.parsecImpl.renderMetalFrame(queue: &queue, texturePtr: &texturePtr)
+        
+        updateImage()
+    }
+}
+
+
 /*import MetalKit
 import ParsecSDK
 

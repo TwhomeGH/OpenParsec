@@ -158,7 +158,7 @@ class CParsec
 	}
 
 	static func renderMetalFrame(_ commandBuffer: MTLCommandBuffer, _ texture: MTLTexture, timeout: UInt32 = 16) {
-        parsecImpl.renderMetalFrame(commandBuffer, texture,timeout)
+        parsecImpl.renderMetalFrame(commandBuffer, texture,timeout:timeout)
     }
 	
 	static func setMuted(_ muted:Bool)

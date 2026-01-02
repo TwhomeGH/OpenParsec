@@ -29,8 +29,9 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         
         var texturePtr: UnsafeMutableRawPointer? = nil
         // 這裡把 drawable.texture 的指針傳給 SDK
-        ParsecSDKBridge.parsecImpl.renderMetalFrame(queue: &queue, texturePtr: &texturePtr)
-        
+        CParsec.renderMetalFrame(&queue, &texturePtr)
+		metalController.drawFrameCompleted()
+		
         updateImage()
     }
 }

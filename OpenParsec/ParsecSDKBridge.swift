@@ -158,8 +158,9 @@ class ParsecSDKBridge: ParsecService
 	 ParsecClientMetalRenderFrame(_parsec, UInt8(DEFAULT_STREAM), &queue, texturePtr, nil, nil, timeout)
 	 }*/
 
-	func renderMetalFrame(queue: inout MTLCommandQueue, texturePtr: UnsafeMutablePointer<UnsafeMutableRawPointer?>, timeout: UInt32 = 16) {
-     	ParsecClientMetalRenderFrame(_parsec, UInt8(DEFAULT_STREAM), &queue, texturePtr, nil, nil, timeout)
+	func renderMetalFrame(_ commandBuffer: MTLCommandBuffer, _ texture: MTLTexture) {
+    // 將 commandBuffer 和 texture 傳給 SDK 的 C API
+   	 ParsecClientMetalRenderFrame(_parsec, UInt8(DEFAULT_STREAM), commandBuffer, texture, nil, nil, 16)
 	}
 	
 	func pollAudio(timeout:UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.

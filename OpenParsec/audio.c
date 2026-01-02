@@ -48,7 +48,7 @@ static void audio_queue_callback(void *opaque, AudioQueueRef queue, AudioQueueBu
 
 	if (!ctx || ctx->isStopping) return;
 
-    int deltaBuf = 0;
+	intptr_t deltaBuf = 0;
 	//int silence_use_count = (int)(silence_buf->mUserData);
 	
     if (ctx == NULL)
@@ -75,10 +75,12 @@ static void audio_queue_callback(void *opaque, AudioQueueRef queue, AudioQueueBu
 	
 	
 	deltaBuf = (int)(intptr_t)(*ctx->rcm.first->curt)->mUserData;
-	
+
 	deltaBuf = deltaBuf - lastbuf - 1;
+
+
 	if (deltaBuf < 0) deltaBuf += NUM_AUDIO_BUF;
-	
+
 	while(ctx->rcm.last_to_queue->next != ctx->rcm.first)
 	{
 		AudioQueueEnqueueBuffer(ctx->q, (*(ctx->rcm.last_to_queue->next->curt)), 0, NULL);
@@ -87,7 +89,10 @@ static void audio_queue_callback(void *opaque, AudioQueueRef queue, AudioQueueBu
 	
 	if (deltaBuf + silence_inqueue < LOWEST_NUM_BUFFER + silence_outqueue)
 	{
-		int numAddBuffer = ((silence_inqueue >= silence_outqueue) ? (LOWEST_NUM_BUFFER - deltaBuf - (int)(silence_inqueue-silence_outqueue)) : (LOWEST_NUM_BUFFER - deltaBuf - (int)((unsigned int)(0xFFFFFFFF)-silence_outqueue + silence_inqueue + 1)));
+		intptr_t numAddBuffer = ((silence_inqueue >= silence_outqueue)
+			? (LOWEST_NUM_BUFFER - deltaBuf - (intptr_t)(silence_inqueue - silence_outqueue))
+			: (LOWEST_NUM_BUFFER - deltaBuf - (intptr_t)((unsigned int)0xFFFFFFFF - silence_outqueue + silence_inqueue + 1)));
+
 		if (numAddBuffer > LOWEST_NUM_BUFFER)
 		{
 			numAddBuffer = LOWEST_NUM_BUFFER - deltaBuf;

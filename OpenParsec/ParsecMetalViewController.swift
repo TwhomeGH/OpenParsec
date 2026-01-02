@@ -1,3 +1,37 @@
+
+import SwiftUI
+import MetalKit
+import UIKit
+
+class ParsecMetalViewControllerWrapper {
+    let viewController: UIViewController
+    var mtkView: MTKView!
+    var renderer: ParsecMetalRenderer!
+    
+    let updateImage: () -> Void
+    
+    init(viewController: UIViewController, updateImage: @escaping () -> Void) {
+        self.viewController = viewController
+        self.updateImage = updateImage
+    }
+    
+    func viewDidLoad() {
+        mtkView = MTKView(frame: viewController.view.bounds)
+        mtkView.device = MTLCreateSystemDefaultDevice()
+        mtkView.enableSetNeedsDisplay = true
+        mtkView.isPaused = false
+        mtkView.preferredFramesPerSecond = SettingsHandler.fpsPerFrame
+        mtkView.framebufferOnly = false
+        
+        renderer = ParsecMetalRenderer(mtkView, updateImage: updateImage)
+        viewController.view.addSubview(mtkView)
+    }
+    
+    func updateSize(width: CGFloat, height: CGFloat) {
+        mtkView.frame.size = CGSize(width: width, height: height)
+    }
+}
+
 /*import SwiftUI
 import MetalKit
 

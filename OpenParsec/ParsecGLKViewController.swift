@@ -77,9 +77,6 @@ class ParsecGLKViewController : ParsecPlayground {
 	public func viewDidLoad() {
 		glkView = GLKView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
 		glkRenderer = ParsecGLKRenderer(glkView, glkViewController, updateImage)
-
-		// 註冊自己到中介
-        ParsecRenderCenter.shared.glkController = self
 		
 		self.viewController.view.addSubview(glkView)
 		setupGLKViewController()

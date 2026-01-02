@@ -35,8 +35,6 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 	
 		commandBuffer.present(drawable)
 		commandBuffer.commit()
-
-		metalController.drawFrameCompleted()
 		
         updateImage()
     }

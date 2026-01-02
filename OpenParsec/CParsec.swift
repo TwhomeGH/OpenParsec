@@ -73,7 +73,7 @@ protocol ParsecService {
 	func renderGLFrame(timeout: UInt32)
 
 	// Metal 
-	func renderMetalFrame(_ commandBuffer: MTLCommandBuffer, _ texture: MTLTexture)
+	func renderMetalFrame(_ commandBuffer: MTLCommandBuffer, _ texture: MTLTexture, timeout: UInt32)
 
 	
 	func setMuted(_ muted: Bool)

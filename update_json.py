@@ -145,7 +145,7 @@ def update_json_file_nightly(json_file, nightly_release):
 
     app = data["apps"][0]
 
-    with open("Resources/Info.plist", 'rb') as infile:
+    with open("OpenParsec/Info.plist", 'rb') as infile:
         info_plist = plistlib.load(infile)
     full_version = info_plist["CFBundleVersion"]
     tag = nightly_release["tag_name"]

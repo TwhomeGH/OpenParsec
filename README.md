@@ -7,10 +7,10 @@ This project is still a major WIP, so apologies for the currently lackluster doc
 Before building, make sure you have the Parsec SDK framework symlinked or copied to the `Frameworks` folder. Builds were tested on Xcode Version 12.5.
 
 ## Downloads
-<a href="https://celloserenity.github.io/altdirect/?url=https://github.com/OpenParsec/OpenParsec/releases/download/nightly/apps_nightly.json" target="_blank">
+<a href="https://celloserenity.github.io/altdirect/?url=https://github.com/hugeBlack/OpenParsec/releases/download/nightly/altstore.json" target="_blank">
    <img src="https://github.com/CelloSerenity/altdirect/blob/main/assets/png/AltSource_Blue.png?raw=true" alt="Add AltSource" width="200">
 </a>
-<a href="https://github.com/OpenParsec/OpenParsec/releases/download/nightly/OpenParsec.ipa" target="_blank">
+<a href="https://github.com/hugeBlack/OpenParsec/releases/download/nightly/OpenParsec.ipa" target="_blank">
    <img src="https://github.com/CelloSerenity/altdirect/blob/main/assets/png/Download_Blue.png?raw=true" alt="Download .ipa" width="200">
 </a>
 

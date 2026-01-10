@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "16.4"
+          xcode-version: "26.1"
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -135,6 +135,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.package.outputs.artifact }}
+      - name: Update AltStore source
+        id: update_source
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NIGHTLY_LINK: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
+          commit_sha: ${{ env.COMMIT_SHA }}
+          commit_msg: ${{ env.COMMIT_MSG }}
+        run: |
+          python update_json.py
       - name: Nightly Release
         uses: andelf/nightly-release@v1
         env:

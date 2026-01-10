@@ -171,23 +171,26 @@ struct ParsecView: View
 						.edgesIgnoringSafeArea(.all)
 						Spacer()
 					}
-					HStack()
-					{
-						Button(action: toggleKeyboard)
+					if SettingsHandler.showKeyboardButton {
+						HStack()
 						{
-							Image(systemName: "keyboard")
-								.resizable()
-								.aspectRatio(contentMode: .fit)
-								.frame(width:32, height:32)
-								.foregroundColor(Color("Foreground"))
-								.padding(8)
-								.background(Rectangle().fill(Color("BackgroundPrompt").opacity(showKeyboard ? 0.75 : 0.5)))
-								.cornerRadius(8)
+							Button(action: toggleKeyboard)
+							{
+								Image(systemName: "keyboard")
+									.resizable()
+									.aspectRatio(contentMode: .fit)
+									.frame(width:32, height:32)
+									.foregroundColor(Color("Foreground"))
+									.padding(8)
+									.background(Rectangle().fill(Color("BackgroundPrompt").opacity(showKeyboard ? 0.75 : 0.5)))
+									.cornerRadius(8)
+							}
+							.padding(.leading)
+							.edgesIgnoringSafeArea(.all)
+							Spacer()
 						}
-						.padding(.leading)
-						.edgesIgnoringSafeArea(.all)
-						Spacer()
 					}
+
 				}
 				if showMenu
 				{	
@@ -321,8 +324,7 @@ struct ParsecView: View
 		// set client resolution
 		let screenSize: CGSize = self.parsecViewController.view.frame.size
 		let scaleFactor = UIScreen.main.nativeScale
-		ParsecResolution.resolutions[1].width = Int(screenSize.width * scaleFactor)
-		ParsecResolution.resolutions[1].height = Int(screenSize.height * scaleFactor)
+		ParsecResolution.updateClientResolution(width: Int(screenSize.width * scaleFactor), height: Int(screenSize.height * scaleFactor))
 
 		getHostUserData()
 
@@ -391,7 +393,6 @@ struct ParsecView: View
 	func changeResolution(res: ParsecResolution) {
         // Save to SettingsHandler for persistence
         SettingsHandler.resolution = res
-        SettingsHandler.save()
 
 		DispatchQueue.main.async {
 			DataManager.model.resolutionX = res.width
@@ -402,7 +403,6 @@ struct ParsecView: View
 
 	func changeBitRate(bitrate: Int) {
 		SettingsHandler.bitrate = bitrate
-		SettingsHandler.save()
 
 		DispatchQueue.main.async {
 			DataManager.model.bitrate = bitrate

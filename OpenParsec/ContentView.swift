@@ -37,9 +37,6 @@ struct ContentView:View
 
 	func initApp()
 	{
-		
-		// Load prefs
-		SettingsHandler.load()
 
 		// Check to see if we have old session data
 		if let data = loadFromKeychain(key: GLBDataModel.shared.SessionKeyChainKey)

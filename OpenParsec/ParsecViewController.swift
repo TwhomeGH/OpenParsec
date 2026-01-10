@@ -26,7 +26,9 @@ class ParsecViewController: UIViewController, UIScrollViewDelegate {
 	var accumulatedDeltaY: Float = 0.0
 	var lastPanLocation: CGPoint = .zero
 	var lastPanTranslation: CGPoint = .zero
-
+	
+	var mouseSensitivity: Float = Float(SettingsHandler.mouseSensitivity)
+	var activatedPanFingerNumber: Int = 0
 	
 	var keyboardAccessoriesView : UIView?
 	var keyboardHeight : CGFloat = 0.0
@@ -90,10 +92,10 @@ class ParsecViewController: UIViewController, UIScrollViewDelegate {
 			}
 
             // Using tracked values for bounds
-			u?.frame = CGRect(x: Int(currentMouseX) - Int(Float(CParsec.mouseInfo.cursorHotX) * SettingsHandler.cursorScale),
-							  y: Int(currentMouseY) - Int(Float(CParsec.mouseInfo.cursorHotY) * SettingsHandler.cursorScale),
-							  width: Int(Float(CParsec.mouseInfo.cursorWidth) * SettingsHandler.cursorScale),
-							  height: Int(Float(CParsec.mouseInfo.cursorHeight) * SettingsHandler.cursorScale))
+			u?.frame = CGRect(x: Int(currentMouseX) - Int(Double(CParsec.mouseInfo.cursorHotX) * SettingsHandler.cursorScale),
+							  y: Int(currentMouseY) - Int(Double(CParsec.mouseInfo.cursorHotY) * SettingsHandler.cursorScale),
+							  width: Int(Double(CParsec.mouseInfo.cursorWidth) * SettingsHandler.cursorScale),
+							  height: Int(Double(CParsec.mouseInfo.cursorHeight) * SettingsHandler.cursorScale))
             
 			// Check bounds and pan if needed
 			// Only pan if we are zoomed in OR if the keyboard is visible (to allow scrolling up)
@@ -417,8 +419,8 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 				}
 
 				// Calculate delta since last update
-				let deltaX = Float(currentTranslation.x - lastPanTranslation.x) * SettingsHandler.mouseSensitivity
-				let deltaY = Float(currentTranslation.y - lastPanTranslation.y) * SettingsHandler.mouseSensitivity
+				let deltaX = Float(currentTranslation.x - lastPanTranslation.x) * mouseSensitivity
+				let deltaY = Float(currentTranslation.y - lastPanTranslation.y) * mouseSensitivity
 
 				lastPanTranslation = currentTranslation
 
@@ -502,8 +504,8 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 			let newLocation = gestureRecognizer.location(in: gestureRecognizer.view)
             let adjustedNewLocation = contentView.convert(newLocation, from: view)
 			CParsec.sendMouseDelta(
-				Int32(Float(adjustedNewLocation.x - lastLongPressPoint.x) * SettingsHandler.mouseSensitivity),
-				Int32(Float(adjustedNewLocation.y - lastLongPressPoint.y) * SettingsHandler.mouseSensitivity)
+				Int32(Float(adjustedNewLocation.x - lastLongPressPoint.x) * mouseSensitivity),
+				Int32(Float(adjustedNewLocation.y - lastLongPressPoint.y) * mouseSensitivity)
 			)
 			lastLongPressPoint = adjustedNewLocation
 		}

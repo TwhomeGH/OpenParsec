@@ -5,17 +5,19 @@ struct SettingsView:View
 	@Binding var visible: Bool
 
 	//@State var renderer:RendererType = SettingsHandler.renderer
-	@State var decoder: DecoderPref = SettingsHandler.decoder
-	@State var cursorMode: CursorMode = SettingsHandler.cursorMode
-	@State var rightClickPosition: RightClickPosition = SettingsHandler.rightClickPosition
-	@State var resolution : ParsecResolution = SettingsHandler.resolution
-	@State var cursorScale: Float = SettingsHandler.cursorScale
-	@State var mouseSensitivity:Float = SettingsHandler.mouseSensitivity
-	@State var noOverlay: Bool = SettingsHandler.noOverlay
-	@State var hideStatusBar: Bool = SettingsHandler.hideStatusBar
-	@State var preferredFramesPerSecond: Int = SettingsHandler.preferredFramesPerSecond
-	@State var decoderCompatibility: Bool = SettingsHandler.decoderCompatibility
-
+	@AppStorage("resolution") var resolution: ParsecResolution = .client
+	@AppStorage("bitrate") var bitrate: Int = 0
+	@AppStorage("decoder") var decoder: DecoderPref = .h264
+	@AppStorage("cursorMode") var cursorMode: CursorMode = .touchpad
+	@AppStorage("cursorScale") var cursorScale: Double = 0.5
+	@AppStorage("mouseSensitivity") var mouseSensitivity: Double = 1.0
+	@AppStorage("noOverlay") var noOverlay: Bool = false
+	@AppStorage("cursorScale") var hideStatusBar: Bool = true
+	@AppStorage("rightClickPosition") var rightClickPosition: RightClickPosition = .firstFinger
+	@AppStorage("preferredFramesPerSecond") var preferredFramesPerSecond: Int = 60 // 0 = use device max (ProMotion)
+	@AppStorage("decoderCompatibility") var decoderCompatibility: Bool = false // Enable for stutter issues on some devices
+	@AppStorage("showKeyboardButton") var showKeyboardButton: Bool = true
+	
 	let resolutionChoices: [Choice<ParsecResolution>]
 
 	init(visible: Binding<Bool>) {
@@ -161,6 +163,11 @@ struct SettingsView:View
 								Toggle("", isOn:$hideStatusBar)
 									.frame(width:80)
 							}
+							CatItem("Show Keyboard Button")
+							{
+								Toggle("", isOn:$showKeyboardButton)
+									.frame(width:80)
+							}
 						}
 						Text("More options coming soon.")
 							.multilineTextAlignment(.center)
@@ -183,18 +190,6 @@ struct SettingsView:View
 	func saveAndExit()
 	{
 		//SettingsHandler.renderer = renderer
-		SettingsHandler.decoder = decoder
-		SettingsHandler.resolution = resolution
-		SettingsHandler.cursorMode = cursorMode
-		SettingsHandler.cursorScale = cursorScale
-		SettingsHandler.rightClickPosition = rightClickPosition
-		SettingsHandler.noOverlay = noOverlay
-		SettingsHandler.hideStatusBar = hideStatusBar
-		SettingsHandler.mouseSensitivity = mouseSensitivity
-		SettingsHandler.preferredFramesPerSecond = preferredFramesPerSecond
-		SettingsHandler.decoderCompatibility = decoderCompatibility
-		SettingsHandler.save()
-
 		visible = false
 	}
 }

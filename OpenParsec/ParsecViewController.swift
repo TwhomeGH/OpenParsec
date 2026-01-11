@@ -9,6 +9,8 @@ import Foundation
 import UIKit
 import ParsecSDK
 
+import OSLog
+
 
 protocol ParsecPlayground {
 	init(viewController: UIViewController, updateImage: @escaping () -> Void)
@@ -19,7 +21,20 @@ protocol ParsecPlayground {
 
 
 class ParsecViewController :UIViewController {
-	var glkView: ParsecPlayground!
+	var renderer: ParsecRenderer!   // typealias ParsecPlayground & ParsecRenderController
+
+	func createRenderer(type: RendererType) -> ParsecRenderer {
+		switch type {
+		case .metal:
+			os_log("Use Metal")
+			return ParsecMetalViewControllerWrapper(viewController: self, updateImage: updateImage)
+		case .opengl:
+			os_log("Use OpenGL")
+			return ParsecGLKViewController(viewController: self, updateImage: updateImage)
+		}
+	}
+
+
 	var gamePadController: GamepadController!
 	var touchController: TouchController!
 	var u:UIImageView?
@@ -41,8 +56,8 @@ class ParsecViewController :UIViewController {
 	init() {
 		super.init(nibName: nil, bundle: nil)
 		
-		self.glkView = ParsecGLKViewController(viewController: self, updateImage: updateImage)
-		
+		self.renderer = createRenderer(type: SettingsHandler.renderer)
+
 		self.gamePadController = GamepadController(viewController: self)
 		self.touchController = TouchController(viewController: self)
 	}
@@ -69,7 +84,7 @@ class ParsecViewController :UIViewController {
 	}
 	
 	override func viewDidLoad() {
-		glkView.viewDidLoad()
+		renderer.viewDidLoad()
 		touchController.viewDidLoad()
 		gamePadController.viewDidLoad()
 		
@@ -137,7 +152,7 @@ class ParsecViewController :UIViewController {
 		let h = size.height
 		let w = size.width
 		
-		self.glkView.updateSize(width: w, height: h)
+		self.renderer.updateSize(width: w, height: h)
 		CParsec.setFrame(w, h, UIScreen.main.scale)
 	}
 	

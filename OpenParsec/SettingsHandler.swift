@@ -2,7 +2,7 @@ import Foundation
 
 struct SettingsHandler
 {
-	//public static var renderer:RendererType = .opengl
+	public static var renderer:RendererType = .opengl
 	public static var resolution : ParsecResolution = ParsecResolution.resolutions[1]
 	public static var decoder:DecoderPref = .h264
 	public static var cursorMode:CursorMode = .touchpad
@@ -16,8 +16,9 @@ struct SettingsHandler
 	
 	public static func load()
 	{
-		//if UserDefaults.standard.exists(forKey:"renderer")
-		//	{ renderer = RendererType(rawValue:UserDefaults.standard.integer(forKey:"renderer"))! }
+		if UserDefaults.standard.exists(forKey:"renderer")
+			{ renderer = RendererType(rawValue:UserDefaults.standard.integer(forKey:"renderer"))! }
+		
 		if UserDefaults.standard.exists(forKey:"decoder")
 			{ decoder = DecoderPref(rawValue:UserDefaults.standard.integer(forKey:"decoder"))! }
 		if UserDefaults.standard.exists(forKey:"cursorMode")
@@ -50,7 +51,7 @@ struct SettingsHandler
 	
 	public static func save()
 	{
-		//UserDefaults.standard.set(renderer.rawValue, forKey:"renderer")
+		UserDefaults.standard.set(renderer.rawValue, forKey:"renderer")
 		UserDefaults.standard.set(decoder.rawValue, forKey:"decoder")
 		UserDefaults.standard.set(cursorMode.rawValue, forKey:"cursorMode")
 		UserDefaults.standard.set(rightClickPosition.rawValue, forKey:"rightClickPosition")

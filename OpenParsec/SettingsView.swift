@@ -1,10 +1,16 @@
 import SwiftUI
 
+
+
+
+
 struct SettingsView:View
 {
+
+
 	@Binding var visible:Bool
 
-	//@State var renderer:RendererType = SettingsHandler.renderer
+	@State var renderer:RendererType = SettingsHandler.renderer
 	@State var decoder:DecoderPref = SettingsHandler.decoder
 	@State var cursorMode:CursorMode = SettingsHandler.cursorMode
 	@State var rightClickPosition:RightClickPosition = SettingsHandler.rightClickPosition
@@ -15,7 +21,11 @@ struct SettingsView:View
 	@State var hideStatusBar:Bool = SettingsHandler.hideStatusBar
 
 	@AppStorage("FPSPerFrame") var fpsPerFrame = 60
-	
+
+
+
+
+
 	let resolutionChoices : [Choice<ParsecResolution>]
 
 	init(visible: Binding<Bool>) {
@@ -111,7 +121,7 @@ struct SettingsView:View
                         CatTitle("Graphics")
                         CatList()
                         {
-                            /*CatItem("Renderer")
+                            CatItem("Renderer")
                             {
 								SegmentPicker(selection:$renderer, options:
 								[
@@ -119,7 +129,7 @@ struct SettingsView:View
 									Choice("Metal", RendererType.metal)
 								])
                                 .frame(width:165)
-                            }*/
+                            }
 							CatItem("Default Resolution")
 							{
 								MultiPicker(selection:$resolution, options:resolutionChoices)

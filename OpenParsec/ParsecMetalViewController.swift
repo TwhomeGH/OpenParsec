@@ -3,7 +3,11 @@ import SwiftUI
 import MetalKit
 import UIKit
 
-class ParsecMetalViewControllerWrapper : ParsecRenderController {
+typealias ParsecRenderer =
+	ParsecPlayground & ParsecRenderController
+
+
+class ParsecMetalViewControllerWrapper : ParsecPlayground,ParsecRenderController {
     let viewController: UIViewController
     var mtkView: MTKView!
     var renderer: ParsecMetalRenderer!
@@ -26,7 +30,10 @@ class ParsecMetalViewControllerWrapper : ParsecRenderController {
     }
 
     
-    init(viewController: UIViewController, updateImage: @escaping () -> Void) {
+	required init(
+		viewController: UIViewController,
+		updateImage: @escaping () -> Void
+	) {
         self.viewController = viewController
         self.updateImage = updateImage
     }
@@ -46,6 +53,11 @@ class ParsecMetalViewControllerWrapper : ParsecRenderController {
     func updateSize(width: CGFloat, height: CGFloat) {
         mtkView.frame.size = CGSize(width: width, height: height)
     }
+
+	func cleanUp() {
+		mtkView?.removeFromSuperview()
+		renderer = nil
+	}
 }
 
 /*import SwiftUI

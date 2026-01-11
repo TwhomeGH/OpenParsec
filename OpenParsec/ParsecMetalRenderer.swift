@@ -1,6 +1,8 @@
 import MetalKit
 import ParsecSDK
 
+
+
 class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     var mtkView: MTKView
     var updateImage: () -> Void

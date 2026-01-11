@@ -331,7 +331,7 @@ struct ParsecView:View
 	func disconnect()
 	{
 		CParsec.disconnect()
-		self.parsecViewController.glkView.cleanUp()
+		self.parsecViewController.renderer.cleanUp()
 
 		if let c = controller
 		{

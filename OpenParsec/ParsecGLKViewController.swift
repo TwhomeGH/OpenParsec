@@ -1,6 +1,8 @@
 import UIKit
 import GLKit
 
+import OSLog
+
 protocol ParsecRenderController : AnyObject {
     var preferredFPS: Int { get set }
     func getFramesDisplayed() -> Int
@@ -20,8 +22,173 @@ extension ParsecGLKViewController: ParsecRenderController {
 final class ParsecRenderCenter {
     static let shared = ParsecRenderCenter()
     
-    weak var renderController: ParsecRenderController?  // 不再直接綁 GLK
-    
+	weak var renderController: ParsecRenderController? // FPS檢測
+
+	weak var viewController: ParsecViewController? // Metal/OpenGL
+
+
+	var rendererType: RendererType = SettingsHandler.renderer
+
+	private(set) var isInitialized = false
+	private(set) var isClientInitialized = false
+
+	private var rendererReady = false
+	private var clientReady = false
+
+	private var pendingResolutionUpdate = false
+	private var pendingBitrateUpdate = false
+
+	func requestResolutionUpdate() {
+		pendingResolutionUpdate = true
+		applyIfPossible()
+	}
+
+	func requestBitrateUpdate() {
+		pendingBitrateUpdate = true
+		applyIfPossible()
+	}
+
+	func setMuted(_ muted: Bool) {
+		CParsec.setMuted(muted)
+	}
+
+	func applyIfPossible() {
+		guard rendererReady, clientReady else { return }
+
+		if pendingResolutionUpdate {
+
+			CParsec.updateHostVideoConfig()
+			updateNativeResolutionIfNeeded()
+			pendingResolutionUpdate = false
+		}
+
+		if pendingBitrateUpdate {
+			CParsec.updateHostVideoConfig()
+			pendingBitrateUpdate = false
+		}
+	}
+
+	func onRendererReady(size: CGSize, scale: CGFloat) {
+		guard !rendererReady else { return }
+
+		rendererReady = true
+
+		CParsec.setFrame(
+			CGFloat(Int(size.width)),
+			CGFloat(Int(size.height)),
+			scale
+		)
+
+		applyIfPossible()
+		os_log("✅ Renderer ready")
+	}
+	
+
+
+	func updateNativeResolutionIfNeeded() {
+		guard let vc = viewController else { return }
+
+		let size = vc.view.bounds.size
+		guard size.width > 0, size.height > 0 else { return }
+
+		let scale = UIScreen.main.nativeScale
+		let w = Int(size.width * scale)
+		let h = Int(size.height * scale)
+
+		let cur = ParsecResolution.resolutions[1]
+		guard cur.width != w || cur.height != h else { return }
+
+		ParsecResolution.resolutions[1].width = w
+		ParsecResolution.resolutions[1].height = h
+
+		os_log("📐 Native resolution updated: %dx%d", w, h)
+	}
+
+	func start(muted: Bool) {
+		guard !isInitialized else {
+			os_log("⚠️ ParsecRenderCenter already initialized")
+			return
+		}
+
+		initRenderer()
+		initCParsec(muted: muted)
+
+		isInitialized = true
+		isClientInitialized = true
+	}
+
+	func shutdown() {
+		CParsec.disconnect()
+
+		viewController?.renderer.cleanUp()
+		viewController = nil
+		renderController = nil
+
+		isInitialized = false
+		isClientInitialized = false
+		didNotifyRendererReady = false
+		
+		os_log("🧹 ParsecRenderCenter shutdown complete")
+	}
+
+	private var didNotifyRendererReady = false
+
+	func notifyRendererReadyIfNeeded(from vc: ParsecViewController) {
+		guard !didNotifyRendererReady else { return }
+
+		let size = vc.view.bounds.size
+		guard size.width > 0, size.height > 0 else { return }
+
+		didNotifyRendererReady = true
+		rendererReady = true
+
+		// renderer 此時一定已存在
+		renderController = vc.renderer
+
+		updateNativeResolutionIfNeeded()
+
+		os_log("✅ Renderer ready, layout confirmed")
+	}
+
+	func getHostUserData() {
+		let data = "".data(using: .utf8)!
+		CParsec.sendUserData(type: .getVideoConfig, message: data)
+		CParsec.sendUserData(type: .getAdapterInfo, message: data)
+	}
+	
+	func initCParsec(muted: Bool) {
+
+			os_log("初始化客戶端")
+			CParsec.applyConfig()
+			CParsec.setMuted(muted)
+			getHostUserData()
+
+			clientReady = true
+
+		}
+
+
+	// MARK: - 初始化或切換 Renderer
+	func initRenderer() {
+		guard viewController == nil else { return }
+
+		let controller = ParsecViewController()
+
+		controller.renderer = controller.createRenderer(type: rendererType)
+
+		viewController = controller
+	}
+
+	func switchRenderer(to type: RendererType) {
+		rendererType = type
+
+		viewController?.switchRenderer(to: type)
+		SettingsHandler.renderer = type
+		SettingsHandler.save()
+	}
+
+
+
     func updateFPS(_ fps: Int) {
         renderController?.preferredFPS = fps
     }

@@ -37,6 +37,8 @@ class ParsecGLKRenderer:NSObject, GLKViewDelegate, GLKViewControllerDelegate
 		{
 		    CParsec.setFrame(view.frame.size.width, view.frame.size.height, view.contentScaleFactor)
 	        lastWidth = view.frame.size.width
+			print("SCALE",view.contentScaleFactor)
+			print("Width:\(view.frame.size.width)x\( view.frame.size.height)")
 		}
 		CParsec.renderGLFrame(timeout:16)
 		

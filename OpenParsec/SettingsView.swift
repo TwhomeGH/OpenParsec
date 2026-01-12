@@ -8,9 +8,11 @@ struct SettingsView:View
 {
 
 
+
 	@Binding var visible:Bool
 
 	@State var renderer:RendererType = SettingsHandler.renderer
+
 	@State var decoder:DecoderPref = SettingsHandler.decoder
 	@State var cursorMode:CursorMode = SettingsHandler.cursorMode
 	@State var rightClickPosition:RightClickPosition = SettingsHandler.rightClickPosition
@@ -28,8 +30,9 @@ struct SettingsView:View
 
 	let resolutionChoices : [Choice<ParsecResolution>]
 
-	init(visible: Binding<Bool>) {
+	init(visible: Binding<Bool> ) {
 		_visible = visible
+
 		var tmp : [Choice<ParsecResolution>] = []
 		for res in ParsecResolution.resolutions {
 			tmp.append(Choice(res.desc, res))
@@ -129,6 +132,13 @@ struct SettingsView:View
 									Choice("Metal", RendererType.metal)
 								])
                                 .frame(width:165)
+								.onChange(of: renderer) {
+									newVal in
+									ParsecRenderCenter.shared
+										.switchRenderer(to: newVal)
+
+								}
+
                             }
 							CatItem("Default Resolution")
 							{
@@ -212,8 +222,10 @@ struct SettingsView_Previews:PreviewProvider
 {
 	@State static var value:Bool = true
 
+
 	static var previews:some View
 	{
+
 		SettingsView(visible:$value)
 	}
 }

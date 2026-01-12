@@ -34,6 +34,19 @@ class ParsecViewController :UIViewController {
 		}
 	}
 
+	func switchRenderer(to type: RendererType) {
+		// 先清理舊渲染器
+		renderer.cleanUp()
+
+		// 建立新的渲染器
+		renderer = createRenderer(type: type)
+		renderer.viewDidLoad()
+
+		// 更新 SettingsHandler
+		SettingsHandler.renderer = type
+		SettingsHandler.save()
+	}
+
 
 	var gamePadController: GamepadController!
 	var touchController: TouchController!
@@ -56,8 +69,6 @@ class ParsecViewController :UIViewController {
 	init() {
 		super.init(nibName: nil, bundle: nil)
 		
-		self.renderer = createRenderer(type: SettingsHandler.renderer)
-
 		self.gamePadController = GamepadController(viewController: self)
 		self.touchController = TouchController(viewController: self)
 	}
@@ -82,7 +93,15 @@ class ParsecViewController :UIViewController {
 			u?.image = nil
 		}
 	}
+
+
 	
+	override func viewDidLayoutSubviews() {
+		super.viewDidLayoutSubviews()
+
+		ParsecRenderCenter.shared.notifyRendererReadyIfNeeded(from: self)
+	}
+
 	override func viewDidLoad() {
 		renderer.viewDidLoad()
 		touchController.viewDidLoad()
@@ -162,6 +181,12 @@ class ParsecViewController :UIViewController {
 			parent.setChildForHomeIndicatorAutoHidden(self)
 			parent.setChildViewControllerForPointerLock(self)
 		}
+
+		ParsecRenderCenter.shared.onRendererReady(
+			size: view.bounds.size,
+			scale: UIScreen.main.scale
+		)
+		
 	}
 	
 	override func viewWillDisappear(_ animated: Bool) {

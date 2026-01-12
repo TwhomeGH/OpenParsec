@@ -1,6 +1,7 @@
 import ParsecSDK
 import MetalKit
 import UIKit
+import OSLog
 
 enum RendererType:Int
 {
@@ -37,7 +38,9 @@ class ParsecSDKBridge: ParsecService
 	var hostWidth: Float = 1920
 	
 	var hostHeight: Float = 1080
-	
+
+	public private(set) var videoReady: Bool = false
+
 	
 	static let PARSEC_VER:UInt32 = UInt32((PARSEC_VER_MAJOR << 16) | PARSEC_VER_MINOR)
 	
@@ -102,11 +105,12 @@ class ParsecSDKBridge: ParsecService
 		parsecClientCfg.video.0.decoderCompatibility = false
 		parsecClientCfg.video.0.decoderH265 = true
 		
-		parsecClientCfg.video.1.decoderIndex = 1
-		parsecClientCfg.video.1.resolutionX = 0
-		parsecClientCfg.video.1.resolutionY = 0
-		parsecClientCfg.video.1.decoderCompatibility = false
-		parsecClientCfg.video.1.decoderH265 = true
+//		parsecClientCfg.video.1.decoderIndex = 1
+//		parsecClientCfg.video.1.resolutionX = 0
+//		parsecClientCfg.video.1.resolutionY = 0
+//		parsecClientCfg.video.1.decoderCompatibility = false
+//		parsecClientCfg.video.1.decoderH265 = true
+//
 		
 		parsecClientCfg.mediaContainer = 0
 		parsecClientCfg.protocol = 1
@@ -130,14 +134,16 @@ class ParsecSDKBridge: ParsecService
 		return ParsecClientGetStatus(_parsec, nil)
 	}
 	
-	func getStatusEx(_ pcs:inout ParsecClientStatus) -> ParsecStatus
-	{
-		self.hostHeight = Float(pcs.decoder.0.height)
-		self.hostWidth = Float(pcs.decoder.0.width)
-		return ParsecClientGetStatus(_parsec, &pcs)
-		
+	func getStatusEx(_ pcs: inout ParsecClientStatus) -> ParsecStatus {
+
+		let status = ParsecClientGetStatus(_parsec, &pcs)
+		if status == PARSEC_OK {
+			hostWidth  = Float(pcs.decoder.0.width)
+			hostHeight = Float(pcs.decoder.0.height)
+		}
+		return status
 	}
-	
+
 	func setFrame(_ width:CGFloat, _ height:CGFloat, _ scale:CGFloat)
 	{
 		ParsecClientSetDimensions(_parsec, UInt8(DEFAULT_STREAM), UInt32(width), UInt32(height), Float(scale))
@@ -158,27 +164,50 @@ class ParsecSDKBridge: ParsecService
 	 ParsecClientMetalRenderFrame(_parsec, UInt8(DEFAULT_STREAM), &queue, texturePtr, nil, nil, timeout)
 	 }*/
 
-	func renderMetalFrame(_ commandBuffer: MTLCommandBuffer, _ texture: MTLTexture, timeout: UInt32 = 16) {
-	    // 取得指針
-	    let commandBufferPtr = Unmanaged.passUnretained(commandBuffer).toOpaque()
-	    let texturePtr = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: 1)
-	    texturePtr.pointee = Unmanaged.passUnretained(texture).toOpaque()
-	    
-	    // 呼叫 C API
-	    ParsecClientMetalRenderFrame(
-	        _parsec,
-	        UInt8(DEFAULT_STREAM),
-	        commandBufferPtr,
-	        texturePtr,
-	        nil,
-	        nil,
-	        timeout
-	    )
-	    
-	    // 釋放指針
-	    texturePtr.deallocate()
+	func renderMetalFrame(
+		queue: MTLCommandQueue,
+		drawable: CAMetalDrawable,
+		timeout: UInt32 = 16
+	) {
+
+
+
+		// 1. 取得 texture
+	    let texture = drawable.texture
+
+
+		// 2. 將 texture 轉成 C 指針
+		var texPtr: UnsafeMutableRawPointer? = Unmanaged.passUnretained(texture).toOpaque()
+
+
+		var parsecTexturePtr: UnsafeMutableRawPointer? = nil
+
+
+		// 3. 呼叫 Parsec C API
+		let status = withUnsafeMutablePointer(
+			to: &parsecTexturePtr
+		) { targetPtr in
+			ParsecClientMetalRenderFrame(
+				_parsec,
+				0,
+				nil,       // CQ 交給 Parsec 管理
+				targetPtr,
+				nil,
+				nil,
+				timeout
+			)
+		}
+
+		// 4. 判斷是否成功
+		if status.rawValue != 0 {
+			print("Parsec render failed with status: \(status)")
+		}
+		//print("Parsec render status:", status, status.rawValue)
+
+
+
 	}
-	
+
 	func pollAudio(timeout:UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	{
 		ParsecClientPollAudio(_parsec, audio_cb, timeout, _audioPtr)
@@ -297,13 +326,15 @@ class ParsecSDKBridge: ParsecService
 		parsecClientCfg.video.0.resolutionY = 0
 		parsecClientCfg.video.0.decoderCompatibility = false
 		parsecClientCfg.video.0.decoderH265 = SettingsHandler.decoder == .h265
-		
-		parsecClientCfg.video.1.decoderIndex = 1
-		parsecClientCfg.video.1.resolutionX = 0
-		parsecClientCfg.video.1.resolutionY = 0
-		parsecClientCfg.video.1.decoderCompatibility = false
-		parsecClientCfg.video.1.decoderH265 = SettingsHandler.decoder == .h265
-		
+
+		//可能是多餘的流
+//		parsecClientCfg.video.1.decoderIndex = 1
+//		parsecClientCfg.video.1.resolutionX = 0
+//		parsecClientCfg.video.1.resolutionY = 0
+//		parsecClientCfg.video.1.decoderCompatibility = false
+//		parsecClientCfg.video.1.decoderH265 = SettingsHandler.decoder == .h265
+//
+
 		parsecClientCfg.mediaContainer = mediaContainer
 		parsecClientCfg.protocol = netProtocol
 		//parsecClientCfg.secret = ""

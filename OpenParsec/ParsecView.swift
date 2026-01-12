@@ -2,6 +2,8 @@ import SwiftUI
 import ParsecSDK
 import Foundation
 
+import OSLog
+
 struct ParsecStatusBar : View {
 	@Binding var showMenu : Bool
 	@State var metricInfo:String = "Loading..."
@@ -117,28 +119,35 @@ struct ParsecView:View
 	@State var resolutions : [ParsecResolution]
 	@State var bitrates : [Int]
 	
-	var parsecViewController : ParsecViewController!
-	
+
 	
 	//@State var showDisplays:Bool = false
 	
 	init(_ controller:ContentView?)
 	{
 		self.controller = controller
-		parsecViewController = ParsecViewController()
+
 		_resolutions = State(initialValue: ParsecResolution.resolutions)
 		_bitrates = State(initialValue: ParsecResolution.bitrates)
 	}
+
 
 	var body:some View
 	{
 		ZStack()
 		{
-			
-			UIViewControllerWrapper(self.parsecViewController)
-				.zIndex(1)
-				.prefersPersistentSystemOverlaysHidden()
-			
+
+
+			if let vc = ParsecRenderCenter.shared.viewController {
+
+
+				GeometryReader { geo in
+					UIViewControllerWrapper(vc)
+						.zIndex(1)
+						.prefersPersistentSystemOverlaysHidden()
+				}
+			}
+
 			ParsecStatusBar(showMenu: $showMenu, showDCAlert: $showDCAlert, DCAlertText: $DCAlertText)
 			
 			VStack()
@@ -152,7 +161,7 @@ struct ParsecView:View
 								showMenu = false
 							} else {
 								showMenu = true
-								getHostUserData()
+								ParsecRenderCenter.shared.getHostUserData()
 							}
 						})
 						{
@@ -276,18 +285,19 @@ struct ParsecView:View
 	
 	func post()
 	{
-		CParsec.applyConfig()
-		CParsec.setMuted(muted)
-		
-		// set client resolution
-		let screenSize: CGSize = self.parsecViewController.view.frame.size
-		let scaleFactor = UIScreen.main.nativeScale
-		ParsecResolution.resolutions[1].width = Int(screenSize.width * scaleFactor)
-		ParsecResolution.resolutions[1].height = Int(screenSize.height * scaleFactor)
-		
-		getHostUserData()
-		
+
+		// 初始化 ParsecRenderCenter (如果尚未初始化)
+		ParsecRenderCenter.shared.start(muted: muted)
+
 		hideOverlay = SettingsHandler.noOverlay
+
+		if let vc = ParsecRenderCenter.shared.viewController {
+				ParsecRenderCenter.shared.notifyRendererReadyIfNeeded(from: vc)
+		}
+
+		
+
+
 	}
 	
 	
@@ -300,7 +310,7 @@ struct ParsecView:View
 	func toggleMute()
 	{
 		muted.toggle()
-		CParsec.setMuted(muted)
+		ParsecRenderCenter.shared.setMuted(muted)
 	}
 	
 	/*func genDisplaySheet() -> ActionSheet
@@ -330,9 +340,8 @@ struct ParsecView:View
 	
 	func disconnect()
 	{
-		CParsec.disconnect()
-		self.parsecViewController.renderer.cleanUp()
-
+		ParsecRenderCenter.shared.shutdown()
+		
 		if let c = controller
 		{
 			c.setView(.main)
@@ -342,12 +351,16 @@ struct ParsecView:View
 	func changeResolution(res: ParsecResolution) {
 		DataManager.model.resolutionX = res.width
 		DataManager.model.resolutionY = res.height
-		CParsec.updateHostVideoConfig()
+
+		ParsecRenderCenter.shared.requestResolutionUpdate()
+		ParsecRenderCenter.shared.applyIfPossible()
+
 	}
 
 	func changeBitRate(bitrate: Int) {
 		DataManager.model.bitrate = bitrate
-		CParsec.updateHostVideoConfig()
+
+		ParsecRenderCenter.shared.requestBitrateUpdate()
 	}
 	
 	func toggleConstantFps() {
@@ -361,11 +374,7 @@ struct ParsecView:View
 		CParsec.updateHostVideoConfig()
 	}
 	
-	func getHostUserData() {
-		let data = "".data(using: .utf8)!
-		CParsec.sendUserData(type: .getVideoConfig, message: data)
-		CParsec.sendUserData(type: .getAdapterInfo, message: data)
-	}
+	
 
 }
 

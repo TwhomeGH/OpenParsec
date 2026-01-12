@@ -39,6 +39,7 @@
 		27E61AAA2929B92200FF6563 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E61AA92929B92200FF6563 /* MainView.swift */; };
 		27ED36FF292D4F9800B1BE3D /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27ED36FE292D4F9800B1BE3D /* NetworkHandler.swift */; };
 		84480EBE2ADC4FDA007DE5F1 /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84480EBD2ADC4FDA007DE5F1 /* GameController.swift */; };
+		CE02CB082F14482F003714A3 /* shader.metal in Sources */ = {isa = PBXBuildFile; fileRef = CE02CB072F144824003714A3 /* shader.metal */; };
 		FC16A7AD29A97BDA00BB70A7 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A7AC29A97BDA00BB70A7 /* Shared.swift */; };
 /* End PBXBuildFile section */
 
@@ -92,6 +93,7 @@
 		27E61AA92929B92200FF6563 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		27ED36FE292D4F9800B1BE3D /* NetworkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
 		84480EBD2ADC4FDA007DE5F1 /* GameController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
+		CE02CB072F144824003714A3 /* shader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = shader.metal; sourceTree = "<group>"; };
 		FC16A7AC29A97BDA00BB70A7 /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -157,6 +159,7 @@
 				271D14FA292EAA3600D7F1D6 /* ParsecGLKRenderer.swift */,
 				271D14FB292EAA3600D7F1D6 /* ParsecGLKViewController.swift */,
 				27B23A212B1B979C00B52F14 /* ParsecMetalRenderer.swift */,
+				CE02CB072F144824003714A3 /* shader.metal */,
 				27B23A232B1B98EF00B52F14 /* ParsecMetalViewController.swift */,
 				17EA35F62BF712A8001BE0DF /* ParsecSDKBridge.swift */,
 				271D14F8292E90EB00D7F1D6 /* ParsecView.swift */,
@@ -287,6 +290,7 @@
 				17EEB91C2BEE62BA00502A3A /* KeyBoardTest.swift in Sources */,
 				17374D412CB8E35D00EDCEE7 /* KeyCodeTranslators.swift in Sources */,
 				271D14F9292E90EB00D7F1D6 /* ParsecView.swift in Sources */,
+				CE02CB082F14482F003714A3 /* shader.metal in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

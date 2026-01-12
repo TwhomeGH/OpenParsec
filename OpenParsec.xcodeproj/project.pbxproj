@@ -40,6 +40,7 @@
 		27ED36FF292D4F9800B1BE3D /* NetworkHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27ED36FE292D4F9800B1BE3D /* NetworkHandler.swift */; };
 		84480EBE2ADC4FDA007DE5F1 /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84480EBD2ADC4FDA007DE5F1 /* GameController.swift */; };
 		CE02CB082F14482F003714A3 /* shader.metal in Sources */ = {isa = PBXBuildFile; fileRef = CE02CB072F144824003714A3 /* shader.metal */; };
+		CE02CB0A2F14C95C003714A3 /* RenderCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE02CB092F14C955003714A3 /* RenderCenter.swift */; };
 		FC16A7AD29A97BDA00BB70A7 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A7AC29A97BDA00BB70A7 /* Shared.swift */; };
 /* End PBXBuildFile section */
 
@@ -94,6 +95,7 @@
 		27ED36FE292D4F9800B1BE3D /* NetworkHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkHandler.swift; sourceTree = "<group>"; };
 		84480EBD2ADC4FDA007DE5F1 /* GameController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
 		CE02CB072F144824003714A3 /* shader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = shader.metal; sourceTree = "<group>"; };
+		CE02CB092F14C955003714A3 /* RenderCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderCenter.swift; sourceTree = "<group>"; };
 		FC16A7AC29A97BDA00BB70A7 /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -163,6 +165,7 @@
 				27B23A232B1B98EF00B52F14 /* ParsecMetalViewController.swift */,
 				17EA35F62BF712A8001BE0DF /* ParsecSDKBridge.swift */,
 				271D14F8292E90EB00D7F1D6 /* ParsecView.swift */,
+				CE02CB092F14C955003714A3 /* RenderCenter.swift */,
 				170E0A762BEF5AFF00B0EA32 /* ParsecViewController.swift */,
 				27E61A99292965FD00FF6563 /* Preview Content */,
 				27E61A93292965FC00FF6563 /* SceneDelegate.swift */,
@@ -284,6 +287,7 @@
 				170E0A772BEF5AFF00B0EA32 /* ParsecViewController.swift in Sources */,
 				27B23A222B1B979C00B52F14 /* ParsecMetalRenderer.swift in Sources */,
 				17840D1D2CB639530097374B /* ParsecUserData.swift in Sources */,
+				CE02CB0A2F14C95C003714A3 /* RenderCenter.swift in Sources */,
 				27E61A96292965FC00FF6563 /* ContentView.swift in Sources */,
 				17EA35F72BF712A8001BE0DF /* ParsecSDKBridge.swift in Sources */,
 				27ED36FF292D4F9800B1BE3D /* NetworkHandler.swift in Sources */,

@@ -8,7 +8,9 @@ struct SettingsView:View
 {
 	@Binding var visible: Bool
 
-	//@State var renderer:RendererType = SettingsHandler.renderer
+
+	@AppStorage("renderer") var renderer: RendererType = .opengl
+
 	@AppStorage("resolution") var resolution: ParsecResolution = .client
 	@AppStorage("bitrate") var bitrate: Int = 0
 	@AppStorage("decoder") var decoder: DecoderPref = .h264

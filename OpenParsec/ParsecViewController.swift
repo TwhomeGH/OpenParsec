@@ -7,14 +7,18 @@ import OSLog
 
 protocol ParsecPlayground {
 	init(viewController: UIViewController, updateImage: @escaping () -> Void)
-	func viewDidLoad()
+
+
+	var renderView: UIView { get }
+	func loadViewIfNeeded()
+
 	func cleanUp()
 	func updateSize(width: CGFloat, height: CGFloat)
 }
 
 
-class ParsecViewController :UIViewController {
-	var renderer: ParsecRenderer!   // typealias ParsecPlayground & ParsecRenderController
+class ParsecViewController :UIViewController, UIScrollViewDelegate {
+	var renderer: ParsecRenderer?   // typealias ParsecPlayground & ParsecRenderController
 
 	func createRenderer(type: RendererType) -> ParsecRenderer {
 		switch type {
@@ -28,17 +32,19 @@ class ParsecViewController :UIViewController {
 	}
 
 	func switchRenderer(to type: RendererType) {
-		// 先清理舊渲染器
-		renderer.cleanUp()
+		renderer?.cleanUp()
+		renderer?.renderView.removeFromSuperview()
 
-		// 建立新的渲染器
 		renderer = createRenderer(type: type)
-		renderer.viewDidLoad()
 
-		// 更新 SettingsHandler
+		let renderView = renderer!.renderView
+		renderView.frame = contentView.bounds
+		renderView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+		contentView.insertSubview(renderView, at: 0)
+
 		SettingsHandler.renderer = type
-		SettingsHandler.save()
 	}
+	
 
 
 	var gamePadController: GamepadController!
@@ -63,6 +69,7 @@ class ParsecViewController :UIViewController {
 	var keyboardHeight : CGFloat = 0.0
 	var keyboardVisible : Bool = false
 	var onKeyboardVisibilityChanged: ((Bool) -> Void)?
+
 	var scrollView: UIScrollView!
 	var contentView: UIView!
 
@@ -193,17 +200,60 @@ class ParsecViewController :UIViewController {
 	override func viewDidLayoutSubviews() {
 		super.viewDidLayoutSubviews()
 
-		ParsecRenderCenter.shared.notifyRendererReadyIfNeeded(from: self)
+		renderer?.updateSize(
+			width: contentView.bounds.width,
+			height: contentView.bounds.height
+		)
+
+
 	}
 
+
+
 	override func viewDidLoad() {
-		renderer.viewDidLoad()
+
+		super.viewDidLoad()
+
+		// ScrollView Setup
+		scrollView = UIScrollView(frame: view.bounds)
+		scrollView.delegate = self
+		scrollView.minimumZoomScale = 1.0
+		scrollView.maximumZoomScale = 5.0
+		scrollView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+		scrollView.panGestureRecognizer.minimumNumberOfTouches = 2
+		/*
+		 We set minimumNumberOfTouches to 2 for the scroll view's pan gesture
+		 so that 1-finger drags are passed through to our custom gesture recognizers
+		 (for moving the mouse).
+		 Standard 2-finger pan will scroll the view.
+		 */
+		view.addSubview(scrollView)
+
+		// ContentView
+		contentView = UIView(frame: view.bounds)
+		scrollView.addSubview(contentView)
+		scrollView.contentSize = view.bounds.size
+
+
+		// ✅ 在真正顯示的 VC 裡建立 renderer
+		if renderer == nil {
+			renderer = createRenderer(type: SettingsHandler.renderer)
+			print("✅ renderer created in ParsecViewController")
+		}
+
+		// 告訴 RenderCenter：我就是那個 VC
+		ParsecRenderCenter.shared.attach(viewController: self)
+
+
+
+
 		touchController.viewDidLoad()
 		gamePadController.viewDidLoad()
 		
 		u = UIImageView(frame: CGRect(x: 0,y: 0,width: 100, height: 100))
+
 		contentView.addSubview(u!) // Add Cursor to ContentView
-		
+
 		setNeedsUpdateOfPrefersPointerLocked()
 		
 		let pointerInteraction = UIPointerInteraction(delegate: self)
@@ -269,7 +319,7 @@ class ParsecViewController :UIViewController {
 		let h = size.height
 		let w = size.width
 		
-		self.renderer.updateSize(width: w, height: h)
+		self.renderer?.updateSize(width: w, height: h)
 		CParsec.setFrame(w, h, UIScreen.main.scale)
 
 		// Reset zoom on rotation
@@ -281,7 +331,10 @@ class ParsecViewController :UIViewController {
             reloadInputViews()
         }
 	}
-	
+
+
+
+
 	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
 		if let parent = parent {
@@ -289,17 +342,47 @@ class ParsecViewController :UIViewController {
 			parent.setChildViewControllerForPointerLock(self)
 		}
 
+		guard let renderer = renderer else {
+			print("❌ renderer is nil")
+			return
+		}
+
+		// ① 建立 GLKView / MTKView
+		renderer.loadViewIfNeeded()
+
+		// ② 加入畫面（此時 window 一定存在）
+		let renderView = renderer.renderView
+
+		// ② 只在「尚未加入」時才加入
+		if renderView.superview == nil {
+
+			renderView.frame = contentView.bounds
+			renderView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+			contentView.insertSubview(renderView, at: 0)
+
+		}
+
+
+		// 3️⃣ 設給 RenderCenter
+		ParsecRenderCenter.shared.renderController = renderer
+		ParsecRenderCenter.shared.viewController = self
+
+		// ③ 通知 RenderCenter：可以 setFrame 了
 		ParsecRenderCenter.shared.onRendererReady(
-			size: view.bounds.size,
+			size: contentView.bounds.size,
 			scale: UIScreen.main.scale
 		)
-		
+
+		print("✅ RenderView window =", renderView.window as Any)
+
+
 		if keyboardVisible {
 			becomeFirstResponder()
 		}
 		scrollView.pinchGestureRecognizer?.isEnabled = false
 	}
-	
+
+
 	override func viewWillDisappear(_ animated: Bool) {
 		super.viewWillDisappear(animated)
 		if let parent = parent {
@@ -373,6 +456,7 @@ class ParsecViewController :UIViewController {
 	}
 	
 }
+
 
 extension ParsecViewController : UIGestureRecognizerDelegate {
 

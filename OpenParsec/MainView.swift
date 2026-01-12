@@ -588,6 +588,10 @@ struct MainView: View
 
 		var status = CParsec.connect(who.id)
 
+		// 初始化 ParsecRenderCenter (如果尚未初始化)
+		ParsecRenderCenter.shared.start()
+
+
 		// Polling status
 		pollTimer = Timer.scheduledTimer(withTimeInterval:1, repeats: true)
 		{ timer in
@@ -618,7 +622,10 @@ struct MainView: View
 	{
 		withAnimation { isConnecting = false }
 
-		CParsec.disconnect()
+		ParsecRenderCenter.shared.shutdown()
+
+		//CParsec.disconnect()
+
 
 		pollTimer!.invalidate()
 	}

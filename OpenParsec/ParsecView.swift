@@ -79,7 +79,7 @@ struct ParsecStatusBar : View {
 			let decoderName = String.fromBuffer(&pcs.decoder.0.name.0, length: 16)
 			
 			// ✅ 新增 FPS 參數（舉例，你的 GLK FPS）
-			let glkFPS = SettingsHandler.fpsPerFrame
+			let glkFPS = SettingsHandler.preferredFramesPerSecond
             let glkCFPS = ParsecRenderCenter.shared.currentFPS()
 			// 查增量實際 FPS（可每秒刷新）
 			let deltaFPS = ParsecRenderCenter.shared.deltaFPS()
@@ -107,9 +107,9 @@ struct ParsecStatusBar : View {
 			
 		}
 
-		if let pc = parsecViewController {
-			// Logic handled in ParsecViewController.scrollView
-		}
+//		if let pc = parsecViewController {
+//			// Logic handled in ParsecViewController.scrollView
+//		}
 	}
 }
 
@@ -359,9 +359,7 @@ struct ParsecView: View
 	func post()
 	{
 
-		// 初始化 ParsecRenderCenter (如果尚未初始化)
-		ParsecRenderCenter.shared.start(muted: muted)
-
+	
 		hideOverlay = SettingsHandler.noOverlay
 
         // Setup callback to update local state

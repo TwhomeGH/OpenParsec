@@ -4,8 +4,7 @@ import MetalKit
 import UIKit
 
 typealias ParsecRenderer =
-	ParsecPlayground & ParsecRenderController
-
+ParsecPlayground & ParsecRenderController
 
 class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRenderController, MTKViewDelegate {
 
@@ -20,6 +19,13 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 	private var commandQueue: MTLCommandQueue!
 
 
+
+	var renderView: UIView {
+			mtkView
+	}
+
+
+
 	var lastWidth:CGFloat = 1.0
 	var lastHeight:CGFloat = 1.0
 
@@ -32,7 +38,7 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 	}
 
 	// MARK: - ParsecPlayground
-	func viewDidLoad() {
+	func loadViewIfNeeded() {
 		mtkView = MTKView(frame: viewController.view.bounds)
 		mtkView.device = MTLCreateSystemDefaultDevice()
 		mtkView.isPaused = false
@@ -40,6 +46,7 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 		mtkView.framebufferOnly = false
 		mtkView.colorPixelFormat = .bgra8Unorm
 		mtkView.preferredFramesPerSecond = preferredFPS
+		
 		viewController.view.addSubview(mtkView)
 
 		// 設置 MTKView Delegate
@@ -55,6 +62,13 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 	}
 
 	func updateSize(width: CGFloat, height: CGFloat) {
+
+		guard let mtkView = mtkView else {
+			// renderer 還沒 load view，不要動
+			return
+		}
+
+
 		mtkView.drawableSize = CGSize(width: width, height: height)
 		CParsec.setFrame(width, height, mtkView.contentScaleFactor)
 	}

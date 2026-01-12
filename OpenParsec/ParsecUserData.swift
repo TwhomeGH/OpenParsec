@@ -12,7 +12,7 @@ struct ParsecUserDataVideo : Codable {
 struct ParsecUserDataVideoConfig : Codable {
 	var virtualMicrophone : Int = 0
 	var virtualTablet : Int = 0
-	var video : [ParsecUserDataVideo] = [
+	var video: [ParsecUserDataVideo] = [
 		ParsecUserDataVideo(),
 		ParsecUserDataVideo(),
 		ParsecUserDataVideo()

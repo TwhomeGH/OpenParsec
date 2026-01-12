@@ -1,39 +1,39 @@
 import SwiftUI
 import ParsecSDK
 
-struct MainView:View
+struct MainView: View
 {
 	var controller:ContentView?
 
 	@State private var page:Page = .hosts
 
 	// Host page vars
-	@State var hostCountStr:String = "0 hosts"
-	@State var refreshTime:String = "Last refreshed at 1/1/1970 12:00 AM"
+	@State var hostCountStr: String = "0 hosts"
+	@State var refreshTime: String = "Last refreshed at 1/1/1970 12:00 AM"
 
 	@State var hosts:Array<IdentifiableHostInfo> = []
 
 	// Friend page vars
-	@State var friendCountStr:String = "0 friends"
+	@State var friendCountStr: String = "0 friends"
 
 	@State var userInfo:IdentifiableUserInfo? = nil
 	@State var friends:Array<IdentifiableUserInfo> = []
 
 	// Global vars
-	@State var showBaseAlert:Bool = false
-	@State var baseAlertText:String = ""
+	@State var showBaseAlert: Bool = false
+	@State var baseAlertText: String = ""
 
-	@State var showLogoutAlert:Bool = false
+	@State var showLogoutAlert: Bool = false
 
-	@State var isConnecting:Bool = false
-	@State var connectingToName:String = ""
-	@State var pollTimer:Timer?
+	@State var isConnecting: Bool = false
+	@State var connectingToName: String = ""
+	@State var pollTimer: Timer?
 
-	@State var isRefreshing:Bool = false
+	@State var isRefreshing: Bool = false
 
-	@State var inSettings:Bool = false
+	@State var inSettings: Bool = false
 
-	var busy:Bool
+	var busy: Bool
 	{
 		isConnecting || isRefreshing || inSettings
 	}
@@ -43,7 +43,7 @@ struct MainView:View
 		self.controller = controller
 	}
 
-	var body:some View
+	var body: some View
 	{
 		ZStack()
 		{
@@ -65,7 +65,7 @@ struct MainView:View
 						.padding()
 						.alert(isPresented:$showLogoutAlert)
 						{
-							Alert(title:Text("Are you sure you want to logout?"), primaryButton:.destructive(Text("Logout"), action:logout), secondaryButton:.cancel(Text("Cancel")))
+							Alert(title: Text("Are you sure you want to logout?"), primaryButton:.destructive(Text("Logout"), action:logout), secondaryButton:.cancel(Text("Cancel")))
 						}
 //					Button(action: {
 //						if let c = controller
@@ -131,7 +131,7 @@ struct MainView:View
 								{
 									VStack()
 									{
-										URLImage(url:URL(string:"https://parsecusercontent.com/cors-resize-image/w=64,h=64,fit=crop,background=white,q=90,f=jpeg/avatars/\(String(i.user.id))/avatar"),
+										URLImage(url: URL(string:"https://parsecusercontent.com/cors-resize-image/w=64,h=64,fit=crop,background=white,q=90,f=jpeg/avatars/\(String(i.user.id))/avatar"),
 												output:
 												{
 													$0
@@ -210,7 +210,7 @@ struct MainView:View
 									.opacity(0.5)
 								HStack()
 								{
-									URLImage(url:URL(string:"https://parsecusercontent.com/cors-resize-image/w=48,h=48,fit=crop,background=white,q=90,f=jpeg/avatars/\(String(user.id))/avatar"),
+									URLImage(url: URL(string:"https://parsecusercontent.com/cors-resize-image/w=48,h=48,fit=crop,background=white,q=90,f=jpeg/avatars/\(String(user.id))/avatar"),
 										output:
 										{
 											$0
@@ -246,7 +246,7 @@ struct MainView:View
 								{ i in
 									HStack()
 									{
-										URLImage(url:URL(string:"https://parsecusercontent.com/cors-resize-image/w=48,h=48,fit=crop,background=white,q=90,f=jpeg/avatars/\(String(i.id))/avatar"),
+										URLImage(url: URL(string:"https://parsecusercontent.com/cors-resize-image/w=48,h=48,fit=crop,background=white,q=90,f=jpeg/avatars/\(String(i.id))/avatar"),
 											output:
 											{
 												$0
@@ -289,7 +289,7 @@ struct MainView:View
 				.frame(maxWidth:.infinity)
 				.alert(isPresented:$showBaseAlert)
 				{
-					Alert(title:Text(baseAlertText))
+					Alert(title: Text(baseAlertText))
 				}
 
 				// Page controls
@@ -424,45 +424,47 @@ struct MainView:View
 
 			let task = URLSession.shared.dataTask(with:request)
 			{ (data, response, error) in
-				if let data = data
-				{
-					let statusCode:Int = (response as! HTTPURLResponse).statusCode
-					let decoder = JSONDecoder()
-
-					if statusCode == 200 // 200 OK
+				DispatchQueue.main.async {
+					if let data = data
 					{
-						let info:HostInfoList =  try! decoder.decode(HostInfoList.self, from:data)
-						hosts.removeAll()
-						if let datas = info.data
+						let statusCode:Int = (response as! HTTPURLResponse).statusCode
+						let decoder = JSONDecoder()
+
+						if statusCode == 200 // 200 OK
 						{
-							datas.forEach
-							{ h in
-								hosts.append(IdentifiableHostInfo(id:h.peer_id, hostname:h.name, user:h.user, connections:h.players))
+							let info:HostInfoList =  try! decoder.decode(HostInfoList.self, from:data)
+							hosts.removeAll()
+							if let datas = info.data
+							{
+								datas.forEach
+								{ h in
+									hosts.append(IdentifiableHostInfo(id:h.peer_id, hostname:h.name, user:h.user, connections:h.players))
+								}
 							}
-						}
 
-						var grammar:String = "hosts"
-						if hosts.count == 1
+							var grammar: String = "hosts"
+							if hosts.count == 1
+							{
+								grammar = "host"
+							}
+
+							hostCountStr = "\(hosts.count) \(grammar)"
+
+							let formatter = DateFormatter()
+							formatter.dateFormat = "M/d/yyyy h:mm a"
+							refreshTime = "Last refreshed at \(formatter.string(from:Date()))"
+						}
+						else if statusCode == 403 // 403 Forbidden
 						{
-							grammar = "host"
+							let info:ErrorInfo = try! decoder.decode(ErrorInfo.self, from:data)
+
+							baseAlertText = "Error gathering hosts: \(info.error)"
+							showBaseAlert = true
 						}
-
-						hostCountStr = "\(hosts.count) \(grammar)"
-
-						let formatter = DateFormatter()
-						formatter.dateFormat = "M/d/yyyy h:mm a"
-						refreshTime = "Last refreshed at \(formatter.string(from:Date()))"
 					}
-					else if statusCode == 403 // 403 Forbidden
-					{
-						let info:ErrorInfo = try! decoder.decode(ErrorInfo.self, from:data)
 
-						baseAlertText = "Error gathering hosts: \(info.error)"
-						showBaseAlert = true
-					}
+					isRefreshing = false
 				}
-
-				isRefreshing = false
 			}
 			task.resume()
 		}
@@ -488,22 +490,24 @@ struct MainView:View
 
 			let task = URLSession.shared.dataTask(with:request)
 			{ (data, response, error) in
-				if let data = data
-				{
-					let statusCode:Int = (response as! HTTPURLResponse).statusCode
-					let decoder = JSONDecoder()
-
-					if statusCode == 200 // 200 OK
+				DispatchQueue.main.async {
+					if let data = data
 					{
-						let data:SelfInfoData =  try! decoder.decode(SelfInfo.self, from:data).data
-						userInfo = IdentifiableUserInfo(id:data.id, username:data.name)
-					}
-					else
-					{
-						let info:ErrorInfo = try! decoder.decode(ErrorInfo.self, from:data)
+						let statusCode:Int = (response as! HTTPURLResponse).statusCode
+						let decoder = JSONDecoder()
 
-						baseAlertText = "Error gathering user info: \(info.error)"
-						showBaseAlert = true
+						if statusCode == 200 // 200 OK
+						{
+							let data: SelfInfoData =  try! decoder.decode(SelfInfo.self, from:data).data
+							userInfo = IdentifiableUserInfo(id:data.id, username:data.name)
+						}
+						else
+						{
+							let info:ErrorInfo = try! decoder.decode(ErrorInfo.self, from:data)
+
+							baseAlertText = "Error gathering user info: \(info.error)"
+							showBaseAlert = true
+						}
 					}
 				}
 			}
@@ -531,44 +535,46 @@ struct MainView:View
 
 			let task = URLSession.shared.dataTask(with:request)
 			{ (data, response, error) in
-				if let data = data
-				{
-					let statusCode:Int = (response as! HTTPURLResponse).statusCode
-					let decoder = JSONDecoder()
-
-					print("/friendships: \(statusCode)")
-					print(String(data:data, encoding:.utf8)!)
-
-					if statusCode == 200 // 200 OK
+				DispatchQueue.main.async {
+					if let data = data
 					{
-						let info:FriendInfoList =  try! decoder.decode(FriendInfoList.self, from:data)
-						friends.removeAll()
-						if let datas = info.data
+						let statusCode:Int = (response as! HTTPURLResponse).statusCode
+						let decoder = JSONDecoder()
+
+						print("/friendships: \(statusCode)")
+						print(String(data:data, encoding:.utf8)!)
+
+						if statusCode == 200 // 200 OK
 						{
-							datas.forEach
-							{ f in
-								friends.append(IdentifiableUserInfo(id:f.user_id, username:f.user_name))
+							let info:FriendInfoList =  try! decoder.decode(FriendInfoList.self, from:data)
+							friends.removeAll()
+							if let datas = info.data
+							{
+								datas.forEach
+								{ f in
+									friends.append(IdentifiableUserInfo(id:f.user_id, username:f.user_name))
+								}
 							}
-						}
 
-						var grammar:String = "friends"
-						if friends.count == 1
+							var grammar: String = "friends"
+							if friends.count == 1
+							{
+								grammar = "friend"
+							}
+
+							friendCountStr = "\(friends.count) \(grammar)"
+						}
+						else
 						{
-							grammar = "friend"
+							let info:ErrorInfo = try! decoder.decode(ErrorInfo.self, from:data)
+
+							baseAlertText = "Error gathering friends: \(info.error)"
+							showBaseAlert = true
 						}
-
-						friendCountStr = "\(friends.count) \(grammar)"
 					}
-					else
-					{
-						let info:ErrorInfo = try! decoder.decode(ErrorInfo.self, from:data)
 
-						baseAlertText = "Error gathering friends: \(info.error)"
-						showBaseAlert = true
-					}
+					isRefreshing = false
 				}
-
-				isRefreshing = false
 			}
 			task.resume()
 		}
@@ -583,7 +589,7 @@ struct MainView:View
 		var status = CParsec.connect(who.id)
 
 		// Polling status
-		pollTimer = Timer.scheduledTimer(withTimeInterval:1, repeats:true)
+		pollTimer = Timer.scheduledTimer(withTimeInterval:1, repeats: true)
 		{ timer in
 			status = CParsec.getStatus()
 
@@ -627,7 +633,7 @@ struct MainView:View
 		}
 	}
 
-	func removeFromKeychain(key:String)
+	func removeFromKeychain(key: String)
 	{
 		let query: [String: Any] = [kSecClass as String: kSecClassGenericPassword, kSecAttrAccount as String: key]
 		let status = SecItemDelete(query as CFDictionary)
@@ -640,7 +646,7 @@ struct MainView:View
 
 struct MainView_Previews:PreviewProvider
 {
-	static var previews:some View
+	static var previews: some View
 	{
 		MainView(nil)
 	}
@@ -648,16 +654,16 @@ struct MainView_Previews:PreviewProvider
 
 struct IdentifiableHostInfo:Identifiable
 {
-	var id:String // Peer ID
-	var hostname:String // Computer's Display Name
-	var user:UserInfo // User Data
+	var id: String // Peer ID
+	var hostname: String // Computer's Display Name
+	var user: UserInfo // User Data
 	var connections:Int // User's Connected To This Host
 }
 
 struct IdentifiableUserInfo:Identifiable
 {
 	var id:Int // User ID
-	var username:String // User Display Name
+	var username: String // User Display Name
 }
 
 private enum Page

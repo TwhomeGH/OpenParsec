@@ -6,41 +6,34 @@ import SwiftUI
 
 struct SettingsView:View
 {
+	@Binding var visible: Bool
 
-
-
-	@Binding var visible:Bool
-
-	@State var renderer:RendererType = SettingsHandler.renderer
-
-	@State var decoder:DecoderPref = SettingsHandler.decoder
-	@State var cursorMode:CursorMode = SettingsHandler.cursorMode
-	@State var rightClickPosition:RightClickPosition = SettingsHandler.rightClickPosition
-	@State var resolution : ParsecResolution = SettingsHandler.resolution
-	@State var cursorScale:Float = SettingsHandler.cursorScale
-	@State var mouseSensitivity:Float = SettingsHandler.mouseSensitivity
-	@State var noOverlay:Bool = SettingsHandler.noOverlay
-	@State var hideStatusBar:Bool = SettingsHandler.hideStatusBar
-
-	@AppStorage("FPSPerFrame") var fpsPerFrame = 60
-
-
-
-
-
-	let resolutionChoices : [Choice<ParsecResolution>]
+	//@State var renderer:RendererType = SettingsHandler.renderer
+	@AppStorage("resolution") var resolution: ParsecResolution = .client
+	@AppStorage("bitrate") var bitrate: Int = 0
+	@AppStorage("decoder") var decoder: DecoderPref = .h264
+	@AppStorage("cursorMode") var cursorMode: CursorMode = .touchpad
+	@AppStorage("cursorScale") var cursorScale: Double = 0.5
+	@AppStorage("mouseSensitivity") var mouseSensitivity: Double = 1.0
+	@AppStorage("noOverlay") var noOverlay: Bool = false
+	@AppStorage("cursorScale") var hideStatusBar: Bool = true
+	@AppStorage("rightClickPosition") var rightClickPosition: RightClickPosition = .firstFinger
+	@AppStorage("preferredFramesPerSecond") var preferredFramesPerSecond: Int = 60 // 0 = use device max (ProMotion)
+	@AppStorage("decoderCompatibility") var decoderCompatibility: Bool = false // Enable for stutter issues on some devices
+	@AppStorage("showKeyboardButton") var showKeyboardButton: Bool = true
+	
+	let resolutionChoices: [Choice<ParsecResolution>]
 
 	init(visible: Binding<Bool> ) {
 		_visible = visible
-
-		var tmp : [Choice<ParsecResolution>] = []
+		var tmp: [Choice<ParsecResolution>] = []
 		for res in ParsecResolution.resolutions {
 			tmp.append(Choice(res.desc, res))
 		}
 		resolutionChoices = tmp
 	}
 	
-	var body:some View
+	var body: some View
 	{
 		ZStack()
 		{
@@ -72,7 +65,7 @@ struct SettingsView:View
 						{
 							HStack()
 							{
-								Button(action:saveAndExit, label:{ Image(systemName:"xmark").scaleEffect(x:-1) })
+								Button(action: saveAndExit, label:{ Image(systemName:"xmark").scaleEffect(x:-1) })
 								 .padding()
 								Spacer()
 							}
@@ -142,32 +135,31 @@ struct SettingsView:View
                             }
 							CatItem("Default Resolution")
 							{
-								MultiPicker(selection:$resolution, options:resolutionChoices)
+								MultiPicker(selection: $resolution, options:resolutionChoices)
 							}
                             CatItem("Decoder")
                             {
-								MultiPicker(selection:$decoder, options:
+								MultiPicker(selection: $decoder, options:
 								[
 									Choice("H.264", DecoderPref.h264),
 									Choice("Prefer H.265", DecoderPref.h265)
 								])
                             }
-							CatItem("FPS") {
-							    MultiPicker(selection:$fpsPerFrame, options:
+							CatItem("Frame Rate")
+							{
+								MultiPicker(selection: $preferredFramesPerSecond, options:
 								[
-									Choice("144", 144  ),
-									Choice("120", 120 ),
-									Choice("90", 90  ),
-									Choice("60", 60  ),
-									Choice("30", 30  ),
-									Choice("15 [For Test]", 15  ),
-								]).onChange(of: fpsPerFrame) { newValue in
-                               	 	SettingsHandler.fpsPerFrame = newValue
-                             	    ParsecRenderCenter.shared.updateFPS(newValue)
-                                }
-								
+									Choice("Auto (Device Max)", 0),
+									Choice("120 FPS", 120),
+									Choice("60 FPS", 60),
+									Choice("30 FPS", 30)
+								])
 							}
-							
+							CatItem("Decoder Compatibility")
+							{
+								Toggle("", isOn:$decoderCompatibility)
+									.frame(width:80)
+							}
                         }
                         CatTitle("Misc")
                         CatList()
@@ -180,6 +172,11 @@ struct SettingsView:View
 							CatItem("Hide Status Bar")
 							{
 								Toggle("", isOn:$hideStatusBar)
+									.frame(width:80)
+							}
+							CatItem("Show Keyboard Button")
+							{
+								Toggle("", isOn:$showKeyboardButton)
 									.frame(width:80)
 							}
 						}
@@ -204,26 +201,15 @@ struct SettingsView:View
 	func saveAndExit()
 	{
 		//SettingsHandler.renderer = renderer
-		SettingsHandler.decoder = decoder
-		SettingsHandler.resolution = resolution
-		SettingsHandler.cursorMode = cursorMode
-		SettingsHandler.cursorScale = cursorScale
-		SettingsHandler.rightClickPosition = rightClickPosition
-		SettingsHandler.noOverlay = noOverlay
-		SettingsHandler.hideStatusBar = hideStatusBar
-		SettingsHandler.mouseSensitivity = mouseSensitivity
-		SettingsHandler.save()
-		
 		visible = false
 	}
 }
 
 struct SettingsView_Previews:PreviewProvider
 {
-	@State static var value:Bool = true
+	@State static var value: Bool = true
 
-
-	static var previews:some View
+	static var previews: some View
 	{
 
 		SettingsView(visible:$value)

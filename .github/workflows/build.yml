@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: "16.4"
+          xcode-version: "26.1"
       - name: Checkout
         uses: actions/checkout@v3
         with:
@@ -53,29 +53,6 @@ jobs:
           file_to_build=`ls -A | grep -i \\.xcworkspace\$ || ls -A | grep -i \\.xcodeproj\$`
           file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
           echo "file_to_build=$file_to_build" >> $GITHUB_OUTPUT
-      - name: Build
-        env:
-          scheme: ${{ steps.scheme.outputs.scheme }}
-          filetype_parameter: ${{ steps.filetype_parameter.outputs.filetype_parameter }}
-          file_to_build: ${{ steps.file_to_build.outputs.file_to_build }}
-        run: |
-             xcodebuild clean build \
-             -scheme "$scheme" \
-             -"$filetype_parameter" "$file_to_build" \
-             -sdk iphoneos \
-             -destination "generic/platform=iOS" \
-             -configuration Release \
-             CODE_SIGN_IDENTITY="" \
-             CODE_SIGNING_REQUIRED=NO \
-             CODE_SIGNING_ALLOWED=NO \
-             | xcpretty && exit ${PIPESTATUS[0]}
-             
-      - name: Analyze
-        env:
-          scheme: ${{ steps.scheme.outputs.scheme }}
-          filetype_parameter: ${{ steps.filetype_parameter.outputs.filetype_parameter }}
-          file_to_build: ${{ steps.file_to_build.outputs.file_to_build }}
-        run: xcodebuild analyze -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -sdk iphoneos -arch arm64 -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO | xcpretty && exit ${PIPESTATUS[0]}
       - name: Archive
         env:
           scheme: ${{ steps.scheme.outputs.scheme }}
@@ -144,29 +121,21 @@ jobs:
       cancel-in-progress: true
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Download a Build Artifact
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.package.outputs.artifact }}
-
-
-      #設定打包📦時間
-      
-      - name: Set Build Timestamp
-        id: timestamp
+      - name: Update AltStore source
+        id: update_source
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NIGHTLY_LINK: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}
+          commit_sha: ${{ env.COMMIT_SHA }}
+          commit_msg: ${{ env.COMMIT_MSG }}
         run: |
-            # 設定台北時間 (UTC+8)
-            DATE=$(TZ="Asia/Taipei" date +"%Y/%-m/%-d")   # 2026/1/2
-            TIME=$(TZ="Asia/Taipei" date +"%I:%M")       # 04:49
-            PERIOD=$(TZ="Asia/Taipei" date +"%p")        # AM/PM
-            PERIOD="${PERIOD/AM/上午}"
-            PERIOD="${PERIOD/PM/下午}"
-            
-            BUILD_TIME="$DATE $PERIOD$TIME"
-            
-            echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
-
-
+          python update_json.py
       - name: Nightly Release
         uses: andelf/nightly-release@v1
         env:
@@ -181,3 +150,4 @@ jobs:
           
           files: |
             ${{ needs.package.outputs.artifact }}
+            altstore.json

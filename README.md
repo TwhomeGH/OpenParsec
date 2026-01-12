@@ -6,10 +6,20 @@ This project is still a major WIP, so apologies for the currently lackluster doc
 
 Before building, make sure you have the Parsec SDK framework symlinked or copied to the `Frameworks` folder. Builds were tested on Xcode Version 12.5.
 
+## Downloads
+<a href="https://celloserenity.github.io/altdirect/?url=https://github.com/hugeBlack/OpenParsec/releases/download/nightly/altstore.json" target="_blank">
+   <img src="https://github.com/CelloSerenity/altdirect/blob/main/assets/png/AltSource_Blue.png?raw=true" alt="Add AltSource" width="200">
+</a>
+<a href="https://github.com/hugeBlack/OpenParsec/releases/download/nightly/OpenParsec.ipa" target="_blank">
+   <img src="https://github.com/CelloSerenity/altdirect/blob/main/assets/png/Download_Blue.png?raw=true" alt="Download .ipa" width="200">
+</a>
+
 ## Touch Control
 You can set the touch mode you want to use in settings. Touchpad mode and direct touch mode are supported.
 
 When streaming, you can tap with 3 fingers to bring up the on-screen keyboard.
+
+You can toggle if you want to use 2 fingers to scroll or zoom in the overlay menu.
 
 ## Mouse & keyboard
 USB mouse & keyboard are supported. 

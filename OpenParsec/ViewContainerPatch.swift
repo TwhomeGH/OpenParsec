@@ -1,10 +1,3 @@
-//
-//  ViewContainerPatch.swift
-//  OpenParsec
-//
-//  Created by s s on 2024/5/12.
-//
-
 import Foundation
 import UIKit
 
@@ -12,11 +5,17 @@ import UIKit
 // from UTM's https://github.com/utmapp/UTM/blob/b03486b8825d5a0e8b9f93162a49a4c98ebab6a1/Platform/iOS/UTMPatches.swift#L33
 final class UTMViewControllerPatches {
 	static private var isPatched: Bool = false
-	
+
 	/// Installs the patches
-	/// TODO: Some thread safety/race issues etc
+	/// Deferred to next run loop to avoid conflicts with GPU debugger initialization
 	static func patchAll() {
-		UIViewController.patchViewController()
+		guard !isPatched else { return }
+		isPatched = true
+
+		// Defer patching to avoid deadlock with GPU tools initialization during dyld loading
+		DispatchQueue.main.async {
+			UIViewController.patchViewController()
+		}
 	}
 }
 

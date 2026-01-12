@@ -14,7 +14,7 @@ struct ContentView:View
 
 	let defaultTransition = AnyTransition.move(edge:.trailing)
 
-	var body:some View
+	var body: some View
 	{
 		ZStack()
 		{
@@ -37,9 +37,6 @@ struct ContentView:View
 
 	func initApp()
 	{
-		
-		// Load prefs
-		SettingsHandler.load()
 
 		// Check to see if we have old session data
 		if let data = loadFromKeychain(key: GLBDataModel.shared.SessionKeyChainKey)
@@ -90,7 +87,7 @@ struct ContentView:View
 
 struct ContentView_Previews:PreviewProvider
 {
-	static var previews:some View
+	static var previews: some View
 	{
 		ContentView()
 	}

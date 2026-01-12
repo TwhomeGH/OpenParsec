@@ -5,21 +5,21 @@ struct LoginView:View
 {
 	var controller:ContentView?
 
-	@State var inputEmail:String = ""
-	@State var inputPassword:String = ""
-	@State var inputTFA:String = ""
-	@State var isTFAOn:Bool = false
+	@State var inputEmail: String = ""
+	@State var inputPassword: String = ""
+	@State var inputTFA: String = ""
+	@State var isTFAOn: Bool = false
 	@State private var presentTFAAlert = false
-	@State var isLoading:Bool = false
-	@State var showAlert:Bool = false
-	@State var alertText:String = ""
+	@State var isLoading: Bool = false
+	@State var showAlert: Bool = false
+	@State var alertText: String = ""
 
 	init(_ controller:ContentView?)
 	{
 		self.controller = controller
 	}
 
-	var body:some View
+	var body: some View
 	{
 		ZStack()
 		{
@@ -144,7 +144,7 @@ struct LoginView:View
 		.foregroundColor(Color("Foreground"))
 		.alert(isPresented:$showAlert)
 		{
-			Alert(title:Text("Login Failed"), message: Text(alertText))
+			Alert(title: Text("Login Failed"), message: Text(alertText))
 		}
 	}
 
@@ -160,7 +160,7 @@ struct LoginView:View
 		print("Data saved to Keychain.")
 	}
 
-	func authenticate(_ tfa:String? = "")
+	func authenticate(_ tfa: String? = "")
 	{
 		#if DEBUG
 		if inputEmail == "test@example.com" // skip authentication (DEBUG ONLY)
@@ -190,56 +190,58 @@ struct LoginView:View
 
 		let task = URLSession.shared.dataTask(with:request)
 		{ (data, response, error) in
-			isLoading = false
-			if let data = data
-			{
-				let statusCode:Int = (response as! HTTPURLResponse).statusCode
-				let decoder = JSONDecoder()
-
-				print("Login Information:")
-				print(statusCode)
-				print(String(data:data, encoding:.utf8)!)
-
-				if statusCode == 201 // 201 Created
+			DispatchQueue.main.async {
+				isLoading = false
+				if let data = data
 				{
-					// store it and recover it from the next app opening, so people won't swear
-					NetworkHandler.clinfo = try? decoder.decode(ClientInfo.self, from:data)
+					let statusCode:Int = (response as! HTTPURLResponse).statusCode
+					let decoder = JSONDecoder()
 
-					saveToKeychain(data: data, key: GLBDataModel.shared.SessionKeyChainKey)
+					print("Login Information:")
+					print(statusCode)
+					print(String(data:data, encoding:.utf8)!)
 
-					if let c = controller
+					if statusCode == 201 // 201 Created
 					{
-						print("*** Login succeeded! ***")
-						c.setView(.main)
-					}
-				}
-				else if statusCode >= 400 // 4XX client errors
-				{
-					let info:ErrorInfo = try! decoder.decode(ErrorInfo.self, from:data)
+						// store it and recover it from the next app opening, so people won't swear
+						NetworkHandler.clinfo = try? decoder.decode(ClientInfo.self, from:data)
 
-					do
-					{
-						let json = try JSONSerialization.jsonObject(with: data, options: [])
-						if let dict = json as? [String: Any], let isTFARequired = dict["tfa_required"] as? Bool {
-							print("Code output:")
-							print(dict)
-							if isTFARequired
-							{
-								presentTFAAlert = true
-							}
-							else
-							{
-								alertText = "Error: \(info)"
-								showAlert = true
-							}
-						} else {
-							alertText = info.error
-							showAlert = true
+						saveToKeychain(data: data, key: GLBDataModel.shared.SessionKeyChainKey)
+
+						if let c = controller
+						{
+							print("*** Login succeeded! ***")
+							c.setView(.main)
 						}
 					}
-					catch
+					else if statusCode >= 400 // 4XX client errors
 					{
-						print("Error on trying JSON Serialization on error data!")
+						let info:ErrorInfo = try! decoder.decode(ErrorInfo.self, from:data)
+
+						do
+						{
+							let json = try JSONSerialization.jsonObject(with: data, options: [])
+							if let dict = json as? [String: Any], let isTFARequired = dict["tfa_required"] as? Bool {
+								print("Code output:")
+								print(dict)
+								if isTFARequired
+								{
+									presentTFAAlert = true
+								}
+								else
+								{
+									alertText = "Error: \(info)"
+									showAlert = true
+								}
+							} else {
+								alertText = info.error
+								showAlert = true
+							}
+						}
+						catch
+						{
+							print("Error on trying JSON Serialization on error data!")
+						}
 					}
 				}
 			}
@@ -250,7 +252,7 @@ struct LoginView:View
 
 struct LoginView_Previews:PreviewProvider
 {
-	static var previews:some View
+	static var previews: some View
 	{
 		LoginView(nil)
 	}

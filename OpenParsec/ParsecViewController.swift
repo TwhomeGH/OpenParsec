@@ -42,7 +42,6 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 		renderView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 		contentView.insertSubview(renderView, at: 0)
 
-		SettingsHandler.renderer = type
 	}
 	
 
@@ -200,6 +199,8 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 	override func viewDidLayoutSubviews() {
 		super.viewDidLayoutSubviews()
 
+
+		print("Debug:\(contentView.bounds.size)")
 		renderer?.updateSize(
 			width: contentView.bounds.width,
 			height: contentView.bounds.height
@@ -237,14 +238,22 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 
 		// ✅ 在真正顯示的 VC 裡建立 renderer
 		if renderer == nil {
-			renderer = createRenderer(type: SettingsHandler.renderer)
-			print("✅ renderer created in ParsecViewController")
+			// 先讀取 SettingsHandler.renderer，如果無效就用預設 OpenGL
+			let type = SettingsHandler.renderer
+			let validRenderer: RendererType
+			switch type {
+			case .metal, .opengl:
+				validRenderer = type
+		
+			}
+
+			renderer = createRenderer(type: validRenderer)
+			SettingsHandler.renderer = validRenderer // 更新回去，確保下一次使用一致
+			print("✅ renderer created in ParsecViewController with type:", validRenderer)
 		}
 
 		// 告訴 RenderCenter：我就是那個 VC
 		ParsecRenderCenter.shared.attach(viewController: self)
-
-
 
 
 		touchController.viewDidLoad()
@@ -353,14 +362,15 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 		// ② 加入畫面（此時 window 一定存在）
 		let renderView = renderer.renderView
 
-		// ② 只在「尚未加入」時才加入
-		if renderView.superview == nil {
-
-			renderView.frame = contentView.bounds
-			renderView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-			contentView.insertSubview(renderView, at: 0)
-
+		// ② 確保 renderView 在 contentView 裡，且在 cursor 底下
+		if renderView.superview !== contentView {
+			if let cursor = u {
+				contentView.insertSubview(renderView, belowSubview: cursor)
+			} else {
+				contentView.addSubview(renderView)
+			}
 		}
+		
 
 
 		// 3️⃣ 設給 RenderCenter

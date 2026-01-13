@@ -46,10 +46,9 @@ class ParsecGLKViewController : ParsecPlayground{
 
 		glkView = GLKView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: UIScreen.main.bounds.height))
 
+
 		glkRenderer = ParsecGLKRenderer(glkView, glkViewController, updateImage)
 
-		
-		self.viewController.view.addSubview(glkView)
 		setupGLKViewController()
 		
 
@@ -63,6 +62,8 @@ class ParsecGLKViewController : ParsecPlayground{
 
 	private func setupGLKViewController() {
 		glkView.context = EAGLContext(api: .openGLES3)!
+
+
 		glkViewController.view = glkView
 
 
@@ -81,8 +82,13 @@ class ParsecGLKViewController : ParsecPlayground{
 		glkViewController.isPaused = false
 
 
+
 		self.viewController.addChild(glkViewController)
 		self.viewController.view.addSubview(glkViewController.view)
+
+
+		glkViewController.view.frame = viewController.view.bounds
+		glkViewController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
 
 		self.glkViewController.didMove(toParent: self.viewController)
 
@@ -104,9 +110,14 @@ class ParsecGLKViewController : ParsecPlayground{
 			return
 		}
 
-		
+		let scale = glkView.contentScaleFactor
+
+		print("w:\(width) h:\(height) scale:\(scale)")
+
+
 		glkView.frame.size.width = width
 		glkView.frame.size.height = height
+
 	}
 
 	

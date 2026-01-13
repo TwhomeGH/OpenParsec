@@ -148,7 +148,7 @@ protocol ParsecService {
 
 	// Metal 
 	func renderMetalFrame(queue:MTLCommandQueue,
-		drawable: CAMetalDrawable, timeout: UInt32)
+						  texture: MTLTexture, preRender: ParsecPreRenderCallback?,opaque: UnsafeMutableRawPointer? ,timeout: UInt32) -> ParsecStatus
 
 	
 	func setMuted(_ muted: Bool)
@@ -234,14 +234,18 @@ class CParsec
 
 	static func renderMetalFrame(
 		queue:MTLCommandQueue,
-		drawable:CAMetalDrawable,
+		texture: MTLTexture,
+		preRender: ParsecPreRenderCallback? = nil,
+		opaque: UnsafeMutableRawPointer? = nil,
 		timeout: UInt32 = 16
-	) {
-		parsecImpl
+	) -> ParsecStatus {
+
+
+		return parsecImpl
 			.renderMetalFrame(
 				queue:queue,
-				drawable: drawable,
-
+				texture:texture,
+				preRender:preRender, opaque: opaque,
 				timeout: timeout
 			)
     }

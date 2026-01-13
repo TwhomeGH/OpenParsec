@@ -39,9 +39,10 @@ class ParsecSDKBridge: ParsecService
 	
 	var hostHeight: Float = 1080
 
-	public private(set) var videoReady: Bool = false
 
-	
+
+
+
 	static let PARSEC_VER: UInt32 = UInt32((PARSEC_VER_MAJOR << 16) | PARSEC_VER_MINOR)
 	
 	private var _parsec: OpaquePointer!
@@ -117,7 +118,13 @@ class ParsecSDKBridge: ParsecService
 
 		self.startBackgroundTask()
 
-		return ParsecClientConnect(_parsec, &parsecClientCfg, NetworkHandler.clinfo?.session_id, peerID)
+
+		let status = ParsecClientConnect(_parsec, &parsecClientCfg, NetworkHandler.clinfo?.session_id, peerID)
+
+
+
+
+		return status
 	}
 	
 	func disconnect() {
@@ -163,49 +170,43 @@ class ParsecSDKBridge: ParsecService
 	 ParsecClientMetalRenderFrame(_parsec, UInt8(DEFAULT_STREAM), &queue, texturePtr, nil, nil, timeout)
 	 }*/
 
+
 	func renderMetalFrame(
 		queue: MTLCommandQueue,
-		drawable: CAMetalDrawable,
+		texture: MTLTexture,
+		preRender: ParsecPreRenderCallback? = nil ,
+		opaque: UnsafeMutableRawPointer? = nil,
 		timeout: UInt32 = 16
-	) {
+	) -> ParsecStatus {
 
 
 
-		// 1. 取得 texture
-	    let texture = drawable.texture
 
 
-		// 2. 將 texture 轉成 C 指針
-		var texPtr: UnsafeMutableRawPointer? = Unmanaged.passUnretained(texture).toOpaque()
 
+		let cqPtr = Unmanaged.passUnretained(queue).toOpaque()
+		let texPtr = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: 1)
+		texPtr.pointee = Unmanaged.passUnretained(texture).toOpaque()
 
-		var parsecTexturePtr: UnsafeMutableRawPointer? = nil
+		print(texture, texture.width, texture.height, texture.pixelFormat, texture.storageMode)
 
+		// 呼叫 C API
+		let status = ParsecClientMetalRenderFrame(
+			_parsec,
+			UInt8(DEFAULT_STREAM),
+			cqPtr,
+			texPtr,    // ⚡ 已經是 UnsafeMutablePointer<UnsafeMutableRawPointer?>
+			nil,
+			nil,
+			timeout
+		)
 
-		// 3. 呼叫 Parsec C API
-		let status = withUnsafeMutablePointer(
-			to: &parsecTexturePtr
-		) { targetPtr in
-			ParsecClientMetalRenderFrame(
-				_parsec,
-				0,
-				nil,       // CQ 交給 Parsec 管理
-				targetPtr,
-				nil,
-				nil,
-				timeout
-			)
-		}
-
-		// 4. 判斷是否成功
-		if status.rawValue != 0 {
-			print("Parsec render failed with status: \(status)")
-		}
-		//print("Parsec render status:", status, status.rawValue)
-
+		return status
 
 
 	}
+
+
 
 	func pollAudio(timeout:UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	{

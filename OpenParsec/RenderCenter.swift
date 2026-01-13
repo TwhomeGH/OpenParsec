@@ -135,6 +135,9 @@ final class ParsecRenderCenter {
 		isClientInitialized = false
 		didNotifyRendererReady = false
 
+		rendererReady = false
+		clientReady = false
+
 		os_log("🧹 ParsecRenderCenter shutdown complete")
 	}
 

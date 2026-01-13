@@ -64,6 +64,8 @@ final class ParsecRenderCenter {
 	func applyIfPossible() {
 		guard rendererReady, clientReady else { return }
 
+		CParsec.applyConfig()
+		
 		if pendingResolutionUpdate {
 
 			CParsec.updateHostVideoConfig()
@@ -179,7 +181,8 @@ final class ParsecRenderCenter {
 		rendererType = type
 
 		viewController?.switchRenderer(to: type)
-		SettingsHandler.renderer = type
+
+		print("RenderT:\(type)")
 
 	}
 

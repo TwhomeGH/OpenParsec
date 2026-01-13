@@ -184,22 +184,26 @@ class ParsecSDKBridge: ParsecService
 
 
 
-		let cqPtr = Unmanaged.passUnretained(queue).toOpaque()
-		let texPtr = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: 1)
-		texPtr.pointee = Unmanaged.passUnretained(texture).toOpaque()
+		let cqPtr  = Unmanaged.passUnretained(queue).toOpaque()
+		// ① 先把 texture 變成 void*
+		var texOpaque: UnsafeMutableRawPointer? =
+				Unmanaged.passUnretained(texture).toOpaque()
 
-		print(texture, texture.width, texture.height, texture.pixelFormat, texture.storageMode)
+		print("DGG:",texture, texture.width, texture.height, texture.pixelFormat, texture.storageMode)
 
-		// 呼叫 C API
-		let status = ParsecClientMetalRenderFrame(
-			_parsec,
-			UInt8(DEFAULT_STREAM),
-			cqPtr,
-			texPtr,    // ⚡ 已經是 UnsafeMutablePointer<UnsafeMutableRawPointer?>
-			nil,
-			nil,
-			timeout
-		)
+		// 傳 ParsecMetalTexture **
+		let status = withUnsafeMutablePointer(to: &texOpaque) { texPtrPtr in
+			ParsecClientMetalRenderFrame(
+				_parsec,
+				UInt8(DEFAULT_STREAM),
+				nil,
+				texPtrPtr,   // ✅ 型別完全正確
+				nil,
+				nil,
+				timeout
+			)
+		}
+
 
 		return status
 
@@ -538,29 +542,29 @@ class ParsecSDKBridge: ParsecService
 		ParsecClientSendMessage(_parsec, &pmsg)
 	}
 	
-	func startBackgroundTask(){
-	
-		
+	func startBackgroundTask() {
 		let item1 = DispatchWorkItem {
 			while self.backgroundTaskRunning {
 				self.pollAudio()
 			}
-			
 		}
 
-		let item2 = DispatchWorkItem {
-			while self.backgroundTaskRunning {
-				self.pollEvent()
-	
-				
+		// 只有當 renderer 是 OpenGL 才跑 pollEvent
+		if SettingsHandler.renderer == .opengl {
+
+			print("OpenGL mode")
+			let item2 = DispatchWorkItem {
+				while self.backgroundTaskRunning {
+					self.pollEvent()
+				}
 			}
-			
+			DispatchQueue.global().async(execute: item2)
 		}
-		let mainQueue = DispatchQueue.global()
-		mainQueue.async(execute: item1)
-		mainQueue.async(execute: item2)
+
+		DispatchQueue.global().async(execute: item1)
 	}
-	
+
+
 	func sendUserData(type: ParsecUserDataType, message: Data) {
         var nullTerminatedMessage = message
         nullTerminatedMessage.append(0)

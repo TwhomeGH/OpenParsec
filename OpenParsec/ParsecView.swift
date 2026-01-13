@@ -73,6 +73,8 @@ struct ParsecStatusBar : View {
             let bitrate = String(format: "%.2f", pcs.`self`.metrics.0.bitrate)
 
             let codec = pcs.decoder.0.h265 ? "H265" : "H264"
+
+			
             let resolution = "\(pcs.decoder.0.width)x\(pcs.decoder.0.height)"
             let colorFormat = pcs.decoder.0.color444 ? "4:4:4" : "4:2:0"
 

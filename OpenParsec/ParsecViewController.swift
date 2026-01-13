@@ -201,10 +201,13 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 
 
 		print("Debug:\(contentView.bounds.size)")
-		renderer?.updateSize(
-			width: contentView.bounds.width,
-			height: contentView.bounds.height
-		)
+
+		if let renderer = renderer {
+			renderer.updateSize(
+				width: contentView.bounds.width,
+				height: contentView.bounds.height
+			)
+		}
 
 
 	}
@@ -236,21 +239,15 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 		scrollView.contentSize = view.bounds.size
 
 
-		// ✅ 在真正顯示的 VC 裡建立 renderer
-		if renderer == nil {
-			// 先讀取 SettingsHandler.renderer，如果無效就用預設 OpenGL
-			let type = SettingsHandler.renderer
-			let validRenderer: RendererType
-			switch type {
-			case .metal, .opengl:
-				validRenderer = type
-		
-			}
+		let RenderType = SettingsHandler.renderer
 
-			renderer = createRenderer(type: validRenderer)
-			SettingsHandler.renderer = validRenderer // 更新回去，確保下一次使用一致
-			print("✅ renderer created in ParsecViewController with type:", validRenderer)
-		}
+		renderer = createRenderer(type: RenderType)
+
+		print(
+			"✅ renderer created in ParsecViewController with type:",
+			RenderType
+		)
+
 
 		// 告訴 RenderCenter：我就是那個 VC
 		ParsecRenderCenter.shared.attach(viewController: self)
@@ -370,7 +367,7 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 				contentView.addSubview(renderView)
 			}
 		}
-		
+
 
 
 		// 3️⃣ 設給 RenderCenter

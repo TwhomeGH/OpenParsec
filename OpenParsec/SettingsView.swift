@@ -14,6 +14,7 @@ struct SettingsView:View
 	@AppStorage("resolution") var resolution: ParsecResolution = .client
 	@AppStorage("bitrate") var bitrate: Int = 0
 	@AppStorage("decoder") var decoder: DecoderPref = .h264
+	
 	@AppStorage("cursorMode") var cursorMode: CursorMode = .touchpad
 	@AppStorage("cursorScale") var cursorScale: Double = 0.5
 	@AppStorage("mouseSensitivity") var mouseSensitivity: Double = 1.0
@@ -127,14 +128,9 @@ struct SettingsView:View
 									Choice("Metal", RendererType.metal)
 								])
                                 .frame(width:165)
-								.onChange(of: renderer) {
-									newVal in
-									ParsecRenderCenter.shared
-										.switchRenderer(to: newVal)
-
-								}
 
                             }
+
 							CatItem("Default Resolution")
 							{
 								MultiPicker(selection: $resolution, options:resolutionChoices)

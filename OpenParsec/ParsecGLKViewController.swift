@@ -62,6 +62,7 @@ class ParsecGLKViewController : ParsecPlayground{
 
 	private func setupGLKViewController() {
 		glkView.context = EAGLContext(api: .openGLES3)!
+		EAGLContext.setCurrent(glkView.context)
 
 
 		glkViewController.view = glkView
@@ -83,12 +84,14 @@ class ParsecGLKViewController : ParsecPlayground{
 
 
 
-		self.viewController.addChild(glkViewController)
-		self.viewController.view.addSubview(glkViewController.view)
 
 
 		glkViewController.view.frame = viewController.view.bounds
 		glkViewController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+
+		self.viewController.addChild(glkViewController)
+		self.viewController.view.addSubview(glkViewController.view)
+
 
 		self.glkViewController.didMove(toParent: self.viewController)
 
@@ -100,9 +103,38 @@ class ParsecGLKViewController : ParsecPlayground{
 
 	
 	func cleanUp() {
-		
+		guard let glkView = glkView else { return }
+
+		print("🧹 GLK cleanUp start")
+
+		// 1️⃣ 停止 render loop
+		glkViewController.isPaused = true
+		glkViewController.preferredFramesPerSecond = 0
+
+		// 2️⃣ 解除 delegate / renderer
+		glkView.delegate = nil
+		glkRenderer = nil
+
+		// 3️⃣ 從 parent VC 移除（如果有加）
+		if glkViewController.parent != nil {
+			glkViewController.willMove(toParent: nil)
+			glkViewController.view.removeFromSuperview()
+			glkViewController.removeFromParent()
+		}
+
+		// 4️⃣ 解除 current EAGLContext（⚠️ 只能 setCurrent(nil)，不能 context = nil）
+		if EAGLContext.current() === glkView.context {
+			EAGLContext.setCurrent(nil)
+		}
+
+		// 5️⃣ 釋放 view
+		glkView.removeFromSuperview()
+		self.glkView = nil
+
+		print("🧹 GLK cleanUp done")
 	}
-	
+
+
 	func updateSize(width: CGFloat, height: CGFloat) {
 
 		guard let glkView = glkView else {

@@ -26,8 +26,6 @@
 		27B23A222B1B979C00B52F14 /* ParsecMetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B23A212B1B979C00B52F14 /* ParsecMetalRenderer.swift */; };
 		27B23A242B1B98EF00B52F14 /* ParsecMetalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B23A232B1B98EF00B52F14 /* ParsecMetalViewController.swift */; };
 		27B8D564292DC7A000A324AD /* CParsec.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27B8D563292DC7A000A324AD /* CParsec.swift */; };
-		27B8D571292DCA5B00A324AD /* ParsecSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27B8D56F292DCA5800A324AD /* ParsecSDK.framework */; settings = {ATTRIBUTES = (Required, ); }; };
-		27B8D572292DCA5B00A324AD /* ParsecSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 27B8D56F292DCA5800A324AD /* ParsecSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		27E61A92292965FC00FF6563 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E61A91292965FC00FF6563 /* AppDelegate.swift */; };
 		27E61A94292965FC00FF6563 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E61A93292965FC00FF6563 /* SceneDelegate.swift */; };
 		27E61A96292965FC00FF6563 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27E61A95292965FC00FF6563 /* ContentView.swift */; };
@@ -41,6 +39,9 @@
 		84480EBE2ADC4FDA007DE5F1 /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84480EBD2ADC4FDA007DE5F1 /* GameController.swift */; };
 		CE02CB082F14482F003714A3 /* shader.metal in Sources */ = {isa = PBXBuildFile; fileRef = CE02CB072F144824003714A3 /* shader.metal */; };
 		CE02CB0A2F14C95C003714A3 /* RenderCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE02CB092F14C955003714A3 /* RenderCenter.swift */; };
+		CEC7D21E2F16AC0F006FBF99 /* Metal.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC7D21D2F16AC0B006FBF99 /* Metal.m */; };
+		CEC7D2292F16D045006FBF99 /* ParsecSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEC7D2282F16D045006FBF99 /* ParsecSDK.framework */; };
+		CEC7D22A2F16D0B1006FBF99 /* ParsecSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CEC7D2282F16D045006FBF99 /* ParsecSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FC16A7AD29A97BDA00BB70A7 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A7AC29A97BDA00BB70A7 /* Shared.swift */; };
 /* End PBXBuildFile section */
 
@@ -51,7 +52,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				27B8D572292DCA5B00A324AD /* ParsecSDK.framework in Embed Frameworks */,
+				CEC7D22A2F16D0B1006FBF99 /* ParsecSDK.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -80,7 +81,6 @@
 		27B23A212B1B979C00B52F14 /* ParsecMetalRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsecMetalRenderer.swift; sourceTree = "<group>"; };
 		27B23A232B1B98EF00B52F14 /* ParsecMetalViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParsecMetalViewController.swift; sourceTree = "<group>"; };
 		27B8D563292DC7A000A324AD /* CParsec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CParsec.swift; sourceTree = "<group>"; };
-		27B8D56F292DCA5800A324AD /* ParsecSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ParsecSDK.framework; path = Frameworks/ParsecSDK.framework; sourceTree = SOURCE_ROOT; };
 		27E61A8E292965FC00FF6563 /* OpenParsec.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OpenParsec.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27E61A91292965FC00FF6563 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		27E61A93292965FC00FF6563 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -96,6 +96,9 @@
 		84480EBD2ADC4FDA007DE5F1 /* GameController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
 		CE02CB072F144824003714A3 /* shader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = shader.metal; sourceTree = "<group>"; };
 		CE02CB092F14C955003714A3 /* RenderCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderCenter.swift; sourceTree = "<group>"; };
+		CEC7D21C2F16ABEC006FBF99 /* Metal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Metal.h; sourceTree = "<group>"; };
+		CEC7D21D2F16AC0B006FBF99 /* Metal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Metal.m; sourceTree = "<group>"; };
+		CEC7D2282F16D045006FBF99 /* ParsecSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ParsecSDK.framework; path = "/Users/user/Downloads/parsec-sdk-6.0/sdk/ios/ParsecSDK.framework"; sourceTree = "<absolute>"; };
 		FC16A7AC29A97BDA00BB70A7 /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -104,7 +107,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				27B8D571292DCA5B00A324AD /* ParsecSDK.framework in Frameworks */,
+				CEC7D2292F16D045006FBF99 /* ParsecSDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -114,7 +117,7 @@
 		27B8D56A292DC98B00A324AD /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				27B8D56F292DCA5800A324AD /* ParsecSDK.framework */,
+				CEC7D2282F16D045006FBF99 /* ParsecSDK.framework */,
 			);
 			path = Frameworks;
 			sourceTree = "<group>";
@@ -147,6 +150,8 @@
 				27E61A97292965FD00FF6563 /* Assets.xcassets */,
 				27899AC5292FE2A9001ACA33 /* audio.c */,
 				27899AC6292FE2A9001ACA33 /* audio.h */,
+				CEC7D21C2F16ABEC006FBF99 /* Metal.h */,
+				CEC7D21D2F16AC0B006FBF99 /* Metal.m */,
 				27E61A95292965FC00FF6563 /* ContentView.swift */,
 				27B8D563292DC7A000A324AD /* CParsec.swift */,
 				27AD365F2B19731800C8A607 /* ExUI.swift */,
@@ -280,6 +285,7 @@
 				27E61A94292965FC00FF6563 /* SceneDelegate.swift in Sources */,
 				27A267352B1AEAB700F34C63 /* SettingsHandler.swift in Sources */,
 				27AD36602B19731800C8A607 /* ExUI.swift in Sources */,
+				CEC7D21E2F16AC0F006FBF99 /* Metal.m in Sources */,
 				27899AC7292FE2A9001ACA33 /* audio.c in Sources */,
 				27E61AA62929817700FF6563 /* LoginView.swift in Sources */,
 				27B8D564292DC7A000A324AD /* CParsec.swift in Sources */,

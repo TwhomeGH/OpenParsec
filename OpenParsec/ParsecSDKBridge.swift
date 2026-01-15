@@ -3,6 +3,9 @@ import MetalKit
 import UIKit
 import OSLog
 
+
+import Metal
+
 enum RendererType: Int
 {
 	case opengl
@@ -101,9 +104,19 @@ class ParsecSDKBridge: ParsecService
 		parsecClientCfg.video.0.decoderIndex = 1
 		parsecClientCfg.video.0.resolutionX = 0
 		parsecClientCfg.video.0.resolutionY = 0
-		parsecClientCfg.video.0.decoderCompatibility = false
-		parsecClientCfg.video.0.decoderH265 = true
+		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.decoderCompatibility
+
+
+		parsecClientCfg.video.0.decoder444 = false
 		
+		parsecClientCfg.video.0.decoderH265 = SettingsHandler.decoder == .h265
+
+		print(
+			"Debug Compatibility? -> \(parsecClientCfg.video.0.decoderCompatibility)"
+		)
+
+		print("Debug H265? -> \(parsecClientCfg.video.0.decoderH265)")
+
 //		parsecClientCfg.video.1.decoderIndex = 1
 //		parsecClientCfg.video.1.resolutionX = 0
 //		parsecClientCfg.video.1.resolutionY = 0
@@ -126,6 +139,12 @@ class ParsecSDKBridge: ParsecService
 
 		return status
 	}
+
+	func destroy() {
+		ParsecDestroy(_parsec)
+		print("清理Parsec")
+
+	}
 	
 	func disconnect() {
 		
@@ -138,7 +157,24 @@ class ParsecSDKBridge: ParsecService
 		
 		return ParsecClientGetStatus(_parsec, nil)
 	}
-	
+
+	func getOutputs(maxCount: Int = 10) -> [ParsecDecoder] {
+		// 1️⃣ 创建一个 C 数组
+		var outputs = [ParsecDecoder](
+			repeating: ParsecDecoder(),
+			count: maxCount
+		)
+
+		// 2️⃣ 调用 SDK
+		let count = outputs.withUnsafeMutableBufferPointer { buffer -> UInt32 in
+			return ParsecGetDecoders(buffer.baseAddress, UInt32(buffer.count))
+		}
+		// 3️⃣ 返回 Swift 数组
+		return Array(outputs.prefix(Int(count)))
+		
+	}
+
+
 	func getStatusEx(_ pcs: inout ParsecClientStatus) -> ParsecStatus {
 
 		let status = ParsecClientGetStatus(_parsec, &pcs)
@@ -158,7 +194,10 @@ class ParsecSDKBridge: ParsecService
 		mouseInfo.mouseX = Int32(width / 2)
 		mouseInfo.mouseY = Int32(height / 2)
 	}
-	
+
+
+
+
 	// timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	func renderGLFrame(timeout: UInt32 = 16) {
 		
@@ -171,43 +210,57 @@ class ParsecSDKBridge: ParsecService
 	 }*/
 
 
+	
+
+	// 在 CParsec 封裝層
 	func renderMetalFrame(
 		queue: MTLCommandQueue,
 		texture: MTLTexture,
-		preRender: ParsecPreRenderCallback? = nil ,
-		opaque: UnsafeMutableRawPointer? = nil,
 		timeout: UInt32 = 16
 	) -> ParsecStatus {
 
+		//let cq = Unmanaged.passUnretained(queue).toOpaque()
+
+		var texPtr: UnsafeMutableRawPointer? = Unmanaged.passUnretained(texture).toOpaque()
+
+		let texPtrPtr = withUnsafeMutablePointer(to: &texPtr) { $0 }
 
 
+		let status = ParsecClientMetalRenderFrame(
+			_parsec,
+			UInt8(DEFAULT_STREAM),
+			nil,
+			texPtrPtr,
+			nil,
+			nil,
+			timeout
+		)
+
+		// SDK 可能在內部替換 texture（例如 resize）
+		if let newTexPtr = texPtrPtr.pointee {
+			let newTex =
+				Unmanaged<MTLTexture>
+				.fromOpaque(newTexPtr)
+				.takeUnretainedValue()
+
+			if #available(iOS 16.0, *) {
+				print("Device",newTex.device,newTex.gpuResourceID,
+					  String(describing: newTex.parent))
+			} else {
+				print("Device15",newTex.device,String(describing: newTex.parent))
 
 
+				// Fallback on earlier versions
+			}
+			print("Texture size: \(newTex.width)x\(newTex.height)")
+			print("Pixel format: \(newTex.pixelFormat)")
 
-		let cqPtr  = Unmanaged.passUnretained(queue).toOpaque()
-		// ① 先把 texture 變成 void*
-		var texOpaque: UnsafeMutableRawPointer? =
-				Unmanaged.passUnretained(texture).toOpaque()
-
-		print("DGG:",texture, texture.width, texture.height, texture.pixelFormat, texture.storageMode)
-
-		// 傳 ParsecMetalTexture **
-		let status = withUnsafeMutablePointer(to: &texOpaque) { texPtrPtr in
-			ParsecClientMetalRenderFrame(
-				_parsec,
-				UInt8(DEFAULT_STREAM),
-				nil,
-				texPtrPtr,   // ✅ 型別完全正確
-				nil,
-				nil,
-				timeout
-			)
+			ParsecMetalTarget.shared.texture = newTex
 		}
 
 
+		
 		return status
-
-
 	}
 
 
@@ -238,7 +291,8 @@ class ParsecSDKBridge: ParsecService
 			handleUserDataEvent(event: e.userData)
 		}
 	}
-	
+
+
 	func handleUserDataEvent(event: ParsecClientUserDataEvent) {
 		
 		let pointer = ParsecGetBuffer(_parsec, event.key)
@@ -549,19 +603,21 @@ class ParsecSDKBridge: ParsecService
 			}
 		}
 
-		// 只有當 renderer 是 OpenGL 才跑 pollEvent
-		if SettingsHandler.renderer == .opengl {
 
-			print("OpenGL mode")
-			let item2 = DispatchWorkItem {
-				while self.backgroundTaskRunning {
-					self.pollEvent()
-				}
+		let item2 = DispatchWorkItem {
+			while self.backgroundTaskRunning {
+				self.pollEvent()
 			}
-			DispatchQueue.global().async(execute: item2)
 		}
 
+		
+
+
+
 		DispatchQueue.global().async(execute: item1)
+		DispatchQueue.global().async(execute: item2)
+
+
 	}
 
 

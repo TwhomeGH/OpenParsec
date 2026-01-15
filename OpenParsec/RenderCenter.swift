@@ -28,6 +28,8 @@ extension ParsecGLKViewController: ParsecRenderController {
 	}
 }
 
+
+
 final class ParsecRenderCenter {
 	static let shared = ParsecRenderCenter()
 
@@ -161,6 +163,10 @@ final class ParsecRenderCenter {
 		let data = "".data(using: .utf8)!
 		CParsec.sendUserData(type: .getVideoConfig, message: data)
 		CParsec.sendUserData(type: .getAdapterInfo, message: data)
+
+		let OUT=CParsec.getOutput(maxCount: 10)
+		print("Out",OUT.count,OUT)
+
 	}
 
 	func initCParsec(muted: Bool) {

@@ -588,6 +588,8 @@ struct MainView: View
 
 		var status = CParsec.connect(who.id)
 
+
+
 		// 初始化 ParsecRenderCenter (如果尚未初始化)
 		ParsecRenderCenter.shared.start()
 

@@ -20,6 +20,8 @@ protocol ParsecPlayground {
 class ParsecViewController :UIViewController, UIScrollViewDelegate {
 	var renderer: ParsecRenderer?   // typealias ParsecPlayground & ParsecRenderController
 
+	var panLockedByKeyboard = false
+
 	func createRenderer(type: RendererType) -> ParsecRenderer {
 		switch type {
 		case .metal:
@@ -28,6 +30,7 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 		case .opengl:
 			os_log("Use OpenGL")
 			return ParsecGLKViewController(viewController: self, updateImage: updateImage)
+
 		}
 	}
 
@@ -124,7 +127,8 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
             
 			// Check bounds and pan if needed
 			// Only pan if we are zoomed in OR if the keyboard is visible (to allow scrolling up)
-			if scrollView.zoomScale > 1.0 || (keyboardVisible && scrollView.contentInset.bottom > 0) {
+
+			if (!panLockedByKeyboard && scrollView.zoomScale > 1.0 )  || (keyboardVisible && scrollView.contentInset.bottom > 0) {
 				let margin: CGFloat = 50.0
                 
                 // Convert cursor frame to screen coordinates (relative to the ViewController's view)
@@ -217,6 +221,8 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 	override func viewDidLoad() {
 
 		super.viewDidLoad()
+
+		_ = self.inputAccessoryView
 
 		// ScrollView Setup
 		scrollView = UIScrollView(frame: view.bounds)
@@ -423,8 +429,18 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 			keyboardHeight = height
             keyboardVisible = true
 
+			panLockedByKeyboard = true
+
             // Allow scrolling past current bottom to see hidden content
-            scrollView.contentInset.bottom = height
+			scrollView.contentInset = UIEdgeInsets(
+				top: 0,
+				left: 0,
+				bottom: height,
+				right: 0
+			)
+
+			scrollView.scrollIndicatorInsets = scrollView.contentInset
+
 
             // Automatic scroll up only if mouse is in the bottom half of the screen
             let mouseY = CGFloat(CParsec.mouseInfo.mouseY)
@@ -444,7 +460,10 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 	@objc func keyboardWillHide(notification: NSNotification) {
 		keyboardHeight = 0.0
         keyboardVisible = false
-        
+
+		panLockedByKeyboard = true
+
+
         // Restore inset
         scrollView.contentInset.bottom = 0
         
@@ -496,6 +515,11 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
             // Native UIScrollView handles 2-finger pan for scrolling.
             // We disable the mouse wheel for now to avoid conflict, or we can check gesture state.
             // If user wants wheel, we might need a specific mode or 3 fingers.
+
+			if panLockedByKeyboard {
+				return   // ⭐ 只讓 scrollView 處理
+			}
+
 			if zoomEnabled {
 				return
 			}
@@ -624,7 +648,14 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 		zoomEnabled = enabled
 		scrollView.pinchGestureRecognizer?.isEnabled = enabled
 	}
-	
+
+	func setPanEnabled(_ enabled: Bool) {
+		scrollView.isScrollEnabled = enabled
+
+		// 同時關掉 zoom，避免打架
+		scrollView.pinchGestureRecognizer?.isEnabled = !enabled
+	}
+
 }
 	
 extension ParsecViewController : UIPointerInteractionDelegate {
@@ -644,6 +675,7 @@ extension ParsecViewController : UIPointerInteractionDelegate {
 	}
 	
 }
+
 
 class KeyboardButton: UIButton {
 	let keyText: String
@@ -704,11 +736,105 @@ extension ParsecViewController : UIKeyInput, UITextInputTraits {
 	}
 	
     // copied from moonlight https://github.com/moonlight-stream/moonlight-ios/blob/022352c1667788d8626b659d984a290aa5c25e17/Limelight/Input/StreamView.m#L393
+
+
+
+	func populateFullKeyboardAccessory(in containerView: UIView) {
+
+		// 已經生成過就跳過
+		if containerView.viewWithTag(999) != nil { return }
+
+		let toolbarBackground = UIView(frame: CGRect(x: 0, y: 50, width: containerView.bounds.width, height: 44))
+		toolbarBackground.autoresizingMask = [.flexibleWidth, .flexibleTopMargin]
+		toolbarBackground.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.9)
+		toolbarBackground.tag = 999  // 標記，避免重複生成
+
+		let scrollView = UIScrollView(frame: CGRect(x: 8, y: 0, width: toolbarBackground.bounds.width - 80, height: 44))
+		scrollView.autoresizingMask = [.flexibleWidth]
+		scrollView.showsHorizontalScrollIndicator = false
+
+		let buttonStackView = UIStackView()
+		buttonStackView.axis = .horizontal
+		buttonStackView.distribution = .equalSpacing
+		buttonStackView.alignment = .center
+		buttonStackView.spacing = 8
+		buttonStackView.translatesAutoresizingMaskIntoConstraints = false
+
+		// ====== 按鈕生成 ======
+		let buttons = [
+			("⇧", "SHIFT", true), ("⌘", "LGUI", true), ("⇥", "TAB", false),
+			("⎋", "UIKeyInputEscape", false), ("⌃", "CONTROL", true), ("⌥", "LALT", true),
+			("Del", "DELETE", false), ("F1","F1",false), ("F2","F2",false), ("F3","F3",false),
+			("F4","F4",false), ("F5","F5",false), ("F6","F6",false), ("F7","F7",false),
+			("F8","F8",false), ("F9","F9",false), ("F10","F10",false), ("F11","F11",false),
+			("F12","F12",false), ("↑","UP",false), ("↓","DOWN",false), ("←","LEFT",false),
+			("→","RIGHT",false)
+		]
+
+		for (display, key, toggle) in buttons {
+			let button = createKeyboardButton(displayText: display, keyText: key, isToggleable: toggle)
+			buttonStackView.addArrangedSubview(button)
+		}
+
+		scrollView.addSubview(buttonStackView)
+
+		NSLayoutConstraint.activate([
+			buttonStackView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),
+			buttonStackView.trailingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.trailingAnchor),
+			buttonStackView.topAnchor.constraint(equalTo: scrollView.contentLayoutGuide.topAnchor),
+			buttonStackView.bottomAnchor.constraint(equalTo: scrollView.contentLayoutGuide.bottomAnchor),
+			buttonStackView.heightAnchor.constraint(equalTo: scrollView.frameLayoutGuide.heightAnchor)
+		])
+
+		toolbarBackground.addSubview(scrollView)
+		containerView.addSubview(toolbarBackground)
+	}
+	
 	override var inputAccessoryView: UIView? {
 
 		if let keyboardAccessoriesView {
 			return keyboardAccessoriesView
 		}
+
+		// ====== 1️⃣ 首次輕量版本 ======
+		let containerView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.bounds.width, height: 94))
+		containerView.autoresizingMask = [.flexibleWidth]
+		containerView.backgroundColor = .clear
+
+		// 簡單 toolbar，只放 Done 按鈕
+		let toolbarBackground = UIView(frame: CGRect(x: 0, y: 50, width: containerView.bounds.width, height: 44))
+		toolbarBackground.autoresizingMask = [.flexibleWidth, .flexibleTopMargin]
+		toolbarBackground.backgroundColor = UIColor.systemBackground.withAlphaComponent(0.9)
+
+		let doneButton = UIButton(type: .system)
+		doneButton.frame = CGRect(x: toolbarBackground.bounds.width - 70, y: 0, width: 60, height: 44)
+		doneButton.autoresizingMask = [.flexibleLeftMargin]
+		doneButton.setTitle("Done", for: .normal)
+		doneButton.addTarget(self, action: #selector(doneTapped), for: .touchUpInside)
+
+		toolbarBackground.addSubview(doneButton)
+		containerView.addSubview(toolbarBackground)
+
+		keyboardAccessoriesView = containerView
+
+		// ====== 2️⃣ 延後生成完整按鈕 ======
+		DispatchQueue.main.async { [weak self] in
+			guard let self = self else { return }
+			self.populateFullKeyboardAccessory(in: containerView)
+		}
+
+		return containerView
+	}
+
+
+	 var OldinputAccessoryView: UIView? {
+
+		if let keyboardAccessoriesView {
+			return keyboardAccessoriesView
+		}
+
+		print("準備KeyBoard")
+
         // Refactored to UIView with autoresizing mask for better landscape support
         // Using frame-based layout for the container to avoid constraint conflicts with keyboard
 		let containerView = UIView(frame: CGRect(x: 0, y: 0, width: self.view.bounds.width, height: 94))

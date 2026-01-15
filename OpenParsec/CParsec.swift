@@ -141,6 +141,11 @@ protocol ParsecService {
 	
 	func connect(_ peerID: String) -> ParsecStatus
 	func disconnect()
+
+	func destroy()
+
+	func getOutputs(maxCount: Int) -> [ParsecDecoder]
+
 	func getStatus() -> ParsecStatus
 	func getStatusEx(_ pcs: inout ParsecClientStatus) -> ParsecStatus
 	func setFrame(_ width: CGFloat, _ height: CGFloat, _ scale: CGFloat)
@@ -148,7 +153,7 @@ protocol ParsecService {
 
 	// Metal 
 	func renderMetalFrame(queue:MTLCommandQueue,
-						  texture: MTLTexture, preRender: ParsecPreRenderCallback?,opaque: UnsafeMutableRawPointer? ,timeout: UInt32) -> ParsecStatus
+						  texture:MTLTexture ,timeout: UInt32) -> ParsecStatus
 
 	
 	func setMuted(_ muted: Bool)
@@ -188,7 +193,6 @@ class CParsec
 		return parsecImpl.mouseInfo
 	}
 	
-	
 
 	static var parsecImpl: ParsecService!
 
@@ -199,7 +203,7 @@ class CParsec
 
 	static func destroy()
 	{
-		
+		parsecImpl.destroy()
 	}
 
 	static func connect(_ peerID: String) -> ParsecStatus
@@ -210,6 +214,11 @@ class CParsec
 	static func disconnect()
 	{
 		parsecImpl.disconnect()
+	}
+
+	static func getOutput(maxCount: Int) -> [ParsecDecoder]
+	{
+		return parsecImpl.getOutputs(maxCount: maxCount)
 	}
 
 	static func getStatus() -> ParsecStatus
@@ -233,10 +242,9 @@ class CParsec
 	}
 
 	static func renderMetalFrame(
-		queue:MTLCommandQueue,
-		texture: MTLTexture,
-		preRender: ParsecPreRenderCallback? = nil,
-		opaque: UnsafeMutableRawPointer? = nil,
+		queue: MTLCommandQueue,
+		texture:MTLTexture,
+
 		timeout: UInt32 = 16
 	) -> ParsecStatus {
 
@@ -245,7 +253,6 @@ class CParsec
 			.renderMetalFrame(
 				queue:queue,
 				texture:texture,
-				preRender:preRender, opaque: opaque,
 				timeout: timeout
 			)
     }

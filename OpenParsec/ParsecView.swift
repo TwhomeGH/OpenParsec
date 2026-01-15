@@ -132,7 +132,9 @@ struct ParsecView: View
 	@State var showDCAlert: Bool = false
 	@State var DCAlertText: String = "Disconnected (reason unknown)"
     @State var metricInfo: String = "Loading..."
-	
+
+
+
 	@State var hideOverlay: Bool = false
 	@State var showMenu: Bool = false
 
@@ -413,7 +415,9 @@ struct ParsecView: View
 	func disconnect()
 	{
 		ParsecRenderCenter.shared.shutdown()
-		
+
+		parsecViewController.keyboardVisible = false
+
 		parsecViewController.scrollView.zoomScale = 1.0
 		parsecViewController.scrollView.contentOffset = .zero
 

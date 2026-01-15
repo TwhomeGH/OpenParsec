@@ -8,22 +8,22 @@ typealias ParsecRenderer =
 ParsecPlayground & ParsecRenderController
 
 
+final class ParsecMetalTarget {
+	static let shared = ParsecMetalTarget()
 
-// ParsecMetalHolder.swift
-class ParsecMetalHolder {
-	static var commandQueue: MTLCommandQueue?
-	static var texture: MTLTexture?
+	var cqQueue:MTLCommandQueue?
 
-	static var commandQueuePtr: UnsafeMutableRawPointer?
+	var texture: MTLTexture? = nil
 
-	// 真正給 C SDK 用的 pointer, 永久持有
-	static let texPtrHolder: UnsafeMutablePointer<UnsafeMutableRawPointer?> = {
+	// ⚠️ 給 C SDK 用的 **指標位址**
+	let texturePtr: UnsafeMutablePointer<UnsafeMutableRawPointer?> = {
 		let p = UnsafeMutablePointer<UnsafeMutableRawPointer?>.allocate(capacity: 1)
 		p.initialize(to: nil)
 		return p
 	}()
-
 }
+
+
 
 
 class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRenderController, MTKViewDelegate {
@@ -37,41 +37,89 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 	var updateImage: () -> Void
 	private var framesDisplayedCounter = 0
 
-	private var commandQueue: MTLCommandQueue!
+	private var commandQueue: MTLCommandQueue?
+
 	private var metalDevice: MTLDevice!
 
 	// 自己持有的 Parsec target texture
-	private var metalTexture: MTLTexture!
-	private var metalTexturePtr: UnsafeMutableRawPointer?
+	private var metalTexture: MTLTexture?
 
 	private var lastWidth: CGFloat = 1.0
 	private var lastHeight: CGFloat = 1.0
+
+	func createParsecTexture(
+		device: MTLDevice,
+		width: Int,
+		height: Int
+	) {
+		let desc = MTLTextureDescriptor.texture2DDescriptor(
+			pixelFormat: .bgra8Unorm,
+			width: width,
+			height: height,
+			mipmapped: false
+		)
+
+		desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
+		desc.storageMode = .shared
+
+		let tex = device.makeTexture(descriptor: desc)!
+
+		// Swift 強引用
+		ParsecMetalTarget.shared.texture = tex
+
+		// ⚠️ C SDK 用的指標
+		ParsecMetalTarget.shared.texturePtr.pointee =
+			Unmanaged.passUnretained(tex).toOpaque()
+	}
+
 
 	// MARK: - Init
 	required init(viewController: UIViewController, updateImage: @escaping () -> Void) {
 		self.viewController = viewController
 		self.updateImage = updateImage
+
 		super.init()
+
+
+		metalDevice = MTLCreateSystemDefaultDevice()
+
+
+		ParsecMetalTarget.shared.cqQueue = metalDevice.makeCommandQueue()
+
+		self.createParsecTexture(
+			device: metalDevice,
+			width: Int(viewController.view.frame.width + 4),
+			height: Int(viewController.view.frame.height + 4)
+		)
+
+
+
+
+
+
+
 	}
+
+
+	
 
 	var renderView: UIView { mtkView }
 
 	// MARK: - Setup
 	func loadViewIfNeeded() {
 		mtkView = MTKView(frame: viewController.view.bounds)
-		metalDevice = MTLCreateSystemDefaultDevice()
-		guard let device = metalDevice else { fatalError("❌ Metal device not available!") }
 
-		mtkView.device = device
+		mtkView.colorPixelFormat = .bgra8Unorm
+		mtkView.device = metalDevice
 		mtkView.isPaused = false
 		mtkView.enableSetNeedsDisplay = false
 		mtkView.framebufferOnly = false
 		mtkView.isHidden = false
-		mtkView.backgroundColor = .black
+		mtkView.backgroundColor = .red
 		mtkView.preferredFramesPerSecond = preferredFPS
 		mtkView.delegate = self
 
-		commandQueue = device.makeCommandQueue()
+
 		viewController.view.addSubview(mtkView)
 
 		DispatchQueue.main.async { [weak self] in
@@ -79,33 +127,14 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 			self.mtkView.contentScaleFactor = self.viewController.view.window?.screen.nativeScale ?? UIScreen.main.nativeScale
 		}
 
-		// 建立 Parsec 專用 target texture
-		createParsecTargetTexture(size: mtkView.drawableSize)
 
 		ParsecMetalViewControllerWrapper.sharedWrapper = self
 	}
 
 	private func aligned(_ x: Int) -> Int { return (x + 1) & ~1 } // 對齊到偶數
 
-	private func createParsecTargetTexture(size: CGSize) {
-		let desc = MTLTextureDescriptor.texture2DDescriptor(
-			pixelFormat: .bgra8Unorm,
-			width: max(1, aligned(Int(size.width))),
-			height: max(1, aligned(Int(size.height))),
-			mipmapped: false
-		)
-		desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
-		desc.storageMode = .private
-
-		guard let tex = metalDevice.makeTexture(descriptor: desc) else {
-			fatalError("❌ Failed to create Parsec texture")
-		}
-		metalTexture = tex
-		metalTexturePtr = UnsafeMutableRawPointer(Unmanaged.passUnretained(metalTexture!).toOpaque())
-	}
-
 	func updateSize(width: CGFloat, height: CGFloat) {
-		guard let mtkView = mtkView else { return }
+		guard let view = mtkView else { return }
 
 		let deltaW = abs(width - lastWidth)
 		let deltaH = abs(height - lastHeight)
@@ -114,9 +143,14 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 			lastHeight = height
 
 			DispatchQueue.main.async { [weak self] in
-				guard let self = self else { return }
-				mtkView.drawableSize = CGSize(width: width, height: height)
-				CParsec.setFrame(width, height, mtkView.contentScaleFactor)
+				guard self != nil else { return }
+
+
+				CParsec.setFrame(width, height, view.contentScaleFactor)
+
+				print("SCALE",view.contentScaleFactor)
+				print("Width:\(width)x\(height)")
+
 			}
 		}
 	}
@@ -131,27 +165,80 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 	}
 
 	func draw(in view: MTKView) {
-		guard let commandQueue = commandQueue, let drawable = view.currentDrawable else { return }
 
-		// 更新 Parsec holder
-		ParsecMetalHolder.commandQueue = commandQueue
-		ParsecMetalHolder.texture = metalTexture
-		ParsecMetalHolder.commandQueuePtr = Unmanaged.passUnretained(commandQueue).toOpaque()
-		ParsecMetalHolder.texPtrHolder.pointee = metalTexturePtr!
 
-		// 渲染 Parsec 到自持有 texture
-		let status = CParsec.renderMetalFrame(
-			queue: commandQueue,
-			texture: metalTexture,
-			preRender: nil,
-			opaque: nil,
-			timeout: 16
-		)
-		print("Parsec render status:", status)
+
+		let deltaWidth: CGFloat = view.frame.size.width - lastWidth
+		if deltaWidth > 0.1 || deltaWidth < -0.1
+		{
+			CParsec.setFrame(view.frame.size.width, view.frame.size.height, view.contentScaleFactor)
+			lastWidth = view.frame.size.width
+			print("SCALE",view.contentScaleFactor)
+			print("Width:\(view.frame.size.width)x\( view.frame.size.height)")
+		}
+		
+
+		let cq = ParsecMetalTarget.shared.cqQueue!
+		let tex = ParsecMetalTarget.shared.texture!
+
+
+		print("MTL Device:", metalDevice ?? "none")
+		print("CQ Device",String(describing: cq.device))
+		print("TEX Device",String(describing: tex.device))
+
+
+
+
+		DispatchQueue.main.async {
+
+			// 渲染 Parsec 到自持有 texture
+			let status = CParsec.renderMetalFrame(
+				queue: cq ,
+				texture: tex,
+				timeout: 16
+			)
+
+			print("Parsec render status:", status)
+
+
+		}
+
+
 
 		
 		drawFrameCompleted()
 		updateImage()
+	}
+
+	func olddraw(in view: MTKView) {
+		guard let drawable = view.currentDrawable,
+			  let rpd = view.currentRenderPassDescriptor,
+			  let commandQueue = commandQueue else {
+			return
+		}
+
+		// 🔴 清成紅色
+		rpd.colorAttachments[0].clearColor =
+			MTLClearColor(red: 1, green: 0, blue: 0, alpha: 1)
+		rpd.colorAttachments[0].loadAction = .clear
+		rpd.colorAttachments[0].storeAction = .store
+
+		let commandBuffer = commandQueue.makeCommandBuffer()!
+		let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: rpd)!
+		encoder.endEncoding()
+
+		commandBuffer.present(drawable)
+		commandBuffer.commit()
+
+		print("TEX size:", drawable.texture.width, drawable.texture.height )
+
+		print("TEX type:", String(describing: drawable.texture.textureType) )
+
+		print("TEX format:", String(describing: drawable.texture.pixelFormat) )
+
+
+
+
 	}
 
 	// MARK: - Clean
@@ -159,12 +246,13 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 		mtkView?.removeFromSuperview()
 		mtkView = nil
 		metalTexture = nil
-		metalTexturePtr = nil
 	}
 
 	// MARK: - Shared
 	static var sharedWrapper: ParsecMetalViewControllerWrapper?
 }
+
+
 //
 //class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRenderController, MTKViewDelegate {
 //

@@ -239,7 +239,7 @@ class ParsecSDKBridge: ParsecService
 			nil,
 			texPtrPtr,
 			nil,
-			nil,
+			UnsafeRawPointer(Unmanaged.passUnretained(self).toOpaque()),
 			timeout
 		)
 

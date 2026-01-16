@@ -60,8 +60,8 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 		)
 
 		desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
-		desc.storageMode = .shared
-
+		desc.storageMode = .private
+	
 		let tex = device.makeTexture(descriptor: desc)!
 
 		// Swift 強引用
@@ -83,15 +83,23 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 
 		metalDevice = MTLCreateSystemDefaultDevice()
 
+		
+
 
 		ParsecMetalTarget.shared.cqQueue = metalDevice.makeCommandQueue()
 
+		let width = viewController.view.frame.width
+		let height = viewController.view.frame.height
+
+		let alignedWidth = ((width + 15) / 16) * 16
+		let alignedHeight = ((height + 15) / 16) * 16
+
 		self.createParsecTexture(
 			device: metalDevice,
-			width: Int(viewController.view.frame.width + 4),
-			height: Int(viewController.view.frame.height + 4)
+			width: Int(alignedWidth),
+			height: Int(alignedHeight)
 		)
-
+		
 
 
 
@@ -113,7 +121,8 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 		mtkView.device = metalDevice
 		mtkView.isPaused = false
 		mtkView.enableSetNeedsDisplay = false
-		mtkView.framebufferOnly = false
+		mtkView.framebufferOnly = true
+		
 		mtkView.isHidden = false
 		mtkView.backgroundColor = .red
 		mtkView.preferredFramesPerSecond = preferredFPS
@@ -161,7 +170,7 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 
 	// MARK: - MTKViewDelegate
 	func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-		updateSize(width: size.width, height: size.height)
+		//updateSize(width: size.width, height: size.height)
 	}
 
 	func draw(in view: MTKView) {
@@ -189,7 +198,6 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 
 
 
-		DispatchQueue.main.async {
 
 			// 渲染 Parsec 到自持有 texture
 			let status = CParsec.renderMetalFrame(
@@ -201,7 +209,7 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 			print("Parsec render status:", status)
 
 
-		}
+
 
 
 

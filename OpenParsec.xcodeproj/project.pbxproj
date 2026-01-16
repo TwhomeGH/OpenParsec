@@ -98,6 +98,7 @@
 		CE02CB092F14C955003714A3 /* RenderCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderCenter.swift; sourceTree = "<group>"; };
 		CE2E6E952F19DEA400844FB7 /* Frameworks */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Frameworks; sourceTree = "<group>"; };
 		CE2E6EA82F19E1A200844FB7 /* ParsecSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ParsecSDK.framework; path = Frameworks/ParsecSDK.framework; sourceTree = "<group>"; };
+		CE2E6EAB2F1A0E8E00844FB7 /* libparsec.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libparsec.dylib; path = Frameworks/libparsec.dylib; sourceTree = "<group>"; };
 		CEC7D21C2F16ABEC006FBF99 /* Metal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Metal.h; sourceTree = "<group>"; };
 		CEC7D21D2F16AC0B006FBF99 /* Metal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Metal.m; sourceTree = "<group>"; };
 		FC16A7AC29A97BDA00BB70A7 /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
@@ -118,6 +119,7 @@
 		27E61A85292965FC00FF6563 = {
 			isa = PBXGroup;
 			children = (
+				CE2E6EAB2F1A0E8E00844FB7 /* libparsec.dylib */,
 				CE2E6EA82F19E1A200844FB7 /* ParsecSDK.framework */,
 				CE2E6E952F19DEA400844FB7 /* Frameworks */,
 				27E61A90292965FC00FF6563 /* OpenParsec */,
@@ -462,6 +464,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks/ParsecSDK.framework/sdk/ios/ParsecSDK.framework",
+					"$(PROJECT_DIR)/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.aigch.OpenParsec.coffee;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -501,6 +504,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Frameworks/ParsecSDK.framework/sdk/ios/ParsecSDK.framework",
+					"$(PROJECT_DIR)/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.aigch.OpenParsec.coffee;
 				PRODUCT_NAME = "$(TARGET_NAME)";

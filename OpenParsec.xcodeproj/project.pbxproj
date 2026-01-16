@@ -39,9 +39,8 @@
 		84480EBE2ADC4FDA007DE5F1 /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84480EBD2ADC4FDA007DE5F1 /* GameController.swift */; };
 		CE02CB082F14482F003714A3 /* shader.metal in Sources */ = {isa = PBXBuildFile; fileRef = CE02CB072F144824003714A3 /* shader.metal */; };
 		CE02CB0A2F14C95C003714A3 /* RenderCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE02CB092F14C955003714A3 /* RenderCenter.swift */; };
-		CE2E6E642F19C03200844FB7 /* ParsecSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CEC7D2282F16D045006FBF99 /* ParsecSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		CE2E6E772F19CB1000844FB7 /* ParsecSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE2E6E762F19CB0F00844FB7 /* ParsecSDK.framework */; };
 		CEC7D21E2F16AC0F006FBF99 /* Metal.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC7D21D2F16AC0B006FBF99 /* Metal.m */; };
-		CEC7D2292F16D045006FBF99 /* ParsecSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CEC7D2282F16D045006FBF99 /* ParsecSDK.framework */; };
 		FC16A7AD29A97BDA00BB70A7 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A7AC29A97BDA00BB70A7 /* Shared.swift */; };
 /* End PBXBuildFile section */
 
@@ -49,10 +48,9 @@
 		27B8D569292DC81500A324AD /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 8;
-			dstPath = "https:/github.com/MalfoyJW/parsec-sdk/tree/bb336699ee7acd7a4eb0c460410a65c23d7f3879";
+			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				CE2E6E642F19C03200844FB7 /* ParsecSDK.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 1;
@@ -96,10 +94,12 @@
 		84480EBD2ADC4FDA007DE5F1 /* GameController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
 		CE02CB072F144824003714A3 /* shader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = shader.metal; sourceTree = "<group>"; };
 		CE02CB092F14C955003714A3 /* RenderCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderCenter.swift; sourceTree = "<group>"; };
-		CE2E6E622F19C02300844FB7 /* Frameworks */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Frameworks; sourceTree = "<group>"; };
+		CE2E6E702F19CABB00844FB7 /* OpenParsec */ = {isa = PBXFileReference; lastKnownFileType = folder; name = OpenParsec; sourceTree = "<group>"; };
+		CE2E6E722F19CACC00844FB7 /* Headers */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Headers; path = Frameworks/ParsecSDK.framework/Headers; sourceTree = "<group>"; };
+		CE2E6E742F19CAE500844FB7 /* ParsecSDK */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = ParsecSDK; path = "../../Downloads/parsec-sdk-6.0/sdk/ios/ParsecSDK.framework/ParsecSDK"; sourceTree = "<group>"; };
+		CE2E6E762F19CB0F00844FB7 /* ParsecSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ParsecSDK.framework; path = "../../Downloads/parsec-sdk-6.0/sdk/ios/ParsecSDK.framework"; sourceTree = "<group>"; };
 		CEC7D21C2F16ABEC006FBF99 /* Metal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Metal.h; sourceTree = "<group>"; };
 		CEC7D21D2F16AC0B006FBF99 /* Metal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Metal.m; sourceTree = "<group>"; };
-		CEC7D2282F16D045006FBF99 /* ParsecSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ParsecSDK.framework; path = "/Users/user/Downloads/parsec-sdk-6.0/sdk/ios/ParsecSDK.framework"; sourceTree = "<absolute>"; };
 		FC16A7AC29A97BDA00BB70A7 /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -108,27 +108,18 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CEC7D2292F16D045006FBF99 /* ParsecSDK.framework in Frameworks */,
+				CE2E6E772F19CB1000844FB7 /* ParsecSDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		27B8D56A292DC98B00A324AD /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				CEC7D2282F16D045006FBF99 /* ParsecSDK.framework */,
-			);
-			path = Frameworks;
-			sourceTree = "<group>";
-		};
 		27E61A85292965FC00FF6563 = {
 			isa = PBXGroup;
 			children = (
-				27B8D56A292DC98B00A324AD /* Frameworks */,
-				CE2E6E622F19C02300844FB7 /* Frameworks */,
 				27E61A90292965FC00FF6563 /* OpenParsec */,
+				CE2E6E6E2F19CA7A00844FB7 /* Frameworks */,
 				27E61A8F292965FC00FF6563 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -193,6 +184,17 @@
 				27E61A9A292965FD00FF6563 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		CE2E6E6E2F19CA7A00844FB7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CE2E6E762F19CB0F00844FB7 /* ParsecSDK.framework */,
+				CE2E6E742F19CAE500844FB7 /* ParsecSDK */,
+				CE2E6E722F19CACC00844FB7 /* Headers */,
+				CE2E6E702F19CABB00844FB7 /* OpenParsec */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -456,6 +458,10 @@
 				DEVELOPMENT_ASSET_PATHS = "\"OpenParsec/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				INFOPLIST_FILE = OpenParsec/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -486,6 +492,10 @@
 				DEVELOPMENT_ASSET_PATHS = "\"OpenParsec/Preview Content\"";
 				ENABLE_PREVIEWS = YES;
 				"EXCLUDED_ARCHS[sdk=iphonesimulator*]" = arm64;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/Frameworks",
+				);
 				INFOPLIST_FILE = OpenParsec/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14;
 				LD_RUNPATH_SEARCH_PATHS = (

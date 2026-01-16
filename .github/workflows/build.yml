@@ -76,6 +76,7 @@ jobs:
       archive_path: ${{ needs.build.outputs.archive_path }}
     outputs:
       artifact: ${{ env.scheme }}.ipa
+      build_time: ${{ steps.timestamp.outputs.build_time }}
 
     steps:
       - name: Download a Build Artifact
@@ -179,10 +180,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: "Nightly Release @ ${{ steps.timestamp.outputs.build_time }}"
+          name: "Nightly Release @ ${{ needs.package.outputs.build_time }}"
           
           body: |
-            This is a nightly release created at ${{ steps.timestamp.outputs.build_time }}.
+            This is a nightly release created at ${{ needs.package.outputs.build_time }}.
             [Workflow link](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}).
 
           

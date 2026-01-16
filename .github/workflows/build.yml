@@ -112,6 +112,11 @@ jobs:
       - name: Set timestamp
         id: timestamp
         run: |
+
+          # 設定時區為台北
+          export TZ="Asia/Taipei"
+
+
           # 取得當前日期與時間
           YEAR=$(date +%Y)
           MONTH=$(date +%-m)

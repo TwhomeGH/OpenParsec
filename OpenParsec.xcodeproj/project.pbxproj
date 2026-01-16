@@ -48,14 +48,14 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		27B8D569292DC81500A324AD /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
+			buildActionMask = 8;
+			dstPath = "https:/github.com/MalfoyJW/parsec-sdk/tree/bb336699ee7acd7a4eb0c460410a65c23d7f3879";
 			dstSubfolderSpec = 10;
 			files = (
 				CEC7D22A2F16D0B1006FBF99 /* ParsecSDK.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
+			runOnlyForDeploymentPostprocessing = 1;
 		};
 /* End PBXCopyFilesBuildPhase section */
 

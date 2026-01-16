@@ -39,7 +39,8 @@
 		84480EBE2ADC4FDA007DE5F1 /* GameController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84480EBD2ADC4FDA007DE5F1 /* GameController.swift */; };
 		CE02CB082F14482F003714A3 /* shader.metal in Sources */ = {isa = PBXBuildFile; fileRef = CE02CB072F144824003714A3 /* shader.metal */; };
 		CE02CB0A2F14C95C003714A3 /* RenderCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE02CB092F14C955003714A3 /* RenderCenter.swift */; };
-		CE2E6E772F19CB1000844FB7 /* ParsecSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE2E6E762F19CB0F00844FB7 /* ParsecSDK.framework */; };
+		CE2E6E822F19CEFF00844FB7 /* ParsecSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CE2E6E812F19CEFF00844FB7 /* ParsecSDK.framework */; };
+		CE2E6E832F19D02A00844FB7 /* ParsecSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CE2E6E812F19CEFF00844FB7 /* ParsecSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CEC7D21E2F16AC0F006FBF99 /* Metal.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC7D21D2F16AC0B006FBF99 /* Metal.m */; };
 		FC16A7AD29A97BDA00BB70A7 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A7AC29A97BDA00BB70A7 /* Shared.swift */; };
 /* End PBXBuildFile section */
@@ -47,13 +48,14 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		27B8D569292DC81500A324AD /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 8;
+			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				CE2E6E832F19D02A00844FB7 /* ParsecSDK.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 1;
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -94,10 +96,11 @@
 		84480EBD2ADC4FDA007DE5F1 /* GameController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameController.swift; sourceTree = "<group>"; };
 		CE02CB072F144824003714A3 /* shader.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = shader.metal; sourceTree = "<group>"; };
 		CE02CB092F14C955003714A3 /* RenderCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderCenter.swift; sourceTree = "<group>"; };
-		CE2E6E702F19CABB00844FB7 /* OpenParsec */ = {isa = PBXFileReference; lastKnownFileType = folder; name = OpenParsec; sourceTree = "<group>"; };
+		CE2E6E702F19CABB00844FB7 /* OpenParsec */ = {isa = PBXFileReference; lastKnownFileType = folder; path = OpenParsec; sourceTree = "<group>"; };
 		CE2E6E722F19CACC00844FB7 /* Headers */ = {isa = PBXFileReference; lastKnownFileType = folder; name = Headers; path = Frameworks/ParsecSDK.framework/Headers; sourceTree = "<group>"; };
 		CE2E6E742F19CAE500844FB7 /* ParsecSDK */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = ParsecSDK; path = "../../Downloads/parsec-sdk-6.0/sdk/ios/ParsecSDK.framework/ParsecSDK"; sourceTree = "<group>"; };
 		CE2E6E762F19CB0F00844FB7 /* ParsecSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ParsecSDK.framework; path = "../../Downloads/parsec-sdk-6.0/sdk/ios/ParsecSDK.framework"; sourceTree = "<group>"; };
+		CE2E6E812F19CEFF00844FB7 /* ParsecSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ParsecSDK.framework; path = Frameworks/ParsecSDK.framework; sourceTree = "<group>"; };
 		CEC7D21C2F16ABEC006FBF99 /* Metal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Metal.h; sourceTree = "<group>"; };
 		CEC7D21D2F16AC0B006FBF99 /* Metal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Metal.m; sourceTree = "<group>"; };
 		FC16A7AC29A97BDA00BB70A7 /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
@@ -108,7 +111,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CE2E6E772F19CB1000844FB7 /* ParsecSDK.framework in Frameworks */,
+				CE2E6E822F19CEFF00844FB7 /* ParsecSDK.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -190,6 +193,7 @@
 			isa = PBXGroup;
 			children = (
 				CE2E6E762F19CB0F00844FB7 /* ParsecSDK.framework */,
+				CE2E6E812F19CEFF00844FB7 /* ParsecSDK.framework */,
 				CE2E6E742F19CAE500844FB7 /* ParsecSDK */,
 				CE2E6E722F19CACC00844FB7 /* Headers */,
 				CE2E6E702F19CABB00844FB7 /* OpenParsec */,

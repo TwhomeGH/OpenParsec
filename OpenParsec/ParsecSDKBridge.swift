@@ -60,7 +60,13 @@ class ParsecSDKBridge: ParsecService
 	public var netProtocol: Int32 = 1
 	public var mediaContainer: Int32 = 0
 	public var pngCursor: Bool = false
-	var backgroundTaskRunning = true
+
+
+
+	private var audioWorkItem: DispatchWorkItem?
+	private var eventWorkItem: DispatchWorkItem?
+
+
 	var didSetResolution = false
 	
 	public var mouseInfo = MouseInfo()
@@ -150,7 +156,8 @@ class ParsecSDKBridge: ParsecService
 		
 		audio_clear(&_audio)
 		ParsecClientDisconnect(_parsec)
-		backgroundTaskRunning = false
+
+		stopBackgroundTask()
 	}
 	
 	func getStatus() -> ParsecStatus {
@@ -219,7 +226,7 @@ class ParsecSDKBridge: ParsecService
 		timeout: UInt32 = 16
 	) -> ParsecStatus {
 
-		//let cq = Unmanaged.passUnretained(queue).toOpaque()
+		let cq = Unmanaged.passUnretained(queue).toOpaque()
 
 		var texPtr: UnsafeMutableRawPointer? = Unmanaged.passUnretained(texture).toOpaque()
 
@@ -597,28 +604,42 @@ class ParsecSDKBridge: ParsecService
 	}
 	
 	func startBackgroundTask() {
-		let item1 = DispatchWorkItem {
-			while self.backgroundTaskRunning {
+
+
+		// audio
+		audioWorkItem = DispatchWorkItem { [weak self] in
+			guard let self else { return }
+			while !(self.audioWorkItem?.isCancelled ?? true) {
 				self.pollAudio()
+				Thread.sleep(forTimeInterval: 0.01) // 適度 yield CPU
 			}
 		}
-
-
-		let item2 = DispatchWorkItem {
-			while self.backgroundTaskRunning {
+		// event
+		eventWorkItem = DispatchWorkItem { [weak self] in
+			guard let self else { return }
+			while !(self.eventWorkItem?.isCancelled ?? true) {
 				self.pollEvent()
+				Thread.sleep(forTimeInterval: 0.01)
 			}
 		}
 
-		
 
 
-
-		DispatchQueue.global().async(execute: item1)
-		DispatchQueue.global().async(execute: item2)
-
+		DispatchQueue.global().async(execute: audioWorkItem!)
+		DispatchQueue.global().async(execute: eventWorkItem!)
 
 	}
+
+	func stopBackgroundTask() {
+		// 安全停止
+		audioWorkItem?.cancel()
+		eventWorkItem?.cancel()
+
+		// 可選：釋放引用
+		audioWorkItem = nil
+		eventWorkItem = nil
+	}
+
 
 
 	func sendUserData(type: ParsecUserDataType, message: Data) {

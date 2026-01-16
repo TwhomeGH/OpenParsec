@@ -108,6 +108,44 @@ jobs:
           name: ${{ env.scheme }}.ipa
           path: ${{ env.scheme }}.ipa
 
+      - name: Set timestamp
+        id: timestamp
+        run: |
+          # 取得當前日期與時間
+          YEAR=$(date +%Y)
+          MONTH=$(date +%-m)
+          DAY=$(date +%-d)
+          
+          HOUR=$(date +%-H)
+          MINUTE=$(date +%M)
+          
+          # 判斷上午/下午
+          if [ $HOUR -ge 12 ]; then
+            AP="下午"
+            HOUR=$((HOUR-12))
+            [ $HOUR -eq 0 ] && HOUR=12
+          else
+            AP="上午"
+            [ $HOUR -eq 0 ] && HOUR=12
+          fi
+          
+          # 星期轉換
+          WEEKDAY_NUM=$(date +%u) # 1 = Monday ... 7 = Sunday
+          case $WEEKDAY_NUM in
+            1) WEEKDAY="週一";;
+            2) WEEKDAY="週二";;
+            3) WEEKDAY="週三";;
+            4) WEEKDAY="週四";;
+            5) WEEKDAY="週五";;
+            6) WEEKDAY="週六";;
+            7) WEEKDAY="週日";;
+          esac
+
+          # 拼接最終字串
+          BUILD_TIME="${YEAR}/${MONTH}/${DAY} ${AP}${HOUR}:${MINUTE} ${WEEKDAY}"
+
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+
   release__nightly:
     name: Nightly Release
     permissions:

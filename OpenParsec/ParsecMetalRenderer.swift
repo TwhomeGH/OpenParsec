@@ -14,6 +14,10 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     private var lastWidth: CGFloat = 1.0
     private var lastHeight: CGFloat = 1.0
 
+    private var yTexture: MTLTexture?
+    private var uvTexture: MTLTexture?
+
+
 
     init(_ view: MTKView, updateImage: @escaping () -> Void) {
         self.mtkView = view
@@ -59,26 +63,37 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         let width = Int(frame.width)
         let height = Int(frame.height)
 
-        let desc = MTLTextureDescriptor.texture2DDescriptor(
-            pixelFormat: .bgra8Unorm,
+        guard let device = mtkView.device else { return }
+
+        // 建立 Y 平面
+        let yDesc = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .r8Unorm,
             width: width,
             height: height,
             mipmapped: false
         )
-        desc.usage = [.shaderRead, .shaderWrite]
-        desc.storageMode = .shared
+        yDesc.usage = [.shaderRead]
+        yTexture = device.makeTexture(descriptor: yDesc)
+        yTexture?.replace(region: MTLRegionMake2D(0, 0, width, height),
+                        mipmapLevel: 0,
+                        withBytes: frame.yPlane,
+                        bytesPerRow: Int(frame.yStride))
 
-        guard let tex = mtkView.device?.makeTexture(descriptor: desc) else { return }
-
-        tex.replace(
-            region: MTLRegionMake2D(0, 0, width, height),
-            mipmapLevel: 0,
-            withBytes: image,
-            bytesPerRow: width * 4 // BGRA 每像素 4 bytes
+        // 建立 UV 平面 (寬高各減半)
+        let uvDesc = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .rg8Unorm,
+            width: width / 2,
+            height: height / 2,
+            mipmapped: false
         )
-
-        currentTexture = tex
+        uvDesc.usage = [.shaderRead]
+        uvTexture = device.makeTexture(descriptor: uvDesc)
+        uvTexture?.replace(region: MTLRegionMake2D(0, 0, width / 2, height / 2),
+                        mipmapLevel: 0,
+                        withBytes: frame.uvPlane,
+                        bytesPerRow: Int(frame.uvStride))
     }
+
 
     // MTKViewDelegate
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
@@ -103,6 +118,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         // 綁定 NV12 的兩個平面
         encoder.setFragmentTexture(yTex, index: 0)
         encoder.setFragmentTexture(uvTex, index: 1)
+
 
         // 用 triangleStrip + 4 頂點畫全螢幕 quad
         encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)

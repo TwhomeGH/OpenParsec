@@ -2,6 +2,9 @@ import MetalKit
 import ParsecSDK
 import OSLog
 
+import SwiftUI
+import UIKit
+
 
 class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     var mtkView: MTKView

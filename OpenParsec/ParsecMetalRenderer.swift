@@ -199,7 +199,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
 
         var showText: Bool = SettingHandle.shared.MetalText // 或 false
-        let showTextBuffer = device.makeBuffer(bytes: &showText,
+        let showTextBuffer = mtkView.device!.makeBuffer(bytes: &showText,
                                             length: MemoryLayout<Bool>.stride,
                                             options: [])
         encoder.setFragmentBuffer(showTextBuffer, offset: 0, index: 1)

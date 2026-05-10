@@ -209,7 +209,7 @@ final class ParsecRenderCenter {
 	}
 
 
-	func Update_DebugMes(_ text:String?) {
+	func Update_DebugMes(_ text:String = "") {
 		renderController?.DebugMes = text
 	}
 

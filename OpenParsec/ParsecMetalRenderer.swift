@@ -33,17 +33,19 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
                                     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         else { return nil }
 
-        // 背景透明
-        context.setFillColor(UIColor.clear.cgColor)
+        // 背景半透明黑色，讓字更顯眼
+        context.setFillColor(UIColor.black.withAlphaComponent(0.6).cgColor)
         context.fill(CGRect(origin: .zero, size: size))
 
-        // 畫字在左上角
+        // 畫字在左上角，改成亮色字體
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 24, weight: .bold),
-            .foregroundColor: UIColor.white
+            .font: UIFont.systemFont(ofSize: 28, weight: .heavy), // 粗體大字
+            .foregroundColor: UIColor.red // 醒目的紅字
         ]
         let attrString = NSAttributedString(string: text, attributes: attributes)
-        attrString.draw(in: CGRect(x: 5, y: 5, width: size.width - 10, height: size.height - 10))
+        attrString.draw(in: CGRect(x: 10, y: 10,
+                                width: size.width - 20,
+                                height: size.height - 20))
 
         guard let cgImage = context.makeImage() else { return nil }
 

@@ -53,8 +53,10 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         ]
         let attrString = NSAttributedString(string: text, attributes: attributes)
 
+        let textSize = attrString.size()
+
         // 用 draw(at:) 確保字不被裁掉
-        attrString.draw(at: CGPoint(x: 10, y: size.height - text.height - 10))
+        attrString.draw(at: CGPoint(x: 10, y: size.height - textSize.height - 10))
 
 
         // 建立 Metal Texture

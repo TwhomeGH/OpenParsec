@@ -109,7 +109,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
         if let img = debugImage {
             // 在 UIImageView 顯示，確認字有沒有畫上去
-            self.textDebugImage =   UIImage(cgImage: img)
+            self.textDebugImage = img
 
         }
         self.textTexture = textTex

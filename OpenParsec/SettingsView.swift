@@ -56,7 +56,7 @@ struct SettingsView:View
 							HStack()
 							{
 								Button(action: saveAndExit, label:{ Image(systemName:"xmark").scaleEffect(x:-1) })
-								 .padding()
+								.padding()
 								Spacer()
 							}
 							Text("Settings")
@@ -93,15 +93,15 @@ struct SettingsView:View
 							}
                             CatItem("Cursor Scale")
                             {
-                                Slider(value: $settings..cursorScale, in:0.1...4, step:0.1)
+                                Slider(value: $settings.cursorScale, in:0.1...4, step:0.1)
 									.frame(width: 200)
-								Text(String(format: "%.1f", settings..cursorScale))
+								Text(String(format: "%.1f", settings.cursorScale))
                             }
 							CatItem("Mouse Sensitivity")
 							{
-								Slider(value: $settings..mouseSensitivity, in:0.1...4, step:0.1)
+								Slider(value: $settings.mouseSensitivity, in:0.1...4, step:0.1)
 									.frame(width: 200)
-								Text(String(format: "%.1f", settings..mouseSensitivity))
+								Text(String(format: "%.1f", settings.mouseSensitivity))
 							}
                         }
                         CatTitle("Graphics")
@@ -109,7 +109,7 @@ struct SettingsView:View
                         {
                             CatItem("Renderer")
                             {
-								SegmentPicker(selection:$settings..renderer, options:
+								SegmentPicker(selection:$settings.renderer, options:
 								[
 									Choice("OpenGL", RendererType.opengl),
 									Choice("Metal", RendererType.metal)
@@ -120,11 +120,11 @@ struct SettingsView:View
 
 							CatItem("Default Resolution")
 							{
-								MultiPicker(selection: $settings..resolution, options:resolutionChoices)
+								MultiPicker(selection: $settings.resolution, options:resolutionChoices)
 							}
                             CatItem("Decoder")
                             {
-								MultiPicker(selection: $settings..decoder, options:
+								MultiPicker(selection: $settings.decoder, options:
 								[
 									Choice("H.264", DecoderPref.h264),
 									Choice("Prefer H.265", DecoderPref.h265)
@@ -133,18 +133,18 @@ struct SettingsView:View
 
 							CatItem("Decoder 444")
 							{
-								Toggle("", isOn:$settings..decoder444)
+								Toggle("", isOn:$settings.decoder444)
 									.frame(width:80)
 							}
 							CatItem("Decoder Compatibility")
 							{
-								Toggle("", isOn:$settings..decoderCompatibility)
+								Toggle("", isOn:$settings.decoderCompatibility)
 									.frame(width:80)
 							}
 							
 							CatItem("Frame Rate")
 							{
-								MultiPicker(selection: $settings..preferredFramesPerSecond, options:
+								MultiPicker(selection: $settings.preferredFramesPerSecond, options:
 								[
 									Choice("Auto (Device Max)", 0),
 									Choice("120 FPS", 120),
@@ -160,17 +160,17 @@ struct SettingsView:View
                         {
                             CatItem("Never Show Overlay")
                             {
-                                Toggle("", isOn:$settings..noOverlay)
+                                Toggle("", isOn:$settings.noOverlay)
                                     .frame(width:80)
                             }
 							CatItem("Hide Status Bar")
 							{
-								Toggle("", isOn:$settings..hideStatusBar)
+								Toggle("", isOn:$settings.hideStatusBar)
 									.frame(width:80)
 							}
 							CatItem("Show Keyboard Button")
 							{
-								Toggle("", isOn:$settings..showKeyboardButton)
+								Toggle("", isOn:$settings.showKeyboardButton)
 									.frame(width:80)
 							}
 						}
@@ -194,7 +194,7 @@ struct SettingsView:View
 	
 	func saveAndExit()
 	{
-		//settings..renderer = renderer
+		//settings.renderer = renderer
 		visible = false
 	}
 }

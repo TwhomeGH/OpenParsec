@@ -155,7 +155,7 @@ protocol ParsecService {
 
 	// Metal 
 	func renderMetalFrame(
-		timeout: UInt32 = 16,
+		timeout: UInt32,
 		onFrame: @escaping (ParsecFrame) -> Void
 	) -> ParsecStatus 
 

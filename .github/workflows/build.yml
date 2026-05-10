@@ -65,7 +65,7 @@ jobs:
       - name: Tar Build Artifact
         run: tar -cvf "$archive_path.xcarchive.tar" "$archive_path.xcarchive"
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.archive_path }}.xcarchive.tar
           path: ${{ env.archive_path }}.xcarchive.tar
@@ -170,7 +170,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Download a Build Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: ${{ needs.package.outputs.artifact }}
       - name: Update AltStore source

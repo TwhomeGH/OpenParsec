@@ -33,7 +33,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
                                     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         else { return nil }
 
-        // 翻轉座標系統，讓文字正確顯示在左上角
+        // 翻轉座標系統，讓文字正確顯示
         context.translateBy(x: 0, y: size.height)
         context.scaleBy(x: 1.0, y: -1.0)
 
@@ -48,12 +48,13 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         ]
         let attrString = NSAttributedString(string: text, attributes: attributes)
 
-        // 注意：翻轉後座標原點在左上角，所以 y 要用 size.height - 字高 - padding
-        let textHeight: CGFloat = 28
+        // 用字串實際大小來決定矩形
+        let textSize = attrString.size()
         let rect = CGRect(x: 10,
-                        y: size.height - textHeight - 10,
+                        y: 10, // 翻轉後原點在左上角，直接用 padding
                         width: size.width - 20,
-                        height: textHeight)
+                        height: textSize.height)
+
         attrString.draw(in: rect)
 
         // 建立 Metal Texture
@@ -75,6 +76,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
         return texture
     }
+
 
 
 

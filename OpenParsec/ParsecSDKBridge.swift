@@ -256,15 +256,13 @@ class ParsecSDKBridge: ParsecService
 	private func parsecFrameCallback(
 		framePtr: UnsafeMutablePointer<ParsecFrame>?,
 		imagePtr: UnsafeRawPointer?,
-		opaque: UnsafeMutableRawPointer?
+		opaque: UnsafeRawPointer?
 	) {
 		guard let frame = framePtr?.pointee, let image = imagePtr else { return }
 
-		// 從 opaque 取回 FrameHandler
 		let handler = Unmanaged<FrameHandler>.fromOpaque(opaque!).takeUnretainedValue()
 		handler.onFrame(frame, image)
 	}
-
 	// 在 CParsec 封裝層
 	// Swift wrapper
 

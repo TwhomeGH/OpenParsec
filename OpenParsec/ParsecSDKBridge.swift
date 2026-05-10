@@ -252,6 +252,7 @@ class ParsecSDKBridge: ParsecService
 		}
 	}
 
+	@convention(c)
 	private func parsecFrameCallback(
 		framePtr: UnsafePointer<ParsecFrame>?,
 		imagePtr: UnsafeRawPointer?,

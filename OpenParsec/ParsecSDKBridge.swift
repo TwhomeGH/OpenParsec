@@ -247,53 +247,20 @@ class ParsecSDKBridge: ParsecService
 
 	// 在 CParsec 封裝層
 	func renderMetalFrame(
-		queue: MTLCommandQueue,
-		texture: MTLTexture,
-		timeout: UInt32 = 16
+		parsec: OpaquePointer,
+		timeout: UInt32 = 16,
+		onFrame: @escaping (ParsecFrame) -> Void
 	) -> ParsecStatus {
-
-		//let cq = Unmanaged.passUnretained(queue).toOpaque()
-
-		var texPtr: UnsafeMutableRawPointer? = Unmanaged.passUnretained(texture).toOpaque()
-
-		let texPtrPtr = withUnsafeMutablePointer(to: &texPtr) { $0 }
-
-
-		let status = ParsecClientMetalRenderFrame(
-			_parsec,
-			UInt8(DEFAULT_STREAM),
-			nil,
-			texPtrPtr,
-			nil,
-			UnsafeRawPointer(Unmanaged.passUnretained(self).toOpaque()),
-			timeout
+		return ParsecClientPollFrame(
+			parsec,
+			0, // stream index
+			{ framePtr, opaque, user in
+				guard let frame = framePtr?.pointee else { return }
+				onFrame(frame)
+			},
+			timeout,
+			nil
 		)
-
-		// SDK 可能在內部替換 texture（例如 resize）
-		if let newTexPtr = texPtrPtr.pointee {
-			let newTex =
-				Unmanaged<MTLTexture>
-				.fromOpaque(newTexPtr)
-				.takeUnretainedValue()
-
-			if #available(iOS 16.0, *) {
-				print("Device",newTex.device,newTex.gpuResourceID,
-					  String(describing: newTex.parent))
-			} else {
-				print("Device15",newTex.device,String(describing: newTex.parent))
-
-
-				// Fallback on earlier versions
-			}
-			print("Texture size: \(newTex.width)x\(newTex.height)")
-			print("Pixel format: \(newTex.pixelFormat)")
-
-			ParsecMetalTarget.shared.texture = newTex
-		}
-
-
-		
-		return status
 	}
 
 

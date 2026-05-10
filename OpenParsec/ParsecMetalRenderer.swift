@@ -43,16 +43,12 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
     // PollFrame → 取得最新畫面
     func pollFrame() {
-        let status = ParsecClientPollFrame(
-            _parsec,
-            0, // stream index
-            { framePtr, opaque in
-                guard let frame = framePtr?.pointee else { return }
-                self.handleFrame(frame)
-            },
-            16, // timeout ms
-            nil
-        )
+        let status = CParsec.renderMetalFrame(
+            timeout: 16
+        ) { frame in
+            self.handleFrame(frame) // 把 frame 複製到 Metal texture
+        }
+
         print("PollFrame status:", status)
     }
 

@@ -154,8 +154,10 @@ protocol ParsecService {
 	func renderGLFrame(timeout: UInt32)
 
 	// Metal 
-	func renderMetalFrame(queue:MTLCommandQueue,
-						  texture:MTLTexture ,timeout: UInt32) -> ParsecStatus
+	func renderMetalFrame(
+		timeout: UInt32 = 16,
+		onFrame: @escaping (ParsecFrame) -> Void
+	) -> ParsecStatus 
 
 	
 	func setMuted(_ muted: Bool)
@@ -251,26 +253,25 @@ class CParsec
 		parsecImpl.setFrame(width, height, scale)
 	}
 
+
+	
 	static func renderGLFrame(timeout: UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	{
 		parsecImpl.renderGLFrame(timeout: timeout)
 	}
 
 	static func renderMetalFrame(
-		queue: MTLCommandQueue,
-		texture:MTLTexture,
-
-		timeout: UInt32 = 16
-	) -> ParsecStatus {
-
-
-		return parsecImpl
-			.renderMetalFrame(
-				queue:queue,
-				texture:texture,
-				timeout: timeout
-			)
+        timeout: UInt32 = 16,
+        onFrame: @escaping (ParsecFrame) -> Void
+    ) -> ParsecStatus {
+        return parsecImpl.renderMetalFrame(
+            timeout: timeout,
+            onFrame: onFrame
+        )
     }
+
+
+
 	
 	static func setMuted(_ muted: Bool)
 	{

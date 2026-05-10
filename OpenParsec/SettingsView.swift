@@ -8,7 +8,7 @@ struct SettingsView:View
 {
 	@Binding var visible: Bool
 
-	@EnvironmentObject var settings: settings
+	@EnvironmentObject var settings: SettingsHandler
 
 
 

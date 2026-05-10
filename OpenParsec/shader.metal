@@ -65,7 +65,7 @@ fragment float4 fragmentNV12(VertexOut in [[stage_in]],
     if (showText != 0) {
         if (in.texCoord.x < 0.25 && in.texCoord.y < 0.1) {
             float2 overlayUV = float2(in.texCoord.x / 0.25,
-                                    in.texCoord.y / 0.1);
+                                    1.0 - (in.texCoord.y / 0.1));
 
             float4 overlay = textOverlay.sample(s, overlayUV);
 

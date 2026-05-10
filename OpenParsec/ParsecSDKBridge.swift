@@ -245,20 +245,38 @@ class ParsecSDKBridge: ParsecService
 
 	
 
+
+	// 定義一個 C-compatible callback
+	private func parsecFrameCallback(
+		framePtr: UnsafeMutablePointer<ParsecFrame>?,
+		imagePtr: UnsafeRawPointer?,
+		opaque: UnsafeMutableRawPointer?
+	) {
+		guard let frame = framePtr?.pointee else { return }
+		guard let image = imagePtr else { return }
+
+		// 取回 Swift closure
+		let onFrame = Unmanaged<(ParsecFrame, UnsafeRawPointer) -> Void>
+			.fromOpaque(opaque!)
+			.takeUnretainedValue()
+
+		onFrame(frame, image)
+	}
+
 	// 在 CParsec 封裝層
 	func renderMetalFrame(
     timeout: UInt32 = 16,
     onFrame: @escaping (ParsecFrame, UnsafeRawPointer) -> Void
 	) -> ParsecStatus {
+
+
+		 // 把 closure 包裝成 Unmanaged 傳進去
+    let opaque = Unmanaged.passUnretained(onFrame).toOpaque()
+
 		return ParsecClientPollFrame(
 			_parsec,
 			UInt8(DEFAULT_STREAM),
-			{ framePtr, imagePtr, opaque in
-				guard let frame = framePtr?.pointee else { return }
-				if let image = imagePtr {
-					onFrame(frame, image)
-				}
-			},
+			parsecFrameCallback,
 			timeout,
 			nil
 		)

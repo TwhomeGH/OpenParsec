@@ -37,14 +37,15 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 
 	func switchRenderer(to type: RendererType) {
 		renderer?.cleanUp()
-		renderer?.renderView.removeFromSuperview()
 
 		renderer = createRenderer(type: type)
+		renderer?.loadViewIfNeeded()
 
 		let renderView = renderer!.renderView
 		renderView.frame = contentView.bounds
 
 		contentView.insertSubview(renderView, at: 0)
+		ParsecRenderCenter.shared.renderController = renderer
 
 	}
 

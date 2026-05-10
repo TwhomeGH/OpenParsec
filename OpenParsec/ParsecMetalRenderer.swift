@@ -7,11 +7,11 @@ import UIKit
 
 
 class ParsecMetalRenderer: NSObject, MTKViewDelegate {
-    var mtkView: MTKView
-    var updateImage: () -> Void
+    weak var mtkView: MTKView?
+    var updateImage: (() -> Void)?
 
-    private var commandQueue: MTLCommandQueue!
-    private var pipelineState: MTLRenderPipelineState!
+    private var commandQueue: MTLCommandQueue?
+    private var pipelineState: MTLRenderPipelineState?
 
     private var lastWidth: CGFloat = 1.0
     private var lastHeight: CGFloat = 1.0
@@ -150,7 +150,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         let width = Int(frame.width)
         let height = Int(frame.height)
 
-        guard let device = mtkView.device else { return }
+        guard let device = mtkView?.device else { return }
 
         // Y 平面大小 = width * height
         let ySize = width * height
@@ -202,8 +202,9 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         pollFrame()
 
         guard let drawable = view.currentDrawable,
-            let commandBuffer = commandQueue.makeCommandBuffer(),
+            let commandBuffer = commandQueue?.makeCommandBuffer(),
             let renderPass = view.currentRenderPassDescriptor,
+            let pipelineState,
             let yTex = yTexture,
             let uvTex = uvTexture,
             let textTex = textTexture else { return }
@@ -214,7 +215,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         // 傳入 viewSize 給頂點着色器
         var viewSize = SIMD2<Float>(Float(view.drawableSize.width),
                                     Float(view.drawableSize.height))
-        let viewSizeBuffer = mtkView.device!.makeBuffer(bytes: &viewSize,
+        let viewSizeBuffer = view.device!.makeBuffer(bytes: &viewSize,
                                                         length: MemoryLayout<SIMD2<Float>>.stride,
                                                         options: [])
         encoder.setVertexBuffer(viewSizeBuffer, offset: 0, index: 0)
@@ -222,7 +223,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
         var showText: UInt32 = SettingsHandler.shared.MetalText ? 1 : 0
 
-        let showTextBuffer = mtkView.device!.makeBuffer(bytes: &showText,
+        let showTextBuffer = view.device!.makeBuffer(bytes: &showText,
                                                         length: MemoryLayout<UInt32>.stride,
                                                         options: [])
         encoder.setFragmentBuffer(showTextBuffer, offset: 0, index: 1)
@@ -249,7 +250,26 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
         
 
-        updateImage()
+        updateImage?()
+    }
+
+    func cleanUp() {
+        if let view = mtkView, (view.delegate as AnyObject?) === self {
+            view.delegate = nil
+        }
+
+        mtkView?.isPaused = true
+        updateImage = nil
+        yTexture = nil
+        uvTexture = nil
+        textTexture = nil
+        textDebugImage = nil
+        pipelineState = nil
+        commandQueue = nil
+    }
+
+    deinit {
+        cleanUp()
     }
 
 }

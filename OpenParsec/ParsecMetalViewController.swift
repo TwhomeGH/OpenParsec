@@ -21,6 +21,17 @@ final class ParsecMetalTarget {
 		p.initialize(to: nil)
 		return p
 	}()
+
+	func reset() {
+		texture = nil
+		cqQueue = nil
+		texturePtr.pointee = nil
+	}
+
+	deinit {
+		texturePtr.deinitialize(count: 1)
+		texturePtr.deallocate()
+	}
 }
 
 
@@ -29,10 +40,10 @@ final class ParsecMetalTarget {
 final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecRenderController, MTKViewDelegate {
 
     // MARK: - Properties
-    let viewController: UIViewController
+    weak var viewController: UIViewController?
     var mtkView: MTKView!
 
-	var updateImage: () -> Void
+	var updateImage: (() -> Void)?
 
     private var metalDevice: MTLDevice!
     private var renderer: ParsecMetalRenderer?
@@ -40,8 +51,8 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 	// MARK: - ParsecRenderController Metal FPS
 
 	var preferredFPS: Int {
-        get { mtkView.preferredFramesPerSecond }
-        set { mtkView.preferredFramesPerSecond = newValue }
+        get { mtkView?.preferredFramesPerSecond ?? 0 }
+        set { mtkView?.preferredFramesPerSecond = newValue }
     }
 
 
@@ -79,6 +90,8 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 
     // MARK: - Setup
     func loadViewIfNeeded() {
+		guard mtkView == nil, let viewController = viewController else { return }
+
         mtkView = MTKView(frame: viewController.view.bounds)
         mtkView.colorPixelFormat = .bgra8Unorm
         mtkView.device = metalDevice
@@ -104,11 +117,11 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
         viewController.view.addSubview(mtkView)
 
         // 初始化新的 PollFrame Renderer
-        renderer = ParsecMetalRenderer(mtkView, updateImage: updateImage)
+        renderer = ParsecMetalRenderer(mtkView, updateImage: updateImage ?? {})
 
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.mtkView.contentScaleFactor = self.viewController.view.window?.screen.nativeScale ?? UIScreen.main.nativeScale
+            guard let self = self, let mtkView = self.mtkView else { return }
+            mtkView.contentScaleFactor = viewController.view.window?.screen.nativeScale ?? UIScreen.main.nativeScale
         }
 
         ParsecMetalViewControllerWrapper.sharedWrapper = self
@@ -143,10 +156,30 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 
     // MARK: - Clean
     func cleanUp() {
+		print("🧹 Metal cleanUp start")
+
+		renderer?.cleanUp()
+		renderer = nil
+		updateImage = nil
+
+		mtkView?.isPaused = true
+		mtkView?.enableSetNeedsDisplay = true
+		mtkView?.delegate = nil
         mtkView?.removeFromSuperview()
         mtkView = nil
-        renderer = nil
+
+		if ParsecMetalViewControllerWrapper.sharedWrapper === self {
+			ParsecMetalViewControllerWrapper.sharedWrapper = nil
+		}
+
+		ParsecMetalTarget.shared.reset()
+
+		print("🧹 Metal cleanUp done")
     }
+
+	deinit {
+		cleanUp()
+	}
 
     // MARK: - Shared
     static var sharedWrapper: ParsecMetalViewControllerWrapper?

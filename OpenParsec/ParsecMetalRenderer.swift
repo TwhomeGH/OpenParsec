@@ -198,11 +198,13 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         encoder.setVertexBuffer(viewSizeBuffer, offset: 0, index: 0)
 
 
-        var showText: Bool = SettingHandle.shared.MetalText // 或 false
+        var showText: UInt32 = SettingHandle.shared.MetalText ? 1 : 0
+        
         let showTextBuffer = mtkView.device!.makeBuffer(bytes: &showText,
-                                            length: MemoryLayout<Bool>.stride,
-                                            options: [])
+                                                        length: MemoryLayout<UInt32>.stride,
+                                                        options: [])
         encoder.setFragmentBuffer(showTextBuffer, offset: 0, index: 1)
+
 
 
         // 綁定 NV12 的兩個平面 + overlay

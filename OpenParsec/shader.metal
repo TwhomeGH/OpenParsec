@@ -44,7 +44,7 @@ fragment float4 fragmentNV12(VertexOut in [[stage_in]],
                              texture2d<float, access::sample> texY [[texture(0)]],
                              texture2d<float, access::sample> texUV [[texture(1)]],
                              texture2d<float, access::sample> textOverlay [[texture(2)]],
-                             constant bool &showText [[buffer(1)]]) {
+                             constant uint &showText [[buffer(1)]]) {
     constexpr sampler s(address::clamp_to_edge, filter::linear);
 
     // NV12 取樣

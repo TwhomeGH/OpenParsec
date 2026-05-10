@@ -65,7 +65,12 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
         guard let device = mtkView.device else { return }
 
-        // 建立 Y 平面
+        // Y 平面大小 = width * height
+        let ySize = width * height
+        let yPtr = image
+        let uvPtr = image.advanced(by: ySize)
+
+        // 建立 Y texture
         let yDesc = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: .r8Unorm,
             width: width,
@@ -76,10 +81,10 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         yTexture = device.makeTexture(descriptor: yDesc)
         yTexture?.replace(region: MTLRegionMake2D(0, 0, width, height),
                         mipmapLevel: 0,
-                        withBytes: frame.yPlane,
-                        bytesPerRow: Int(frame.yStride))
+                        withBytes: yPtr,
+                        bytesPerRow: width)
 
-        // 建立 UV 平面 (寬高各減半)
+        // 建立 UV texture (寬高各減半)
         let uvDesc = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: .rg8Unorm,
             width: width / 2,
@@ -90,9 +95,10 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         uvTexture = device.makeTexture(descriptor: uvDesc)
         uvTexture?.replace(region: MTLRegionMake2D(0, 0, width / 2, height / 2),
                         mipmapLevel: 0,
-                        withBytes: frame.uvPlane,
-                        bytesPerRow: Int(frame.uvStride))
+                        withBytes: uvPtr,
+                        bytesPerRow: width)
     }
+
 
 
     // MTKViewDelegate

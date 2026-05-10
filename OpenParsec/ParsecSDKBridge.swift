@@ -152,10 +152,10 @@ class ParsecSDKBridge: ParsecService
 		var cfg = buildConfig()
 
 		print(
-			"Debug Compatibility? -> \(cfg.0.decoderCompatibility)"
+			"Debug Compatibility? -> \(cfg.decoderCompatibility)"
 		)
 
-		print("Debug H265? -> \(cfg.0.decoderH265)")
+		print("Debug H265? -> \(cfg.decoderH265)")
 
 		ParsecClientSetConfig(_parsec, &cfg);
 

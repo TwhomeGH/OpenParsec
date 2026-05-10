@@ -6,6 +6,10 @@ This project is still a major WIP, so apologies for the currently lackluster doc
 
 Before building, make sure you have the Parsec SDK framework symlinked or copied to the `Frameworks` folder. Builds were tested on Xcode Version 12.5.
 
+## CHANGED 改動說明文件
+
+[Changed.md](./Docs/Changed.md)
+
 ## Downloads
 <a href="https://celloserenity.github.io/altdirect/?url=https://github.com/hugeBlack/OpenParsec/releases/download/nightly/altstore.json" target="_blank">
    <img src="https://github.com/CelloSerenity/altdirect/blob/main/assets/png/AltSource_Blue.png?raw=true" alt="Add AltSource" width="200">

@@ -406,6 +406,10 @@ class ParsecSDKBridge: ParsecService
 		let size = Int(event.cursor.size)
 		let width = Int(event.cursor.width)
 		let height = Int(event.cursor.height)
+		mouseInfo.cursorWidth = width
+		mouseInfo.cursorHeight = height
+		mouseInfo.cursorHotX = Int(event.cursor.hotX)
+		mouseInfo.cursorHotY = Int(event.cursor.hotY)
 
 		let data = Data(bytes: pointer, count: size)   // ✅ Swift 管理
 

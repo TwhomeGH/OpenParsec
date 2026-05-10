@@ -120,7 +120,7 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
         lastCursorHidden = currentHidden
         
 		if currentImg != nil && !currentHidden {
-			if lastImg != currentImg{
+			if lastImg != currentImg || u?.image == nil {
 				u!.image = UIImage(cgImage: currentImg!)
 				lastImg = currentImg!
 			}
@@ -209,6 +209,7 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 			
 		} else {
 			u?.image = nil
+			lastImg = nil
 		}
 	}
 

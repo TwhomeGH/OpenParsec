@@ -58,6 +58,8 @@ class ParsecGLKViewController : ParsecPlayground{
 		glkView
 	}
 
+	private var _debugMES: String = ""   // 真正存值的變數
+
 
 
 	private func setupGLKViewController() {

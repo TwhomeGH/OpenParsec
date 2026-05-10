@@ -47,7 +47,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
                                 width: size.width - 20,
                                 height: size.height - 20))
 
-        guard let cgImage = context.makeImage() else { return nil }
+        //guard let cgImage = context.makeImage() else { return nil }
 
         let textureDesc = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: .bgra8Unorm,

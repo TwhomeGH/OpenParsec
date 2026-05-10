@@ -14,7 +14,6 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     private var lastWidth: CGFloat = 1.0
     private var lastHeight: CGFloat = 1.0
 
-    private var parsec: OpaquePointer
 
     init(_ view: MTKView, updateImage: @escaping () -> Void) {
         self.mtkView = view

@@ -691,11 +691,11 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 		let button = ParsecMouseButton.init(rawValue: 1)
 
 		if gestureRecognizer.state == .began{
-			CParsec.sendMouseClickMessage(button, true)
+			CParsec.sendMouseMessage(button, CParsec.mouseInfo.mouseX, CParsec.mouseInfo.mouseY, true)
 			let location = gestureRecognizer.location(in: gestureRecognizer.view)
 			lastLongPressPoint = contentView.convert(location, from: view)
 		} else if gestureRecognizer.state == .ended {
-			CParsec.sendMouseClickMessage(button, false)
+			CParsec.sendMouseMessage(button, CParsec.mouseInfo.mouseX, CParsec.mouseInfo.mouseY, false)
 		} else if gestureRecognizer.state == .changed {
 			let newLocation = gestureRecognizer.location(in: gestureRecognizer.view)
             let adjustedNewLocation = contentView.convert(newLocation, from: view)

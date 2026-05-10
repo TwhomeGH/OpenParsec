@@ -475,12 +475,14 @@ class ParsecSDKBridge: ParsecService
 	
 	func sendMousePosition(_ x:Int32, _ y:Int32)
 	{
-		mouseInfo.mouseX = ParsecSDKBridge.clamp(x, minValue: 0, maxValue: Int32(self.clientWidth))
-		mouseInfo.mouseY = ParsecSDKBridge.clamp(y, minValue: 0, maxValue: Int32(self.clientHeight))
+		let clampedX = ParsecSDKBridge.clamp(x, minValue: 0, maxValue: Int32(self.clientWidth))
+		let clampedY = ParsecSDKBridge.clamp(y, minValue: 0, maxValue: Int32(self.clientHeight))
+		mouseInfo.mouseX = clampedX
+		mouseInfo.mouseY = clampedY
 		var motionMessage = ParsecMessage()
 		motionMessage.type = MESSAGE_MOUSE_MOTION
-		motionMessage.mouseMotion.x = x
-		motionMessage.mouseMotion.y = y
+		motionMessage.mouseMotion.x = clampedX
+		motionMessage.mouseMotion.y = clampedY
 		ParsecClientSendMessage(_parsec, &motionMessage)
 	}
 	

@@ -9,6 +9,11 @@ class TouchController
 	init(viewController: UIViewController) {
 		self.viewController = viewController
 	}
+
+	private func currentMousePosition() -> (x: Int32, y: Int32) {
+		let mouseInfo = CParsec.mouseInfo
+		return (mouseInfo.mouseX, mouseInfo.mouseY)
+	}
 	
 	func onTouch(typeOfTap:Int, location:CGPoint, state: UIGestureRecognizer.State) {
 
@@ -46,9 +51,10 @@ class TouchController
 			}
 
 		} else {
-			CParsec.sendMouseClickMessage(parsecTap, true)
+			let position = currentMousePosition()
+			CParsec.sendMouseMessage(parsecTap, position.x, position.y, true)
 			DispatchQueue.global().asyncAfter(deadline: .now() + 0.02) {
-				CParsec.sendMouseClickMessage(parsecTap, false)
+				CParsec.sendMouseMessage(parsecTap, position.x, position.y, false)
 			}
 		}
 	}

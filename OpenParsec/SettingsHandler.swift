@@ -1,9 +1,9 @@
 import Foundation
 import SwiftUI
 
-final class SettingsHandler {
+final class SettingsHandler: ObservableObject {
 	// 全局配置中軀
-	
+
 	@AppStorage("renderer") public static var renderer: RendererType = .opengl
 
 	@AppStorage("resolution") public static var resolution: ParsecResolution = .client

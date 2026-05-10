@@ -590,10 +590,6 @@ struct MainView: View
 
 		var status = CParsec.connect(who.id)
 
-		// 初始化 ParsecRenderCenter (如果尚未初始化)
-		ParsecRenderCenter.shared.start()
-
-
 		// Polling status
 		pollTimer = Timer.scheduledTimer(withTimeInterval:1, repeats: true)
 		{ timer in
@@ -605,6 +601,9 @@ struct MainView: View
 
 			if status == PARSEC_OK
 			{
+				// 初始化 ParsecRenderCenter only after the SDK reports a live connection.
+				ParsecRenderCenter.shared.start()
+
 				if let c = controller
 				{
 					c.setView(.parsec)

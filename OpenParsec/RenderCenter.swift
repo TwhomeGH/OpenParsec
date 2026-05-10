@@ -55,6 +55,15 @@ final class ParsecRenderCenter {
 	private var pendingResolutionUpdate = false
 	private var pendingBitrateUpdate = false
 
+	private func applyDefaultVideoSettings() {
+		DataManager.model.resolutionX = SettingsHandler.shared.resolution.width
+		DataManager.model.resolutionY = SettingsHandler.shared.resolution.height
+
+		if SettingsHandler.shared.bitrate != 0 {
+			DataManager.model.bitrate = SettingsHandler.shared.bitrate
+		}
+	}
+
 	func requestResolutionUpdate() {
 		pendingResolutionUpdate = true
 		applyIfPossible()
@@ -89,6 +98,7 @@ final class ParsecRenderCenter {
 		guard !rendererReady else { return }
 
 		rendererReady = true
+		updateClientResolution(size: size, scale: scale)
 
 		CParsec.setFrame(
 			CGFloat(Int(size.width)),
@@ -98,6 +108,21 @@ final class ParsecRenderCenter {
 
 		applyIfPossible()
 		os_log("✅ Renderer ready")
+	}
+
+	private func updateClientResolution(size: CGSize, scale: CGFloat) {
+		guard size.width > 0, size.height > 0 else { return }
+
+		let w = Int(size.width * scale)
+		let h = Int(size.height * scale)
+		ParsecResolution.updateClientResolution(width: w, height: h)
+
+		if SettingsHandler.shared.resolution == .client {
+			DataManager.model.resolutionX = w
+			DataManager.model.resolutionY = h
+		}
+
+		os_log("📐 Client resolution updated: %dx%d", w, h)
 	}
 
 
@@ -112,10 +137,14 @@ final class ParsecRenderCenter {
 		let w = Int(size.width * scale)
 		let h = Int(size.height * scale)
 
-		let cur = ParsecResolution.resolutions[1]
+		ParsecResolution.updateClientResolution(width: w, height: h)
 
+		if SettingsHandler.shared.resolution == .client {
+			DataManager.model.resolutionX = w
+			DataManager.model.resolutionY = h
+		}
 
-		os_log("📐 Native resolution now: %dx%d updated: %dx%d", cur.width,cur.height,w, h)
+		os_log("📐 Native resolution updated: %dx%d", w, h)
 	}
 
 	func start(muted: Bool = false) {
@@ -178,6 +207,7 @@ final class ParsecRenderCenter {
 
 			os_log("初始化客戶端")
 			CParsec.setMuted(muted)
+			applyDefaultVideoSettings()
 			getHostUserData()
 
 			requestResolutionUpdate()

@@ -118,7 +118,7 @@ struct ParsecStatusBar : View {
 			    "\n目標FPS \(glkFPS)",   // 如果 glkCFPS 是 optional
 			    "平均FPS \(glkFPS_ACT)",
 				"deltaFPS \(String(format: "%.2f", deltaFPS))",
-				"DebugMes: \(DebugMes ? nil)"
+				"DebugMes: \(DebugMes ?? nil)"
 			]
 
 			metricInfo = metricsArray.joined(separator: " ")

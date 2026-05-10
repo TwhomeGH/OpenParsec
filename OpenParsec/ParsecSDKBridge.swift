@@ -113,8 +113,8 @@ class ParsecSDKBridge: ParsecService
 
 		var parsecClientCfg = ParsecClientConfig()
 		parsecClientCfg.video.0.decoderIndex = 1
-		parsecClientCfg.video.0.resolutionX = 0
-		parsecClientCfg.video.0.resolutionY = 0
+		parsecClientCfg.video.0.resolutionX = SettingsHandler.shared.resolution.width
+		parsecClientCfg.video.0.resolutionY = SettingsHandler.shared.resolution.height
 
 		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.shared.decoderCompatibility
 		parsecClientCfg.video.0.decoder444 = SettingsHandler.shared.decoder444
@@ -154,8 +154,9 @@ class ParsecSDKBridge: ParsecService
 		var parsecClientCfg = ParsecClientConfig()
 
 		parsecClientCfg.video.0.decoderIndex = 1
-		parsecClientCfg.video.0.resolutionX = 0
-		parsecClientCfg.video.0.resolutionY = 0
+		parsecClientCfg.video.0.resolutionX = SettingsHandler.shared.resolution.width
+		parsecClientCfg.video.0.resolutionY = SettingsHandler.shared.resolution.height
+
 		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.shared.decoderCompatibility
 		parsecClientCfg.video.0.decoderH265 = SettingsHandler.shared.decoder == .h265
 		parsecClientCfg.video.0.decoder444 = SettingsHandler.shared.decoder444
@@ -353,8 +354,12 @@ class ParsecSDKBridge: ParsecService
 				DispatchQueue.main.async {
 					DataManager.model.resolutionX = videoConfig.resolutionX
 					DataManager.model.resolutionY = videoConfig.resolutionY
+
+					
 					DataManager.model.bitrate = videoConfig.encoderMaxBitrate
 					DataManager.model.constantFps = videoConfig.fullFPS
+					DataManager.model.output = videoConfig.output
+
 					if !self.didSetResolution {
 						self.didSetResolution = true
 						DataManager.model.resolutionX = SettingsHandler.shared.resolution.width
@@ -363,9 +368,11 @@ class ParsecSDKBridge: ParsecService
 						if SettingsHandler.shared.bitrate != 0 {
 							DataManager.model.bitrate = SettingsHandler.shared.bitrate
 						}
-						
+
 						self.updateHostVideoConfig()
 					}
+
+
 				}
 				
 			} catch {

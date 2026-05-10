@@ -267,6 +267,9 @@ class ParsecSDKBridge: ParsecService
 	// 在 CParsec 封裝層
 	// Swift wrapper
 
+
+	
+
 	func renderMetalFrame(
     timeout: UInt32 = 16,
     onFrame: @escaping (ParsecFrame, UnsafeRawPointer) -> Void
@@ -285,18 +288,7 @@ class ParsecSDKBridge: ParsecService
 	}
 
 
-	@_silgen_name("ParsecClientPollFrame")
-	func ParsecClientPollFrame(
-		_ ps: UnsafeMutablePointer<Parsec>?,
-		_ stream: UInt8,
-		_ callback: (@convention(c) (
-			UnsafeMutablePointer<ParsecFrame>?,
-			UnsafeRawPointer?,
-			UnsafeRawPointer?
-		) -> Void)?,
-		_ timeout: UInt32,
-		_ opaque: UnsafeRawPointer?
-	) -> ParsecStatus
+	
 
 
 

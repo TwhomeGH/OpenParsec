@@ -47,7 +47,7 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
     }
 
 
-	private var _debugMES: String = ""   // 真正存值的變數
+	var _debugMES: String = ""   // 真正存值的變數
 
 	var DebugMes: String {
 		get { _debugMES }

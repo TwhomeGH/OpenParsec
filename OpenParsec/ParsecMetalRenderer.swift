@@ -33,21 +33,23 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
                                     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         else { return nil }
 
-        // 背景半透明黑色，讓字更顯眼
+        // 翻轉座標系統，避免文字被畫到底部
+        context.translateBy(x: 0, y: size.height)
+        context.scaleBy(x: 1.0, y: -1.0)
+
+        // 背景半透明黑色
         context.setFillColor(UIColor.black.withAlphaComponent(0.6).cgColor)
         context.fill(CGRect(origin: .zero, size: size))
 
-        // 畫字在左上角，改成亮色字體
+        // 畫字
         let attributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 28, weight: .heavy), // 粗體大字
-            .foregroundColor: UIColor.red // 醒目的紅字
+            .font: UIFont.systemFont(ofSize: 28, weight: .heavy),
+            .foregroundColor: UIColor.red
         ]
         let attrString = NSAttributedString(string: text, attributes: attributes)
         attrString.draw(in: CGRect(x: 10, y: 10,
                                 width: size.width - 20,
                                 height: size.height - 20))
-
-        //guard let cgImage = context.makeImage() else { return nil }
 
         let textureDesc = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: .bgra8Unorm,
@@ -164,6 +166,9 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         CParsec.setFrame(size.width, size.height, view.contentScaleFactor)
     }
 
+
+    var framesDisplayedCounter: Int = 0
+
     func draw(in view: MTKView) {
         pollFrame()
 
@@ -195,7 +200,15 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
         encoder.endEncoding()
         commandBuffer.present(drawable)
+
+        commandBuffer.addCompletedHandler { [self] _ in
+            self.framesDisplayedCounter += 1
+
+        }
         commandBuffer.commit()
+
+
+        
 
         updateImage()
     }

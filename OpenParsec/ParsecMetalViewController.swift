@@ -37,8 +37,6 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
     private var metalDevice: MTLDevice!
     private var renderer: ParsecMetalRenderer?
 
-	private var framesDisplayedCounter: Int = 0
-
 	// MARK: - ParsecRenderController Metal FPS
 
 	var preferredFPS: Int {
@@ -54,12 +52,8 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 		set { _debugMES = newValue }
 	}
 
-	func drawFrameCompleted() {
-		framesDisplayedCounter += 1
-	}
-
 	func getFramesDisplayed() -> Int {
-		let RES = framesDisplayedCounter
+		let RES = viewController.framesDisplayedCounter
 
 		ParsecRenderCenter.shared.Update_DebugMes("MetalFPS:\(RES)")
 

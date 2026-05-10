@@ -61,15 +61,19 @@ fragment float4 fragmentNV12(VertexOut in [[stage_in]],
 
     float4 color = float4(R, G, B, 1.0);
 
-    // 疊加文字貼圖 (左上角 Metal Test)
+    // 疊加文字貼圖 (左上角顯示)
     if (showText != 0) {
-        if (in.texCoord.x < 0.25 && in.texCoord.y < 0.1) {
-            float2 overlayUV = float2(in.texCoord.x / 0.25,
-                                      in.texCoord.y / 0.1);
-            float4 overlay = textOverlay.sample(s, overlayUV);
-            color = mix(color, overlay, overlay.a);
-        }
+        // 把左上角 256x64 的貼圖映射到螢幕左上角
+        float2 overlayUV = float2(in.texCoord.x / 0.25,
+                                in.texCoord.y / 0.1);
+
+        // 取樣文字貼圖
+        float4 overlay = textOverlay.sample(s, overlayUV);
+
+        // 直接用 overlay 的 alpha 做疊加
+        color = overlay.a > 0.0 ? overlay : color;
     }
+
 
     return color;
 }

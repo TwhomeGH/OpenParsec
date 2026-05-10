@@ -8,7 +8,7 @@ struct SettingsView:View
 {
 	@Binding var visible: Bool
 
-	@EnvironmentObject var settings: SettingsHandler
+	@EnvironmentObject var settings: settings
 
 
 
@@ -76,7 +76,7 @@ struct SettingsView:View
                         {
                             CatItem("Mouse Movement")
                             {
-                                MultiPicker(selection:$SettingsHandler.shared.cursorMode, options:
+                                MultiPicker(selection:$settings.shared.cursorMode, options:
 								[
 									Choice("Touchpad", CursorMode.touchpad),
 									Choice("Direct", CursorMode.direct)
@@ -84,7 +84,7 @@ struct SettingsView:View
                             }
 							CatItem("Right Click Position")
 							{
-								MultiPicker(selection:$SettingsHandler.shared.rightClickPosition, options:
+								MultiPicker(selection:$settings.shared.rightClickPosition, options:
 								[
 									Choice("First Finger", RightClickPosition.firstFinger),
 									Choice("Middle", RightClickPosition.middle),
@@ -93,15 +93,15 @@ struct SettingsView:View
 							}
                             CatItem("Cursor Scale")
                             {
-                                Slider(value: $SettingsHandler.shared.cursorScale, in:0.1...4, step:0.1)
+                                Slider(value: $settings.shared.cursorScale, in:0.1...4, step:0.1)
 									.frame(width: 200)
-								Text(String(format: "%.1f", SettingsHandler.shared.cursorScale))
+								Text(String(format: "%.1f", settings.shared.cursorScale))
                             }
 							CatItem("Mouse Sensitivity")
 							{
-								Slider(value: $SettingsHandler.shared.mouseSensitivity, in:0.1...4, step:0.1)
+								Slider(value: $settings.shared.mouseSensitivity, in:0.1...4, step:0.1)
 									.frame(width: 200)
-								Text(String(format: "%.1f", SettingsHandler.shared.mouseSensitivity))
+								Text(String(format: "%.1f", settings.shared.mouseSensitivity))
 							}
                         }
                         CatTitle("Graphics")
@@ -109,7 +109,7 @@ struct SettingsView:View
                         {
                             CatItem("Renderer")
                             {
-								SegmentPicker(selection:$SettingsHandler.shared.renderer, options:
+								SegmentPicker(selection:$settings.shared.renderer, options:
 								[
 									Choice("OpenGL", RendererType.opengl),
 									Choice("Metal", RendererType.metal)
@@ -120,11 +120,11 @@ struct SettingsView:View
 
 							CatItem("Default Resolution")
 							{
-								MultiPicker(selection: $SettingsHandler.shared.resolution, options:resolutionChoices)
+								MultiPicker(selection: $settings.shared.resolution, options:resolutionChoices)
 							}
                             CatItem("Decoder")
                             {
-								MultiPicker(selection: $SettingsHandler.shared.decoder, options:
+								MultiPicker(selection: $settings.shared.decoder, options:
 								[
 									Choice("H.264", DecoderPref.h264),
 									Choice("Prefer H.265", DecoderPref.h265)
@@ -133,18 +133,18 @@ struct SettingsView:View
 
 							CatItem("Decoder 444")
 							{
-								Toggle("", isOn:$SettingsHandler.shared.decoder444)
+								Toggle("", isOn:$settings.shared.decoder444)
 									.frame(width:80)
 							}
 							CatItem("Decoder Compatibility")
 							{
-								Toggle("", isOn:$SettingsHandler.shared.decoderCompatibility)
+								Toggle("", isOn:$settings.shared.decoderCompatibility)
 									.frame(width:80)
 							}
 							
 							CatItem("Frame Rate")
 							{
-								MultiPicker(selection: $SettingsHandler.shared.preferredFramesPerSecond, options:
+								MultiPicker(selection: $settings.shared.preferredFramesPerSecond, options:
 								[
 									Choice("Auto (Device Max)", 0),
 									Choice("120 FPS", 120),
@@ -160,17 +160,17 @@ struct SettingsView:View
                         {
                             CatItem("Never Show Overlay")
                             {
-                                Toggle("", isOn:$SettingsHandler.shared.noOverlay)
+                                Toggle("", isOn:$settings.shared.noOverlay)
                                     .frame(width:80)
                             }
 							CatItem("Hide Status Bar")
 							{
-								Toggle("", isOn:$SettingsHandler.shared.hideStatusBar)
+								Toggle("", isOn:$settings.shared.hideStatusBar)
 									.frame(width:80)
 							}
 							CatItem("Show Keyboard Button")
 							{
-								Toggle("", isOn:$SettingsHandler.shared.showKeyboardButton)
+								Toggle("", isOn:$settings.shared.showKeyboardButton)
 									.frame(width:80)
 							}
 						}
@@ -194,7 +194,7 @@ struct SettingsView:View
 	
 	func saveAndExit()
 	{
-		//SettingsHandler.shared.renderer = renderer
+		//settings.shared.renderer = renderer
 		visible = false
 	}
 }

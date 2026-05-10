@@ -53,7 +53,7 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 	}
 
 	func getFramesDisplayed() -> Int {
-		let RES = viewController.framesDisplayedCounter
+		let RES = renderView.framesDisplayedCounter
 
 		ParsecRenderCenter.shared.Update_DebugMes("MetalFPS:\(RES)")
 
@@ -138,7 +138,7 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 
     func draw(in view: MTKView) {
         renderer?.draw(in: view)
-        drawFrameCompleted()
+        
     }
 
     // MARK: - Clean

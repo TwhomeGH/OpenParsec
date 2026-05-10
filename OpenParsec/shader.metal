@@ -62,7 +62,7 @@ fragment float4 fragmentNV12(VertexOut in [[stage_in]],
     float4 color = float4(R, G, B, 1.0);
 
     // 疊加文字貼圖 (左上角 Metal Test)
-    if (showText) {
+    if (showText != 0) {
         if (in.texCoord.x < 0.25 && in.texCoord.y < 0.1) {
             float2 overlayUV = float2(in.texCoord.x / 0.25,
                                       in.texCoord.y / 0.1);

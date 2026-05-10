@@ -85,8 +85,9 @@ struct CatItem<Content:View>:View
  *
  * Used to depict a single choice with a given label and value.
  */
-struct Choice<T: Hashable>
+struct Choice<T: Hashable>: Identifiable
 {
+	var id = UUID()
 	var label:String
 	var value:T
 	

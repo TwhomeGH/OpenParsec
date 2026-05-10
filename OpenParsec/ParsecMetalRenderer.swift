@@ -21,14 +21,18 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     private var uvTexture: MTLTexture?
     private var textTexture: MTLTexture?
 
+    var textDebugImage: UIImage?
+
 
     // 畫字 分辨Metal用 
+    // MARK: 建立文字貼圖 (同時回傳 UIImage 方便 debug)
     func makeTextTexture(device: MTLDevice,
                         text: String,
-                        size: CGSize = CGSize(width: 256, height: 64)) -> MTLTexture? {
+                        size: CGSize = CGSize(width: 256, height: 64)) -> (MTLTexture?, UIImage?) {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bytesPerRow = Int(size.width) * 4
 
+        // Metal 的 .bgra8Unorm 對應 BGRA + little endian + alpha 在前
         let bitmapInfo = CGImageAlphaInfo.premultipliedFirst.rawValue
                     | CGBitmapInfo.byteOrder32Little.rawValue
 
@@ -39,9 +43,9 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
                                     bytesPerRow: bytesPerRow,
                                     space: colorSpace,
                                     bitmapInfo: bitmapInfo)
-        else { return nil }
+        else { return (nil, nil) }
 
-        // 翻轉座標系統
+        // 翻轉座標系統 (原點移到左上角)
         context.translateBy(x: 0, y: size.height)
         context.scaleBy(x: 1.0, y: -1.0)
 
@@ -66,7 +70,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
             mipmapped: false
         )
         textureDesc.usage = [.shaderRead]
-        guard let texture = device.makeTexture(descriptor: textureDesc) else { return nil }
+        guard let texture = device.makeTexture(descriptor: textureDesc) else { return (nil, nil) }
 
         let region = MTLRegionMake2D(0, 0, Int(size.width), Int(size.height))
         let data = context.data!
@@ -75,7 +79,13 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
                         withBytes: data,
                         bytesPerRow: bytesPerRow)
 
-        return texture
+        // Debug: 轉成 UIImage 檢查字有沒有畫上去
+        var debugImage: UIImage? = nil
+        if let cgImage = context.makeImage() {
+            debugImage = UIImage(cgImage: cgImage)
+        }
+
+        return (texture, debugImage)
     }
 
 
@@ -94,7 +104,15 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         guard let device = view.device else { fatalError("Metal device not found") }
         commandQueue = device.makeCommandQueue()
 
-        self.textTexture = makeTextTexture(device: device, text: "Metal Testing")
+
+        let (textTex, debugImage) = makeTextTexture(device: device, text: "Metal Testing")
+
+        if let img = debugImage {
+            // 在 UIImageView 顯示，確認字有沒有畫上去
+            self.textDebugImage =   UIImage(cgImage: img)
+
+        }
+        self.textTexture = textTex
         
 
         // 建立簡單的 passthrough pipeline

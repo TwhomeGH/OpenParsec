@@ -69,8 +69,8 @@ fragment float4 fragmentNV12(VertexOut in [[stage_in]],
 
             float4 overlay = textOverlay.sample(s, overlayUV);
 
-            // 正確 alpha 混合
-            color = color * (1.0 - overlay.a) + overlay * overlay.a;
+            // textOverlay is uploaded from a premultiplied-alpha BGRA bitmap.
+            color.rgb = color.rgb * (1.0 - overlay.a) + overlay.rgb;
         }
     }
 

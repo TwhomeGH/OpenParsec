@@ -45,10 +45,6 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
                                     bitmapInfo: bitmapInfo)
         else { return (nil, nil) }
 
-        // 翻轉座標系統 (原點移到左上角)
-        context.translateBy(x: 0, y: size.height)
-        context.scaleBy(x: 1.0, y: -1.0)
-
         // 背景透明（方便 debug）
         context.setFillColor(UIColor.clear.cgColor)
         context.fill(CGRect(origin: .zero, size: size))
@@ -59,13 +55,10 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
             .foregroundColor: UIColor.red
         ]
         let attrString = NSAttributedString(string: text, attributes: attributes)
-        let textSize = attrString.size()
-        
-
-        // 翻轉後原點在左上角，直接用 y:10
-
         let drawRect = CGRect(x: 10, y: 10, width: size.width - 20, height: size.height - 20)
+        UIGraphicsPushContext(context)
         attrString.draw(in: drawRect)
+        UIGraphicsPopContext()
         
 
         // 建立 Metal Texture

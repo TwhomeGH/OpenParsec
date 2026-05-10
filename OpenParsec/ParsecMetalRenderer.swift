@@ -192,7 +192,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
         lastWidth = size.width
         lastHeight = size.height
-        CParsec.setFrame(size.width, size.height, view.contentScaleFactor)
+        CParsec.setFrame(view.bounds.width, view.bounds.height, view.contentScaleFactor)
     }
 
 

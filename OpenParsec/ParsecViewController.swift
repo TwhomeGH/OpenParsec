@@ -218,7 +218,13 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 	override func viewDidLayoutSubviews() {
 		super.viewDidLayoutSubviews()
 
+		scrollView?.frame = view.bounds
 
+		if scrollView?.zoomScale == 1.0 {
+			contentView?.frame = scrollView.bounds
+			scrollView?.contentSize = scrollView.bounds.size
+			renderer?.renderView.frame = contentView.bounds
+		}
 
 		//print("Debug:\(contentView.bounds.size)")
 

@@ -83,7 +83,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         commandQueue = device.makeCommandQueue()
 
 
-        if SettingsHandler.MetalText {
+        if SettingsHandler.shared.MetalText {
             self.textTexture = makeTextTexture(device: device, text: "Metal Test 測試")
             print("製作Metal提示文本")
         } else {

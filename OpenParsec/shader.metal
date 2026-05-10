@@ -1,33 +1,27 @@
 #include <metal_stdlib>
 using namespace metal;
 
-// 頂點結構
 struct VertexOut {
     float4 position [[position]];
     float2 texCoord;
 };
 
-// 頂點着色器：生成一個全螢幕 quad
+// 四個頂點：左下、右下、左上、右上
 vertex VertexOut vertexPassthrough(uint vertexID [[vertex_id]]) {
     VertexOut out;
 
-    // 六個頂點，組成兩個三角形
-    float2 positions[6] = {
+    float2 positions[4] = {
         float2(-1.0, -1.0), // 左下
         float2( 1.0, -1.0), // 右下
         float2(-1.0,  1.0), // 左上
-        float2(-1.0,  1.0), // 左上
-        float2( 1.0, -1.0), // 右下
         float2( 1.0,  1.0)  // 右上
     };
 
-    float2 texCoords[6] = {
-        float2(0.0, 1.0),
-        float2(1.0, 1.0),
-        float2(0.0, 0.0),
-        float2(0.0, 0.0),
-        float2(1.0, 1.0),
-        float2(1.0, 0.0)
+    float2 texCoords[4] = {
+        float2(0.0, 1.0), // 左下 → UV (0,1)
+        float2(1.0, 1.0), // 右下 → UV (1,1)
+        float2(0.0, 0.0), // 左上 → UV (0,0)
+        float2(1.0, 0.0)  // 右上 → UV (1,0)
     };
 
     out.position = float4(positions[vertexID], 0.0, 1.0);

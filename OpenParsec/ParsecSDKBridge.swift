@@ -111,32 +111,7 @@ class ParsecSDKBridge: ParsecService
 
 	func connect(_ peerID: String) -> ParsecStatus {
 
-		var parsecClientCfg = ParsecClientConfig()
-		parsecClientCfg.video.0.decoderIndex = 1
-		parsecClientCfg.video.0.resolutionX = SettingsHandler.shared.resolution.width
-		parsecClientCfg.video.0.resolutionY = SettingsHandler.shared.resolution.height
-
-		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.shared.decoderCompatibility
-		parsecClientCfg.video.0.decoder444 = SettingsHandler.shared.decoder444
-		parsecClientCfg.video.0.decoderH265 = SettingsHandler.shared.decoder == .h265
-
-		print(
-			"Debug Compatibility? -> \(parsecClientCfg.video.0.decoderCompatibility)"
-		)
-
-		print("Debug H265? -> \(parsecClientCfg.video.0.decoderH265)")
-
-		//		parsecClientCfg.video.1.decoderIndex = 1
-		//		parsecClientCfg.video.1.resolutionX = 0
-		//		parsecClientCfg.video.1.resolutionY = 0
-		//		parsecClientCfg.video.1.decoderCompatibility = false
-		//		parsecClientCfg.video.1.decoderH265 = true
-		//
-		
-		parsecClientCfg.mediaContainer = 0
-		parsecClientCfg.protocol = 1
-		//parsecClientCfg.secret = ""
-		parsecClientCfg.pngCursor = false
+		self.applyConfig()
 
 
 		let status = ParsecClientConnect(_parsec, &parsecClientCfg, NetworkHandler.clinfo?.session_id, peerID)
@@ -148,18 +123,26 @@ class ParsecSDKBridge: ParsecService
 		return status
 	}
 
-
+	// 套用配置專用
 	func applyConfig() {
 
 		var parsecClientCfg = ParsecClientConfig()
 
 		parsecClientCfg.video.0.decoderIndex = 1
-		parsecClientCfg.video.0.resolutionX = SettingsHandler.shared.resolution.width
-		parsecClientCfg.video.0.resolutionY = SettingsHandler.shared.resolution.height
+		parsecClientCfg.video.0.resolutionX = Int32(SettingsHandler.shared.resolution.width)
+		parsecClientCfg.video.0.resolutionY = Int32(SettingsHandler.shared.resolution.height)
 
 		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.shared.decoderCompatibility
 		parsecClientCfg.video.0.decoderH265 = SettingsHandler.shared.decoder == .h265
 		parsecClientCfg.video.0.decoder444 = SettingsHandler.shared.decoder444
+
+
+		print(
+			"Debug Compatibility? -> \(parsecClientCfg.video.0.decoderCompatibility)"
+		)
+
+		print("Debug H265? -> \(parsecClientCfg.video.0.decoderH265)")
+
 
 		//可能是多餘的流
 		//		parsecClientCfg.video.1.decoderIndex = 1

@@ -62,8 +62,10 @@ fragment float4 fragmentNV12(VertexOut in [[stage_in]],
 
 
     // 疊加文字貼圖 (左上角 Metal Test)
-    float2 overlayUV = float2(in.texCoord.x / 0.25, in.texCoord.y / 0.1);
+    // 將 texCoord 映射到左上角 25% 寬 × 10% 高的區域
     if (in.texCoord.x < 0.25 && in.texCoord.y < 0.1) {
+        float2 overlayUV = float2(in.texCoord.x / 0.25,
+                                  in.texCoord.y / 0.1);
         float4 overlay = textOverlay.sample(s, overlayUV);
         color = mix(color, overlay, overlay.a);
     }

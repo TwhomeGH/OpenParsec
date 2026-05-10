@@ -12,7 +12,7 @@ struct SettingsView:View
 
 
 
-	let bitrateChoices: [Choice<Int>] = ParsecResolution.bitrates.map {
+	let bitrateChoices: [Choice<Int>] = ParsecResolution.bitrates.map { value in
 
 		if value == 0 {
 			return Choice("不指定 Not Setting [Auto]", value)

@@ -37,6 +37,32 @@ struct KeyBoardKeyEvent {
 	var isPressBegin: Bool
 }
 
+
+
+
+// 包裝 closure 的 class
+final class FrameHandler {
+	let onFrame: (ParsecFrame, UnsafeRawPointer) -> Void
+	init(onFrame: @escaping (ParsecFrame, UnsafeRawPointer) -> Void) {
+		self.onFrame = onFrame
+	}
+}
+
+
+
+func parsecFrameCallback(
+	framePtr: UnsafePointer<ParsecFrame>?,
+	imagePtr: UnsafeRawPointer?,
+	opaque: UnsafeMutableRawPointer?
+) {
+	guard let frame = framePtr?.pointee, let image = imagePtr else { return }
+	let handler = Unmanaged<FrameHandler>.fromOpaque(opaque!).takeUnretainedValue()
+	handler.onFrame(frame, image)
+}
+
+
+
+
 class ParsecSDKBridge: ParsecService
 {
 	var hostWidth: Float = 1920
@@ -244,33 +270,7 @@ class ParsecSDKBridge: ParsecService
 
 
 	
-	// 包裝 closure 的 class
-	final class FrameHandler {
-		let onFrame: (ParsecFrame, UnsafeRawPointer) -> Void
-		init(onFrame: @escaping (ParsecFrame, UnsafeRawPointer) -> Void) {
-			self.onFrame = onFrame
-		}
-	}
-
-	typealias ParsecFrameCallbackSwift = @convention(c) (
-		UnsafePointer<ParsecFrame>?,
-		UnsafeRawPointer?,
-		UnsafeMutableRawPointer?
-	) -> Void
-
-
-	private func parsecFrameCallback(
-		framePtr: UnsafePointer<ParsecFrame>?,
-		imagePtr: UnsafeRawPointer?,
-		opaque: UnsafeMutableRawPointer?
-	) {
-		guard let frame = framePtr?.pointee, let image = imagePtr else { return }
-		let handler = Unmanaged<FrameHandler>.fromOpaque(opaque!).takeUnretainedValue()
-		handler.onFrame(frame, image)
-	}
-
-
-
+	
 	// 在 CParsec 封裝層
 	// Swift wrapper
 

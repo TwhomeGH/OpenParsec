@@ -146,7 +146,7 @@ class ParsecSession: ObservableObject {
 
 struct ParsecView: View
 {
-	var controller:ContentView?
+	@Binding var currentView: ViewType
 	
 	@State var showDCAlert: Bool = false
 	@State var DCAlertText: String = "Disconnected (reason unknown)"
@@ -182,9 +182,9 @@ struct ParsecView: View
 	
 	//@State var showDisplays: Bool = false
 	
-	init(_ controller:ContentView?)
+	init(currentView: Binding<ViewType>)
 	{
-		self.controller = controller
+		_currentView = currentView
 		// parsecViewController logic moved to ParsecSession
         
 		_resolutions = State(initialValue: ParsecResolution.resolutions)
@@ -449,9 +449,13 @@ struct ParsecView: View
 		parsecViewController.scrollView.zoomScale = 1.0
 		parsecViewController.scrollView.contentOffset = .zero
 
-		if let c = controller
-		{
-			c.setView(.main)
+		setView(.main)
+	}
+
+	private func setView(_ view: ViewType)
+	{
+		withAnimation(.easeInOut) {
+			currentView = view
 		}
 	}
 	

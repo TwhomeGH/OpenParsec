@@ -3,7 +3,7 @@ import ParsecSDK
 
 struct MainView: View
 {
-	var controller:ContentView?
+	@Binding var currentView: ViewType
 
 	@State private var page:Page = .hosts
 
@@ -38,9 +38,9 @@ struct MainView: View
 		isConnecting || isRefreshing || inSettings
 	}
 
-	init(_ controller:ContentView?)
+	init(currentView: Binding<ViewType>)
 	{
-		self.controller = controller
+		_currentView = currentView
 	}
 
 	var body: some View
@@ -604,10 +604,7 @@ struct MainView: View
 				// 初始化 ParsecRenderCenter only after the SDK reports a live connection.
 				ParsecRenderCenter.shared.start()
 
-				if let c = controller
-				{
-					c.setView(.parsec)
-				}
+				setView(.parsec)
 			}
 			else
 			{
@@ -635,10 +632,7 @@ struct MainView: View
 	{
 		removeFromKeychain(key:GLBDataModel.shared.SessionKeyChainKey)
 		NetworkHandler.clinfo = nil
-		if let c = controller
-		{
-			c.setView(.login)
-		}
+		setView(.login)
 	}
 
 	func removeFromKeychain(key: String)
@@ -650,13 +644,20 @@ struct MainView: View
 			print("Successfully removed data from keychain.")
 		}
 	}
+
+	private func setView(_ view: ViewType)
+	{
+		withAnimation(.easeInOut) {
+			currentView = view
+		}
+	}
 }
 
 struct MainView_Previews:PreviewProvider
 {
 	static var previews: some View
 	{
-		MainView(nil)
+		MainView(currentView: .constant(.main))
 	}
 }
 

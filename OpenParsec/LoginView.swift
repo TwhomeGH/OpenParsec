@@ -3,7 +3,7 @@ import os
 
 struct LoginView:View
 {
-	var controller:ContentView?
+	@Binding var currentView: ViewType
 
 	@State var inputEmail: String = ""
 	@State var inputPassword: String = ""
@@ -14,9 +14,9 @@ struct LoginView:View
 	@State var showAlert: Bool = false
 	@State var alertText: String = ""
 
-	init(_ controller:ContentView?)
+	init(currentView: Binding<ViewType>)
 	{
-		self.controller = controller
+		_currentView = currentView
 	}
 
 	var body: some View
@@ -165,10 +165,7 @@ struct LoginView:View
 		#if DEBUG
 		if inputEmail == "test@example.com" // skip authentication (DEBUG ONLY)
 		{
-			if let c = controller
-			{
-				c.setView(.main)
-			}
+			setView(.main)
 			return
 		}
 		#endif
@@ -208,11 +205,8 @@ struct LoginView:View
 
 						saveToKeychain(data: data, key: GLBDataModel.shared.SessionKeyChainKey)
 
-						if let c = controller
-						{
-							print("*** Login succeeded! ***")
-							c.setView(.main)
-						}
+						print("*** Login succeeded! ***")
+						setView(.main)
 					}
 					else if statusCode >= 400 // 4XX client errors
 					{
@@ -248,12 +242,19 @@ struct LoginView:View
 		}
 		task.resume()
 	}
+
+	private func setView(_ view: ViewType)
+	{
+		withAnimation(.easeInOut) {
+			currentView = view
+		}
+	}
 }
 
 struct LoginView_Previews:PreviewProvider
 {
 	static var previews: some View
 	{
-		LoginView(nil)
+		LoginView(currentView: .constant(.login))
 	}
 }

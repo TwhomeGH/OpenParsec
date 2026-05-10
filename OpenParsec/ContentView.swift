@@ -20,14 +20,14 @@ struct ContentView:View
 			switch curView
 			{
 				case .login:
-					LoginView(self)
+					LoginView(currentView: $curView)
 				case .main:
-					MainView(self)
+					MainView(currentView: $curView)
 						.transition(defaultTransition)
 				case .parsec:
-					ParsecView(self)
+					ParsecView(currentView: $curView)
 			case .test:
-				TestView(self)
+				TestView(currentView: $curView)
 			 }
 		}
 		.onAppear(perform:initApp)

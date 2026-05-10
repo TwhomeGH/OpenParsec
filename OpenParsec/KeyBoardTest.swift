@@ -5,14 +5,14 @@ import SwiftUI
 import GameController
 
 struct TestView : View {
-	var controller:ContentView?
+	@Binding var currentView: ViewType
 	var KeyBoardTest:KeyboardTestController
 
 
-	init(_ controller:ContentView?)
+	init(currentView: Binding<ViewType>)
 	{
 		self.KeyBoardTest = KeyboardTestController()
-		self.controller = controller
+		_currentView = currentView
 	}
 	
 	var body: some View

@@ -8,7 +8,6 @@ struct SettingsView:View
 {
 	@Binding var visible: Bool
 
-	@StateObject private var settings = SettingsHandler.shared()
 
 
 	let resolutionChoices: [Choice<ParsecResolution>]

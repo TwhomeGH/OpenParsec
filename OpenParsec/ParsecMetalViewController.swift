@@ -24,20 +24,6 @@ final class ParsecMetalTarget {
 }
 
 
-// MetalFPS
-
-extension ParsecMetalRenderer: ParsecRenderController {
-    var preferredFPS: Int {
-        get { mtkView.preferredFramesPerSecond }
-        set { mtkView.preferredFramesPerSecond = newValue }
-    }
-
-    func getFramesDisplayed() -> Int {
-        return framesDisplayedCounter
-    }
-}
-
-
 // 新的處理方式測試
 
 final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,  ParsecRenderController,MTKViewDelegate {
@@ -45,11 +31,21 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,  Parse
     // MARK: - Properties
     let viewController: UIViewController
     var mtkView: MTKView!
-    var preferredFPS: Int = 60 {
-        didSet { mtkView?.preferredFramesPerSecond = preferredFPS }
+
+	// FPS
+    var preferredFPS: Int {
+        get { mtkView.preferredFramesPerSecond }
+        set { mtkView.preferredFramesPerSecond = newValue }
     }
+
+
     var updateImage: () -> Void
     private var framesDisplayedCounter = 0
+
+
+	func getFramesDisplayed() -> Int {
+        return framesDisplayedCounter
+    }
 
     private var metalDevice: MTLDevice!
     private var renderer: ParsecMetalRenderer?

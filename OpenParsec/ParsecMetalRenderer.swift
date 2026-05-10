@@ -9,11 +9,11 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
     private var commandQueue: MTLCommandQueue!
     private var pipelineState: MTLRenderPipelineState!
-    private var currentTexture: MTLTexture?
 
     private var lastWidth: CGFloat = 1.0
     private var lastHeight: CGFloat = 1.0
 
+    // 主NV12 Texture
     private var yTexture: MTLTexture?
     private var uvTexture: MTLTexture?
 

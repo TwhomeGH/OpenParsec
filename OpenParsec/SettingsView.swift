@@ -120,7 +120,7 @@ struct SettingsView:View
 
 							CatItem("Default Resolution")
 							{
-								MultiPicker(selection: $settings.resolutions, options:resolutionChoices)
+								MultiPicker(selection: $settings.resolution, options:resolutionChoices)
 							}
                             CatItem("Decoder")
                             {

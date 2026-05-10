@@ -2,6 +2,7 @@ import MetalKit
 import ParsecSDK
 import OSLog
 
+
 class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     var mtkView: MTKView
     var updateImage: () -> Void
@@ -13,9 +14,12 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     private var lastWidth: CGFloat = 1.0
     private var lastHeight: CGFloat = 1.0
 
-    init(_ view: MTKView, updateImage: @escaping () -> Void) {
+    private var parsec: OpaquePointer
+
+    init(_ view: MTKView, parsec: OpaquePointer, updateImage: @escaping () -> Void) {
         self.mtkView = view
         self.updateImage = updateImage
+        self.parsec = parsec
         super.init()
 
         guard let device = view.device else { fatalError("Metal device not found") }
@@ -43,17 +47,23 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
     // PollFrame → 取得最新畫面
     func pollFrame() {
-        let status = CParsec.renderMetalFrame(
-            timeout: 16
-        ) { frame in
-            self.handleFrame(frame) // 把 frame 複製到 Metal texture
-        }
-
+        let status = ParsecClientPollFrame(
+            parsec,
+            0, // stream index
+            { framePtr, imagePtr, opaque in
+                guard let frame = framePtr?.pointee else { return }
+                if let image = imagePtr {
+                    self.handleFrame(frame, image: image)
+                }
+            },
+            16, // timeout ms
+            nil
+        )
         print("PollFrame status:", status)
     }
 
-    // 把 ParsecFrame 複製到 Metal Texture
-    private func handleFrame(_ frame: ParsecFrame) {
+    // 把 ParsecFrame + image buffer 複製到 Metal Texture
+    private func handleFrame(_ frame: ParsecFrame, image: UnsafeRawPointer) {
         let width = Int(frame.width)
         let height = Int(frame.height)
 
@@ -71,8 +81,8 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         tex.replace(
             region: MTLRegionMake2D(0, 0, width, height),
             mipmapLevel: 0,
-            withBytes: frame.data,
-            bytesPerRow: Int(frame.stride)
+            withBytes: image,
+            bytesPerRow: width * 4 // BGRA 每像素 4 bytes
         )
 
         currentTexture = tex
@@ -105,6 +115,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         updateImage()
     }
 }
+
 
 
 

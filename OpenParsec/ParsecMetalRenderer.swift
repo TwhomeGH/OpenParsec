@@ -82,14 +82,8 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         guard let device = view.device else { fatalError("Metal device not found") }
         commandQueue = device.makeCommandQueue()
 
-
-        if SettingsHandler.shared.MetalText {
-            self.textTexture = makeTextTexture(device: device, text: "Metal Test 測試")
-            print("製作Metal提示文本")
-        } else {
-            print("跳過Metal提示文本")
-            
-        }
+        self.textTexture = makeTextTexture(device: device, text: "Metal Testing")
+        
 
         // 建立簡單的 passthrough pipeline
         if let library = device.makeDefaultLibrary(),
@@ -195,6 +189,14 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
                                                         length: MemoryLayout<SIMD2<Float>>.stride,
                                                         options: [])
         encoder.setVertexBuffer(viewSizeBuffer, offset: 0, index: 0)
+
+
+        var showText: Bool = SettingHandle.shared.MetalText // 或 false
+        let showTextBuffer = device.makeBuffer(bytes: &showText,
+                                            length: MemoryLayout<Bool>.stride,
+                                            options: [])
+        encoder.setFragmentBuffer(showTextBuffer, offset: 0, index: 1)
+
 
         // 綁定 NV12 的兩個平面 + overlay
         encoder.setFragmentTexture(yTex, index: 0)

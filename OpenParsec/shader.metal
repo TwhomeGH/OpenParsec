@@ -43,7 +43,8 @@ vertex VertexOut vertexPassthrough(uint vertexID [[vertex_id]],
 fragment float4 fragmentNV12(VertexOut in [[stage_in]],
                              texture2d<float, access::sample> texY [[texture(0)]],
                              texture2d<float, access::sample> texUV [[texture(1)]],
-                             texture2d<float, access::sample> textOverlay [[texture(2)]]) {
+                             texture2d<float, access::sample> textOverlay [[texture(2)]],
+                             constant bool &showText [[buffer(1)]]) {
     constexpr sampler s(address::clamp_to_edge, filter::linear);
 
     // NV12 取樣
@@ -60,16 +61,15 @@ fragment float4 fragmentNV12(VertexOut in [[stage_in]],
 
     float4 color = float4(R, G, B, 1.0);
 
-
     // 疊加文字貼圖 (左上角 Metal Test)
-    // 將 texCoord 映射到左上角 25% 寬 × 10% 高的區域
-    if (in.texCoord.x < 0.25 && in.texCoord.y < 0.1) {
-        float2 overlayUV = float2(in.texCoord.x / 0.25,
-                                  in.texCoord.y / 0.1);
-        float4 overlay = textOverlay.sample(s, overlayUV);
-        color = mix(color, overlay, overlay.a);
+    if (showText) {
+        if (in.texCoord.x < 0.25 && in.texCoord.y < 0.1) {
+            float2 overlayUV = float2(in.texCoord.x / 0.25,
+                                      in.texCoord.y / 0.1);
+            float4 overlay = textOverlay.sample(s, overlayUV);
+            color = mix(color, overlay, overlay.a);
+        }
     }
-
 
     return color;
 }

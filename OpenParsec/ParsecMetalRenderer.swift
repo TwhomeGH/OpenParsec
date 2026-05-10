@@ -91,21 +91,29 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         pollFrame() // 每次 draw 前先 poll 一次 frame
 
         guard let drawable = view.currentDrawable,
-              let commandBuffer = commandQueue.makeCommandBuffer(),
-              let renderPass = view.currentRenderPassDescriptor,
-              let tex = currentTexture else { return }
+            let commandBuffer = commandQueue.makeCommandBuffer(),
+            let renderPass = view.currentRenderPassDescriptor,
+            let yTex = yTexture,   // Y 平面
+            let uvTex = uvTexture  // UV 平面
+        else { return }
 
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass)!
         encoder.setRenderPipelineState(pipelineState)
-        encoder.setFragmentTexture(tex, index: 0)
-        encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 6)
-        encoder.endEncoding()
 
+        // 綁定 NV12 的兩個平面
+        encoder.setFragmentTexture(yTex, index: 0)
+        encoder.setFragmentTexture(uvTex, index: 1)
+
+        // 用 triangleStrip + 4 頂點畫全螢幕 quad
+        encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+
+        encoder.endEncoding()
         commandBuffer.present(drawable)
         commandBuffer.commit()
 
         updateImage()
     }
+
 }
 
 

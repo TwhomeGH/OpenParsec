@@ -207,7 +207,7 @@ final class ParsecRenderCenter {
 
 	func DebugMes() -> String? {
 
-		return renderController?.Debug_MES 
+		return renderController?.Debug_MES
 	}
 
 

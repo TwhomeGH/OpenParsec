@@ -102,7 +102,7 @@ struct ParsecStatusBar : View {
 			// 查增量實際 FPS（可每秒刷新）
 			let deltaFPS = ParsecRenderCenter.shared.deltaFPS()
 
-			let DebugMes = ParsecRenderCenter.shared.DebugMes
+			let DebugMes = ParsecRenderCenter.shared.DebugMes()
 
 
 

@@ -8,25 +8,6 @@ struct SettingsView:View
 {
 	@Binding var visible: Bool
 
-
-	@AppStorage("renderer") var renderer: RendererType = .opengl
-
-	@AppStorage("resolution") var resolution: ParsecResolution = .client
-	@AppStorage("bitrate") var bitrate: Int = 0
-	@AppStorage("decoder") var decoder: DecoderPref = .h264
-	
-	@AppStorage("cursorMode") var cursorMode: CursorMode = .touchpad
-	@AppStorage("cursorScale") var cursorScale: Double = 0.5
-	@AppStorage("mouseSensitivity") var mouseSensitivity: Double = 1.0
-	@AppStorage("noOverlay") var noOverlay: Bool = false
-	@AppStorage("cursorScale") var hideStatusBar: Bool = true
-	@AppStorage("rightClickPosition") var rightClickPosition: RightClickPosition = .firstFinger
-	@AppStorage("preferredFramesPerSecond") var preferredFramesPerSecond: Int = 60 // 0 = use device max (ProMotion)
-	@AppStorage("decoderCompatibility") var decoderCompatibility: Bool = false // Enable for stutter issues on some devices
-	@AppStorage("decoder444") var decoder444: Bool = true // Enable for stutter issues on some devices
-
-	@AppStorage("showKeyboardButton") var showKeyboardButton: Bool = true
-	
 	let resolutionChoices: [Choice<ParsecResolution>]
 
 	init(visible: Binding<Bool> ) {
@@ -91,7 +72,7 @@ struct SettingsView:View
                         {
                             CatItem("Mouse Movement")
                             {
-                                MultiPicker(selection:$cursorMode, options:
+                                MultiPicker(selection:$SettingsHandler.cursorMode, options:
 								[
 									Choice("Touchpad", CursorMode.touchpad),
 									Choice("Direct", CursorMode.direct)
@@ -99,7 +80,7 @@ struct SettingsView:View
                             }
 							CatItem("Right Click Position")
 							{
-								MultiPicker(selection:$rightClickPosition, options:
+								MultiPicker(selection:$SettingsHandler.rightClickPosition, options:
 								[
 									Choice("First Finger", RightClickPosition.firstFinger),
 									Choice("Middle", RightClickPosition.middle),
@@ -108,15 +89,15 @@ struct SettingsView:View
 							}
                             CatItem("Cursor Scale")
                             {
-                                Slider(value: $cursorScale, in:0.1...4, step:0.1)
+                                Slider(value: $SettingsHandler.cursorScale, in:0.1...4, step:0.1)
 									.frame(width: 200)
-								Text(String(format: "%.1f", cursorScale))
+								Text(String(format: "%.1f", SettingsHandler.cursorScale))
                             }
 							CatItem("Mouse Sensitivity")
 							{
-								Slider(value: $mouseSensitivity, in:0.1...4, step:0.1)
+								Slider(value: $SettingsHandler.mouseSensitivity, in:0.1...4, step:0.1)
 									.frame(width: 200)
-								Text(String(format: "%.1f", mouseSensitivity))
+								Text(String(format: "%.1f", SettingsHandler.mouseSensitivity))
 							}
                         }
                         CatTitle("Graphics")
@@ -124,7 +105,7 @@ struct SettingsView:View
                         {
                             CatItem("Renderer")
                             {
-								SegmentPicker(selection:$renderer, options:
+								SegmentPicker(selection:$SettingsHandler.renderer, options:
 								[
 									Choice("OpenGL", RendererType.opengl),
 									Choice("Metal", RendererType.metal)
@@ -135,19 +116,31 @@ struct SettingsView:View
 
 							CatItem("Default Resolution")
 							{
-								MultiPicker(selection: $resolution, options:resolutionChoices)
+								MultiPicker(selection: $SettingsHandler.resolution, options:resolutionChoices)
 							}
                             CatItem("Decoder")
                             {
-								MultiPicker(selection: $decoder, options:
+								MultiPicker(selection: $SettingsHandler.decoder, options:
 								[
 									Choice("H.264", DecoderPref.h264),
 									Choice("Prefer H.265", DecoderPref.h265)
 								])
                             }
+
+							CatItem("Decoder 444")
+							{
+								Toggle("", isOn:$SettingsHandler.decoder444)
+									.frame(width:80)
+							}
+							CatItem("Decoder Compatibility")
+							{
+								Toggle("", isOn:$SettingsHandler.decoderCompatibility)
+									.frame(width:80)
+							}
+							
 							CatItem("Frame Rate")
 							{
-								MultiPicker(selection: $preferredFramesPerSecond, options:
+								MultiPicker(selection: $SettingsHandler.preferredFramesPerSecond, options:
 								[
 									Choice("Auto (Device Max)", 0),
 									Choice("120 FPS", 120),
@@ -155,33 +148,25 @@ struct SettingsView:View
 									Choice("30 FPS", 30)
 								])
 							}
-							CatItem("Decoder Compatibility")
-							{
-								Toggle("", isOn:$decoderCompatibility)
-									.frame(width:80)
-							}
-							CatItem("Decoder 444")
-							{
-								Toggle("", isOn:$decoder444)
-									.frame(width:80)
-							}
+							
+							
                         }
                         CatTitle("Misc")
                         CatList()
                         {
                             CatItem("Never Show Overlay")
                             {
-                                Toggle("", isOn:$noOverlay)
+                                Toggle("", isOn:$SettingsHandler.noOverlay)
                                     .frame(width:80)
                             }
 							CatItem("Hide Status Bar")
 							{
-								Toggle("", isOn:$hideStatusBar)
+								Toggle("", isOn:$SettingsHandler.hideStatusBar)
 									.frame(width:80)
 							}
 							CatItem("Show Keyboard Button")
 							{
-								Toggle("", isOn:$showKeyboardButton)
+								Toggle("", isOn:$SettingsHandler.showKeyboardButton)
 									.frame(width:80)
 							}
 						}

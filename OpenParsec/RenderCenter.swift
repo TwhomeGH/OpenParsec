@@ -224,9 +224,11 @@ final class ParsecRenderCenter {
 
 	// MARK: - 實際送出 FPS 計算
 	private var startTime: CFTimeInterval = CACurrentMediaTime()
+	private var lastTime: CFTimeInterval = CACurrentMediaTime()
+
 	private var lastFramesDisplayed: Int = 0
 
-	/// 從開始到現在的平均實際 FPS
+	// MARK: 從開始到現在的平均實際 FPS
 	func actualFPS() -> Double {
 		guard let controller = renderController else { return 0 }
 		let now = CACurrentMediaTime()
@@ -237,17 +239,20 @@ final class ParsecRenderCenter {
 		return frames / elapsed
 	}
 
-	/// 從上次呼叫到現在的增量 FPS（可每秒更新顯示）
+	// MARK: 從上次呼叫到現在的增量 FPS（可每秒更新顯示）
 	func deltaFPS() -> Double {
 		guard let controller = renderController else { return 0 }
 		let now = CACurrentMediaTime()
-		let elapsed = now - startTime
+		let elapsed = now - lastTime
 		guard elapsed > 0 else { return 0 }
 
-		let deltaFrames = Double(controller.getFramesDisplayed() - lastFramesDisplayed)
-		lastFramesDisplayed = controller.getFramesDisplayed()
-		startTime = now
+		let currentFrames = controller.getFramesDisplayed()
+		let deltaFrames = Double(currentFrames - lastFramesDisplayed)
+
+		lastFramesDisplayed = currentFrames
+		lastTime = now   // ✅ 用 lastTime，不要重設 startTime
 
 		return deltaFrames / elapsed
 	}
+
 }

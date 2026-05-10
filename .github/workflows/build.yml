@@ -83,7 +83,7 @@ jobs:
 
     steps:
       - name: Download a Build Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ env.archive_path }}.xcarchive.tar
       - name: Extract Build Artifact
@@ -168,7 +168,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Download a Build Artifact
         uses: actions/download-artifact@v7
         with:

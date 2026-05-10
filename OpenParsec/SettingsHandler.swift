@@ -3,7 +3,7 @@ import SwiftUI
 
 final class SettingsHandler: ObservableObject {
 	// 全局配置中軀
-	static let shared = SettingsHandler.shared()   // 單例，全局共用
+	static let shared = SettingsHandler()   // 單例，全局共用
 
 
 	@AppStorage("renderer") public var renderer: RendererType = .opengl

@@ -16,10 +16,9 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
     private var parsec: OpaquePointer
 
-    init(_ view: MTKView, parsec: OpaquePointer, updateImage: @escaping () -> Void) {
+    init(_ view: MTKView, updateImage: @escaping () -> Void) {
         self.mtkView = view
         self.updateImage = updateImage
-        self.parsec = parsec
         super.init()
 
         guard let device = view.device else { fatalError("Metal device not found") }
@@ -47,7 +46,9 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
     // PollFrame → 取得最新畫面
     func pollFrame() {
-        let status = CParsec.renderMetalFrame(timeout: 16) { frame, image in
+        let status = CParsec.renderMetalFrame(
+            timeout: 16,
+            ) { frame, image in
             self.handleFrame(frame, image: image)
         }
         print("PollFrame status:", status)

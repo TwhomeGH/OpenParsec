@@ -244,23 +244,25 @@ class ParsecSDKBridge: ParsecService
 
 
 	
+	// 包裝 closure 的 class
+	final class FrameHandler {
+		let onFrame: (ParsecFrame, UnsafeRawPointer) -> Void
+		init(onFrame: @escaping (ParsecFrame, UnsafeRawPointer) -> Void) {
+			self.onFrame = onFrame
+		}
+	}
 
-
-	// 定義一個 C-compatible callback
+	// C-compatible callback
 	private func parsecFrameCallback(
 		framePtr: UnsafeMutablePointer<ParsecFrame>?,
 		imagePtr: UnsafeRawPointer?,
 		opaque: UnsafeMutableRawPointer?
 	) {
-		guard let frame = framePtr?.pointee else { return }
-		guard let image = imagePtr else { return }
+		guard let frame = framePtr?.pointee, let image = imagePtr else { return }
 
-		// 取回 Swift closure
-		let onFrame = Unmanaged<(ParsecFrame, UnsafeRawPointer) -> Void>
-			.fromOpaque(opaque!)
-			.takeUnretainedValue()
-
-		onFrame(frame, image)
+		// 從 opaque 取回 FrameHandler
+		let handler = Unmanaged<FrameHandler>.fromOpaque(opaque!).takeUnretainedValue()
+		handler.onFrame(frame, image)
 	}
 
 	// 在 CParsec 封裝層
@@ -268,20 +270,17 @@ class ParsecSDKBridge: ParsecService
     timeout: UInt32 = 16,
     onFrame: @escaping (ParsecFrame, UnsafeRawPointer) -> Void
 	) -> ParsecStatus {
-
-
-		 // 把 closure 包裝成 Unmanaged 傳進去
-    let opaque = Unmanaged.passUnretained(onFrame).toOpaque()
+		let handler = FrameHandler(onFrame: onFrame)
+		let opaque = Unmanaged.passUnretained(handler).toOpaque()
 
 		return ParsecClientPollFrame(
 			_parsec,
 			UInt8(DEFAULT_STREAM),
 			parsecFrameCallback,
 			timeout,
-			nil
+			opaque
 		)
 	}
-
 
 
 

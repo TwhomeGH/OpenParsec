@@ -267,6 +267,7 @@ class ParsecSDKBridge: ParsecService
 
 	// 在 CParsec 封裝層
 	// Swift wrapper
+
 	func renderMetalFrame(
 		timeout: UInt32 = 16,
 		onFrame: @escaping (ParsecFrame, UnsafeRawPointer) -> Void
@@ -274,7 +275,7 @@ class ParsecSDKBridge: ParsecService
 		let handler = FrameHandler(onFrame: onFrame)
 		let opaque = Unmanaged.passUnretained(handler).toOpaque()
 
-		// 明確標註回傳型別，避免 "ambiguous" 錯誤
+		// 明確標註回傳型別，避免 ambiguous
 		let status: ParsecStatus = ParsecClientPollFrame(
 			_parsec,
 			UInt8(DEFAULT_STREAM),

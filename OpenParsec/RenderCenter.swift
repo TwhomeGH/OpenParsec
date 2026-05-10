@@ -13,6 +13,7 @@ import OSLog
 
 protocol ParsecRenderController : AnyObject {
 	var preferredFPS: Int { get set }
+	var Debug_MES:String
 	func getFramesDisplayed() -> Int
 
 }
@@ -22,6 +23,7 @@ extension ParsecGLKViewController: ParsecRenderController {
 		get { glkViewController.preferredFramesPerSecond }
 		set { glkViewController.preferredFramesPerSecond = newValue }
 	}
+	var Debug_MES:String = ""
 
 	func getFramesDisplayed() -> Int {
 		return glkViewController.framesDisplayed
@@ -196,16 +198,15 @@ final class ParsecRenderCenter {
 
 	}
 
-	var Debug_MES: String = ""
 
 	func DebugMes() {
 
-		return Debug_MES 
+		return renderController?.Debug_MES 
 	}
 
 
 	func Update_DebugMes(_ text:String) {
-		Debug_MES = text
+		renderController?.Debug_MES = text
 	}
 
 

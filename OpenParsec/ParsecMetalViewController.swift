@@ -46,6 +46,8 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
         set { mtkView.preferredFramesPerSecond = newValue }
     }
 
+	var Debug_MES:String = ""
+
 	func drawFrameCompleted() {
 		framesDisplayedCounter += 1
 	}

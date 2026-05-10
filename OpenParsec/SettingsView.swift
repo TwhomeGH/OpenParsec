@@ -173,6 +173,12 @@ struct SettingsView:View
                         CatTitle("Misc")
                         CatList()
                         {
+
+							CatItem("Metal 顯示的可見確認用提示文本")
+							{
+								Toggle("", isOn:$settings.MetalText)
+									.frame(width:80)
+							}
                             CatItem("Never Show Overlay")
                             {
                                 Toggle("", isOn:$settings.noOverlay)

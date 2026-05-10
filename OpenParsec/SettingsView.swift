@@ -12,6 +12,10 @@ struct SettingsView:View
 
 
 
+	let bitrateChoices: [Choice<Int>] = ParsecResolution.bitrates.map {
+		Choice(value: $0, label: "\($0) kbps")
+	}
+
 	let resolutionChoices: [Choice<ParsecResolution>]
 
 	init(visible: Binding<Bool> ) {
@@ -124,7 +128,7 @@ struct SettingsView:View
 							}
 							CatItem("BitRate")
 							{
-								MultiPicker(selection: $settings.bitrate, options:ParsecResolution.bitrates)
+								MultiPicker(selection: $settings.bitrate, options:bitrateChoices)
 							}
 
                             CatItem("Decoder")

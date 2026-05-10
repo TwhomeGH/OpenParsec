@@ -252,7 +252,13 @@ class ParsecSDKBridge: ParsecService
 		}
 	}
 
-	@convention(c)
+	typealias ParsecFrameCallbackSwift = @convention(c) (
+		UnsafePointer<ParsecFrame>?,
+		UnsafeRawPointer?,
+		UnsafeMutableRawPointer?
+	) -> Void
+
+
 	private func parsecFrameCallback(
 		framePtr: UnsafePointer<ParsecFrame>?,
 		imagePtr: UnsafeRawPointer?,

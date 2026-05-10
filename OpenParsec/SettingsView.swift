@@ -13,7 +13,7 @@ struct SettingsView:View
 
 
 	let bitrateChoices: [Choice<Int>] = ParsecResolution.bitrates.map {
-		Choice(value: $0, label: "\($0) kbps")
+		Choice("\($0) Mbps", $0)
 	}
 
 	let resolutionChoices: [Choice<ParsecResolution>]

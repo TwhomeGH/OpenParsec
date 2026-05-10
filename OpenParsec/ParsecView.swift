@@ -115,9 +115,9 @@ struct ParsecStatusBar : View {
 			    "Bitrate \(bitrate) Mbps",
 			    "\(codec) \(resolution) \(colorFormat)",
 			    decoderName,
-			    "\n目標FPS \(glkFPS)",   // 如果 glkCFPS 是 optional
-			    "平均FPS \(glkFPS_ACT)",
-				"deltaFPS \(String(format: "%.2f", deltaFPS))",
+			    "\n目標FPS \(glkFPS)",  
+			    "平均FPS \(String(format: "%.2f", glkFPS_ACT))",
+				"當前FPS \(String(format: "%.2f", deltaFPS))",
 				"DebugMes: \(DebugMes ?? "")"
 			]
 

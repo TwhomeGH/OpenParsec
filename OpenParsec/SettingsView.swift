@@ -122,7 +122,11 @@ struct SettingsView:View
 							{
 								MultiPicker(selection: $settings.resolution, options:resolutionChoices)
 							}
-							
+							CatItem("BitRate")
+							{
+								MultiPicker(selection: $settings.bitrate, options:ParsecResolution.bitrates)
+							}
+
                             CatItem("Decoder")
                             {
 								MultiPicker(selection: $settings.decoder, options:

@@ -174,6 +174,9 @@ final class ParsecRenderCenter {
 			CParsec.setMuted(muted)
 			getHostUserData()
 
+			requestResolutionUpdate()
+			requestBitrateUpdate()
+
 			clientReady = true
 
 		}

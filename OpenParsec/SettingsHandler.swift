@@ -1,6 +1,14 @@
 import Foundation
 import SwiftUI
 
+enum RemoteTextInputMode: Int
+{
+	case keycodeOnly
+	case linuxUnicode
+	case macUnicodeHex
+	case windowsHexNumpad
+}
+
 final class SettingsHandler: ObservableObject {
 	// 全局配置中軀
 	static let shared = SettingsHandler()   // 單例，全局共用
@@ -27,6 +35,7 @@ final class SettingsHandler: ObservableObject {
 	@AppStorage("noOverlay") public var noOverlay: Bool = false
 
 	@AppStorage("showKeyboardButton") public var showKeyboardButton: Bool = true
+	@AppStorage("remoteTextInputMode") public var remoteTextInputMode: RemoteTextInputMode = .keycodeOnly
 
 	// 識別是不是Metal分辨用的文本
 	@AppStorage("MetalText") public var MetalText: Bool = false

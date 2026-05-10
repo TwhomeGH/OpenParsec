@@ -194,6 +194,16 @@ struct SettingsView:View
 								Toggle("", isOn:$settings.showKeyboardButton)
 									.frame(width:80)
 							}
+							CatItem("Remote Text Input")
+							{
+								MultiPicker(selection: $settings.remoteTextInputMode, options:
+								[
+									Choice("Keycodes Only", RemoteTextInputMode.keycodeOnly),
+									Choice("Linux Ctrl+Shift+U", RemoteTextInputMode.linuxUnicode),
+									Choice("macOS Unicode Hex", RemoteTextInputMode.macUnicodeHex),
+									Choice("Windows Hex Numpad", RemoteTextInputMode.windowsHexNumpad)
+								])
+							}
 						}
 						Text("More options coming soon.")
 							.multilineTextAlignment(.center)

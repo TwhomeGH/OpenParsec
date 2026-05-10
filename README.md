@@ -28,6 +28,9 @@ You can toggle if you want to use 2 fingers to scroll or zoom in the overlay men
 ## Mouse & keyboard
 USB mouse & keyboard are supported. 
 
+For Chinese Zhuyin/Pinyin or Japanese text committed by the iOS software
+keyboard, see [RemoteTextInput.md](./Docs/RemoteTextInput.md).
+
 ## Game Controllers
 When streaming, press any trigger button in your controller and parsec will recognize it. Make sure to configure the host properly (install virtual USB driver etc.) before using game controllers.
 

@@ -77,6 +77,7 @@ class ParsecSDKBridge: ParsecService
 	private let _audioPtr: UnsafeRawPointer
 	
 	private var isVirtualShiftOn = false
+	private let keyboardQueue = DispatchQueue(label: "openparsec.keyboard.input")
 	
 	public var clientWidth: Float = 1920
 	public var clientHeight: Float = 1080
@@ -530,57 +531,117 @@ class ParsecSDKBridge: ParsecService
 		return (keyCode, useShift)
 	}
 	
-	func sendVirtualKeyboardInput(text: String) {
+	private func sendKeyboardCode(_ code: ParsecKeycode, pressed: Bool) {
+		var keyboardMessage = ParsecMessage()
+		keyboardMessage.type = MESSAGE_KEYBOARD
+		keyboardMessage.keyboard.code = code
+		keyboardMessage.keyboard.pressed = pressed
+		ParsecClientSendMessage(_parsec, &keyboardMessage)
+	}
+
+	private func tapKeyboardCode(_ code: ParsecKeycode, useShift: Bool = false, holdFor delay: TimeInterval = 0.02) {
+		if !isVirtualShiftOn && useShift {
+			sendKeyboardCode(ParsecKeycode(rawValue: 225), pressed: true)
+		}
+
+		sendKeyboardCode(code, pressed: true)
+		Thread.sleep(forTimeInterval: delay)
+		sendKeyboardCode(code, pressed: false)
+
+		if useShift && !isVirtualShiftOn {
+			sendKeyboardCode(ParsecKeycode(rawValue: 225), pressed: false)
+		}
+	}
+
+	private func tapTextKey(_ text: String) -> Bool {
 		let (keyCode, useShift) = getKeyCodeByText(text: text)
 
 		guard let keyCode else {
-			return
+			return false
 		}
 
 		os_log("KeyCode:\(keyCode.rawValue)-\(text)")
+		tapKeyboardCode(keyCode, useShift: useShift, holdFor: 0.05)
+		return true
+	}
 
-		if !isVirtualShiftOn && useShift {
-			var shiftDown = ParsecMessage()
-			shiftDown.type = MESSAGE_KEYBOARD
-			shiftDown.keyboard.code = ParsecKeycode(rawValue: 225)
-			shiftDown.keyboard.pressed = true
-			ParsecClientSendMessage(_parsec, &shiftDown)
+	private func tapHexDigit(_ digit: Character) {
+		_ = tapTextKey(String(digit))
+	}
+
+	private func sendLinuxUnicodeScalar(_ scalar: UnicodeScalar) {
+		let hex = String(scalar.value, radix: 16, uppercase: false)
+
+		sendKeyboardCode(ParsecKeycode(rawValue: 224), pressed: true)
+		sendKeyboardCode(ParsecKeycode(rawValue: 225), pressed: true)
+		tapKeyboardCode(ParsecKeycode(rawValue: 24))
+		sendKeyboardCode(ParsecKeycode(rawValue: 225), pressed: false)
+		sendKeyboardCode(ParsecKeycode(rawValue: 224), pressed: false)
+
+		Thread.sleep(forTimeInterval: 0.02)
+		for digit in hex {
+			tapHexDigit(digit)
+		}
+		tapKeyboardCode(ParsecKeycode(rawValue: 40))
+	}
+
+	private func sendMacUnicodeHexCodeUnit(_ codeUnit: UInt16) {
+		let hex = String(format: "%04x", codeUnit)
+
+		sendKeyboardCode(ParsecKeycode(rawValue: 226), pressed: true)
+		for digit in hex {
+			tapHexDigit(digit)
+		}
+		sendKeyboardCode(ParsecKeycode(rawValue: 226), pressed: false)
+	}
+
+	private func sendWindowsHexNumpadScalar(_ scalar: UnicodeScalar) {
+		let hex = String(scalar.value, radix: 16, uppercase: false)
+
+		sendKeyboardCode(ParsecKeycode(rawValue: 226), pressed: true)
+		tapKeyboardCode(ParsecKeycode(rawValue: 87))
+		for digit in hex {
+			tapHexDigit(digit)
+		}
+		sendKeyboardCode(ParsecKeycode(rawValue: 226), pressed: false)
+	}
+
+	private func sendUnicodeScalar(_ scalar: UnicodeScalar) {
+		switch SettingsHandler.shared.remoteTextInputMode {
+		case .keycodeOnly:
+			os_log("Unsupported virtual keyboard text without unicode input mode: \(String(scalar))")
+		case .linuxUnicode:
+			sendLinuxUnicodeScalar(scalar)
+		case .macUnicodeHex:
+			for codeUnit in String(scalar).utf16 {
+				sendMacUnicodeHexCodeUnit(codeUnit)
+			}
+		case .windowsHexNumpad:
+			sendWindowsHexNumpadScalar(scalar)
+		}
+	}
+
+	private func sendVirtualKeyboardText(_ text: String) {
+		if tapTextKey(text) {
+			return
 		}
 
-		var keyboardMessagePress = ParsecMessage()
-		keyboardMessagePress.type = MESSAGE_KEYBOARD
-		keyboardMessagePress.keyboard.pressed = true
-		keyboardMessagePress.keyboard.code = keyCode
-
-		let res = ParsecClientSendMessage(_parsec, &keyboardMessagePress)
-
-		os_log("Key res->\(res.rawValue)")
-
-
-		// add release delay in case some games ignore instant key release
-		DispatchQueue.global().asyncAfter(deadline: .now() + 0.05) {
-
-			// 主鍵 release
-			var keyUp = ParsecMessage()
-			keyUp.type = MESSAGE_KEYBOARD
-			keyUp.keyboard.code = keyCode
-			keyUp.keyboard.pressed = false
-			ParsecClientSendMessage(self._parsec, &keyUp)
-
-			// Shift release
-			if useShift && !self.isVirtualShiftOn {
-				var shiftUp = ParsecMessage()
-				shiftUp.type = MESSAGE_KEYBOARD
-				shiftUp.keyboard.code = ParsecKeycode(rawValue: 225)
-				shiftUp.keyboard.pressed = false
-				ParsecClientSendMessage(self._parsec, &shiftUp)
+		for character in text {
+			let characterText = String(character)
+			if tapTextKey(characterText) {
+				continue
 			}
 
-
-			os_log("Key Release")
-
+			for scalar in characterText.unicodeScalars {
+				sendUnicodeScalar(scalar)
+			}
 		}
+	}
 
+	func sendVirtualKeyboardInput(text: String) {
+		keyboardQueue.async { [weak self] in
+			self?.sendVirtualKeyboardText(text)
+		}
 	}
 
 

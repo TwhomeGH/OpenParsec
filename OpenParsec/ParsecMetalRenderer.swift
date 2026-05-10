@@ -198,7 +198,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         encoder.setVertexBuffer(viewSizeBuffer, offset: 0, index: 0)
 
 
-        var showText: UInt32 = SettingsHandle.shared.MetalText ? 1 : 0
+        var showText: UInt32 = SettingsHandler.shared.MetalText ? 1 : 0
 
         let showTextBuffer = mtkView.device!.makeBuffer(bytes: &showText,
                                                         length: MemoryLayout<UInt32>.stride,

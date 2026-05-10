@@ -284,6 +284,20 @@ class ParsecSDKBridge: ParsecService
 	}
 
 
+	@_silgen_name("ParsecClientPollFrame")
+	func ParsecClientPollFrame(
+		_ ps: UnsafeMutablePointer<Parsec>?,
+		_ stream: UInt8,
+		_ callback: (@convention(c) (
+			UnsafeMutablePointer<ParsecFrame>?,
+			UnsafeRawPointer?,
+			UnsafeRawPointer?
+		) -> Void)?,
+		_ timeout: UInt32,
+		_ opaque: UnsafeRawPointer?
+	) -> ParsecStatus
+
+
 
 	func pollAudio(timeout:UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	{

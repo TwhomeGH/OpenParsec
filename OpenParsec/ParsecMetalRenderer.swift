@@ -22,7 +22,6 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     func makeTextTexture(device: MTLDevice,
                         text: String,
                         size: CGSize = CGSize(width: 256, height: 64)) -> MTLTexture? {
-        // 建立 CoreGraphics context
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bytesPerRow = Int(size.width) * 4
         guard let context = CGContext(data: nil,
@@ -34,22 +33,20 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
                                     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         else { return nil }
 
-        // 填透明背景
+        // 背景透明
         context.setFillColor(UIColor.clear.cgColor)
         context.fill(CGRect(origin: .zero, size: size))
 
-        // 畫字
+        // 畫字在左上角
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 24, weight: .bold),
             .foregroundColor: UIColor.white
         ]
         let attrString = NSAttributedString(string: text, attributes: attributes)
-        attrString.draw(in: CGRect(x: 10, y: 10, width: size.width - 20, height: size.height - 20))
+        attrString.draw(in: CGRect(x: 5, y: 5, width: size.width - 10, height: size.height - 10))
 
-        // 轉成 CGImage
         guard let cgImage = context.makeImage() else { return nil }
 
-        // 建立 Metal texture
         let textureDesc = MTLTextureDescriptor.texture2DDescriptor(
             pixelFormat: .bgra8Unorm,
             width: Int(size.width),
@@ -59,7 +56,6 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         textureDesc.usage = [.shaderRead]
         guard let texture = device.makeTexture(descriptor: textureDesc) else { return nil }
 
-        // 複製像素資料
         let region = MTLRegionMake2D(0, 0, Int(size.width), Int(size.height))
         let data = context.data!
         texture.replace(region: region,

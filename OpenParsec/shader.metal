@@ -60,9 +60,14 @@ fragment float4 fragmentNV12(VertexOut in [[stage_in]],
 
     float4 color = float4(R, G, B, 1.0);
 
+
     // 疊加文字貼圖 (左上角 Metal Test)
-    float4 overlay = textOverlay.sample(s, in.texCoord);
-    color = mix(color, overlay, overlay.a);
+    float2 overlayUV = float2(in.texCoord.x / 0.25, in.texCoord.y / 0.1);
+    if (in.texCoord.x < 0.25 && in.texCoord.y < 0.1) {
+        float4 overlay = textOverlay.sample(s, overlayUV);
+        color = mix(color, overlay, overlay.a);
+    }
+
 
     return color;
 }

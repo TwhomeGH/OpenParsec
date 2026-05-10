@@ -252,7 +252,7 @@ class ParsecSDKBridge: ParsecService
 	) -> ParsecStatus {
 		return ParsecClientPollFrame(
 			_parsec,
-			0,
+			UInt8(DEFAULT_STREAM),
 			{ framePtr, imagePtr, opaque in
 				guard let frame = framePtr?.pointee else { return }
 				if let image = imagePtr {

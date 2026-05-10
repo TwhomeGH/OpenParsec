@@ -40,7 +40,7 @@ extension ParsecMetalRenderer: ParsecRenderController {
 
 // 新的處理方式測試
 
-final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, MTKViewDelegate {
+final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,  ParsecRenderController,MTKViewDelegate {
 
     // MARK: - Properties
     let viewController: UIViewController

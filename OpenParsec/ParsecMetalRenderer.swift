@@ -26,7 +26,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         // 建立簡單的 passthrough pipeline
         if let library = device.makeDefaultLibrary(),
            let vertexFunc = library.makeFunction(name: "vertexPassthrough"),
-           let fragmentFunc = library.makeFunction(name: "fragmentPassthrough") {
+           let fragmentFunc = library.makeFunction(name: "fragmentNV12") {
 
             let pipelineDesc = MTLRenderPipelineDescriptor()
             pipelineDesc.vertexFunction = vertexFunc

@@ -18,7 +18,8 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     private var uvTexture: MTLTexture?
     private var textTexture: MTLTexture?
 
-    // MARK: 文字疊加層 分辨用Metal
+
+    // 畫字 分辨Metal用 
     func makeTextTexture(device: MTLDevice,
                         text: String,
                         size: CGSize = CGSize(width: 256, height: 64)) -> MTLTexture? {
@@ -33,29 +34,23 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
                                     bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         else { return nil }
 
-        // 翻轉座標系統，讓文字正確顯示
+        // 翻轉座標系統
         context.translateBy(x: 0, y: size.height)
         context.scaleBy(x: 1.0, y: -1.0)
 
-        // 背景半透明黑色
-        context.setFillColor(UIColor.black.withAlphaComponent(0.6).cgColor)
+        // 背景透明（先不要黑底，方便 debug）
+        context.setFillColor(UIColor.clear.cgColor)
         context.fill(CGRect(origin: .zero, size: size))
 
-        // 畫字（左上角）
+        // 畫字
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 28, weight: .heavy),
             .foregroundColor: UIColor.red
         ]
         let attrString = NSAttributedString(string: text, attributes: attributes)
 
-        // 用字串實際大小來決定矩形
-        let textSize = attrString.size()
-        let rect = CGRect(x: 10,
-                        y: 10, // 翻轉後原點在左上角，直接用 padding
-                        width: size.width - 20,
-                        height: textSize.height)
-
-        attrString.draw(in: rect)
+        // 用 draw(at:) 確保字不被裁掉
+        attrString.draw(at: CGPoint(x: 10, y: 10))
 
         // 建立 Metal Texture
         let textureDesc = MTLTextureDescriptor.texture2DDescriptor(
@@ -76,6 +71,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
         return texture
     }
+
 
 
 

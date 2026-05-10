@@ -65,14 +65,15 @@ fragment float4 fragmentNV12(VertexOut in [[stage_in]],
     if (showText != 0) {
         if (in.texCoord.x < 0.25 && in.texCoord.y < 0.1) {
             float2 overlayUV = float2(in.texCoord.x / 0.25,
-                                      in.texCoord.y / 0.1);
+                                    in.texCoord.y / 0.1);
 
             float4 overlay = textOverlay.sample(s, overlayUV);
 
-            // 用 overlay 的 alpha 做混合，黑底保持透明
-            color = mix(color, overlay, overlay.a);
+            // 正確 alpha 混合
+            color = color * (1.0 - overlay.a) + overlay * overlay.a;
         }
     }
+
 
     return color;
 }

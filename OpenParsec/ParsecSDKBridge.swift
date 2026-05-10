@@ -113,8 +113,10 @@ class ParsecSDKBridge: ParsecService
 
 		self.applyConfig()
 
+		var cfg = buildConfig()
 
-		let status = ParsecClientConnect(_parsec, &parsecClientCfg, NetworkHandler.clinfo?.session_id, peerID)
+
+		let status = ParsecClientConnect(_parsec, &cfg, NetworkHandler.clinfo?.session_id, peerID)
 
 
 
@@ -123,9 +125,8 @@ class ParsecSDKBridge: ParsecService
 		return status
 	}
 
-	// 套用配置專用
-	func applyConfig() {
-
+	// 配置建立
+	func buildConfig() -> ParsecClientConfig {
 		var parsecClientCfg = ParsecClientConfig()
 
 		parsecClientCfg.video.0.decoderIndex = 1
@@ -136,28 +137,29 @@ class ParsecSDKBridge: ParsecService
 		parsecClientCfg.video.0.decoderH265 = SettingsHandler.shared.decoder == .h265
 		parsecClientCfg.video.0.decoder444 = SettingsHandler.shared.decoder444
 
-
-		print(
-			"Debug Compatibility? -> \(parsecClientCfg.video.0.decoderCompatibility)"
-		)
-
-		print("Debug H265? -> \(parsecClientCfg.video.0.decoderH265)")
-
-
-		//可能是多餘的流
-		//		parsecClientCfg.video.1.decoderIndex = 1
-		//		parsecClientCfg.video.1.resolutionX = 0
-		//		parsecClientCfg.video.1.resolutionY = 0
-		//		parsecClientCfg.video.1.decoderCompatibility = false
-		//		parsecClientCfg.video.1.decoderH265 = SettingsHandler.shared.decoder == .h265
-		//
-
 		parsecClientCfg.mediaContainer = mediaContainer
 		parsecClientCfg.protocol = netProtocol
-		//parsecClientCfg.secret = ""
 		parsecClientCfg.pngCursor = pngCursor
+		//parsecClientCfg.secret = ""
 
-		ParsecClientSetConfig(_parsec, &parsecClientCfg);
+		return parsecClientCfg
+	}
+
+
+	// 套用配置
+	func applyConfig() {
+
+		var cfg = buildConfig()
+
+		print(
+			"Debug Compatibility? -> \(cfg.0.decoderCompatibility)"
+		)
+
+		print("Debug H265? -> \(cfg.0.decoderH265)")
+
+		ParsecClientSetConfig(_parsec, &cfg);
+
+		
 	}
 
 

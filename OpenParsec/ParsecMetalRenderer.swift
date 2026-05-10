@@ -60,7 +60,10 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         ]
         let attrString = NSAttributedString(string: text, attributes: attributes)
         let textSize = attrString.size()
-        attrString.draw(at: CGPoint(x: 10, y: size.height - textSize.height - 10))
+        
+
+        // 翻轉後原點在左上角，直接用 y:10
+        attrString.draw(at: CGPoint(x: 10, y: 10))
 
         // 建立 Metal Texture
         let textureDesc = MTLTextureDescriptor.texture2DDescriptor(

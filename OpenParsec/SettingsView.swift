@@ -117,10 +117,15 @@ struct SettingsView:View
                                 .frame(width:165)
 
                             }
-
+						
 							CatItem("Default Resolution")
 							{
 								MultiPicker(selection: $settings.resolution, options:resolutionChoices)
+							}.onChange { newVal
+
+								print("New Resolution \(newVal)")
+								CParsec.updateHostVideoConfig()
+								
 							}
                             CatItem("Decoder")
                             {

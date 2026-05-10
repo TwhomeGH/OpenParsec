@@ -25,13 +25,17 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
                         size: CGSize = CGSize(width: 256, height: 64)) -> MTLTexture? {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bytesPerRow = Int(size.width) * 4
+
+        let bitmapInfo = CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
+
+
         guard let context = CGContext(data: nil,
                                     width: Int(size.width),
                                     height: Int(size.height),
                                     bitsPerComponent: 8,
                                     bytesPerRow: bytesPerRow,
                                     space: colorSpace,
-                                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+                                    bitmapInfo: bitmapInfo)
         else { return nil }
 
         // 翻轉座標系統

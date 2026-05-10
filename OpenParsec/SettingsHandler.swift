@@ -26,7 +26,11 @@ final class SettingsHandler: ObservableObject {
 	@AppStorage("mouseSensitivity") public var mouseSensitivity: Double = 1.0
 	@AppStorage("noOverlay") public var noOverlay: Bool = false
 
-
 	@AppStorage("showKeyboardButton") public var showKeyboardButton: Bool = true
+
+	// 識別是不是Metal分辨用的文本
+	@AppStorage("MetalText") public var MetalText: Bool = false
+
+
 
 }

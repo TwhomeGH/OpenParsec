@@ -82,8 +82,14 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         guard let device = view.device else { fatalError("Metal device not found") }
         commandQueue = device.makeCommandQueue()
 
-        self.textTexture = makeTextTexture(device: device, text: "Metal Test 測試")
 
+        if SettingsHandler.MetalText {
+            self.textTexture = makeTextTexture(device: device, text: "Metal Test 測試")
+            print("製作Metal提示文本")
+        } else {
+            print("跳過Metal提示文本")
+            
+        }
 
         // 建立簡單的 passthrough pipeline
         if let library = device.makeDefaultLibrary(),

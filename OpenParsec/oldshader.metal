@@ -1,6 +1,8 @@
 #include <metal_stdlib>
 using namespace metal;
 
+// 舊Shaders
+
 struct Vertex {
 	float4 position [[position]];
 	float2 texCoord;

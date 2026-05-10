@@ -24,25 +24,9 @@ final class ParsecMetalTarget {
 }
 
 
+// 新的處理方式測試 Metal
 
-// 新的處理方式測試 Metal FPS
-
-extension ParsecMetalRenderer: ParsecRenderController {
-    var preferredFPS: Int {
-        get { mtkView.preferredFramesPerSecond }
-        set { mtkView.preferredFramesPerSecond = newValue }
-    }
-
-    func getFramesDisplayed() -> Int {
-        return framesDisplayedCounter
-    }
-}
-
-
-
-// 新的處理方式測試
-
-final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,MTKViewDelegate {
+final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecRenderController, MTKViewDelegate {
 
     // MARK: - Properties
     let viewController: UIViewController
@@ -52,6 +36,23 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,MTKView
 
     private var metalDevice: MTLDevice!
     private var renderer: ParsecMetalRenderer?
+
+	private var framesDisplayedCounter: Int = 0
+
+	// MARK: - ParsecRenderController Metal FPS
+
+	var preferredFPS: Int {
+        get { mtkView.preferredFramesPerSecond }
+        set { mtkView.preferredFramesPerSecond = newValue }
+    }
+
+	func drawFrameCompleted() {
+		framesDisplayedCounter += 1
+	}
+
+	func getFramesDisplayed() -> Int {
+		return framesDisplayedCounter
+	}
 
     private var lastWidth: CGFloat = 1.0
     private var lastHeight: CGFloat = 1.0
@@ -119,7 +120,7 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,MTKView
         }
     }
 
-
+    
 
     // MARK: - MTKViewDelegate
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
@@ -128,6 +129,7 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,MTKView
 
     func draw(in view: MTKView) {
         renderer?.draw(in: view)
+        drawFrameCompleted()
     }
 
     // MARK: - Clean

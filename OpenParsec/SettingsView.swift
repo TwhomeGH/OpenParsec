@@ -13,7 +13,13 @@ struct SettingsView:View
 
 
 	let bitrateChoices: [Choice<Int>] = ParsecResolution.bitrates.map {
-		Choice("\($0) Mbps", $0)
+
+		if value == 0 {
+			return Choice("不指定 Not Setting [Auto]", value)
+		} else {
+			return Choice("\(value) Mbps", value)
+		}
+
 	}
 
 	let resolutionChoices: [Choice<ParsecResolution>]

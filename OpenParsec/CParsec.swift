@@ -111,7 +111,7 @@ enum ParsecResolution: String, CaseIterable, Hashable {
 		return Array(Self.allCases)
 	}
 
-	static var bitrates = [3, 5, 7, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+	static var bitrates = [ 0 ,3, 5, 7, 10, 15, 20, 25, 30, 35, 40, 45, 50]
 
 	static func updateClientResolution(width: Int, height: Int) {
 		clientSize = (width, height)

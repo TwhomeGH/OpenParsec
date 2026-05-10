@@ -109,7 +109,7 @@ struct ParsecStatusBar : View {
 			    "Decode \(decodeLatency)ms",
 			    "Encode \(encodeLatency)ms",
 			    "Network \(networkLatency)ms",
-			    "Bitrate \(bitrate)Mbps",
+			    "Bitrate \(bitrate) Mbps",
 			    "\(codec) \(resolution) \(colorFormat)",
 			    decoderName,
 			    "\nCFPS \(glkCFPS)",   // 如果 glkCFPS 是 optional

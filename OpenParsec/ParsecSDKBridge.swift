@@ -360,7 +360,9 @@ class ParsecSDKBridge: ParsecService
 						DataManager.model.resolutionX = SettingsHandler.shared.resolution.width
 						DataManager.model.resolutionY = SettingsHandler.shared.resolution.height
 
-						DataManager.model.bitrate = SettingsHandler.shared.bitrate
+						if SettingsHandler.shared.bitrate != 0 {
+							DataManager.model.bitrate = SettingsHandler.shared.bitrate
+						}
 						
 						self.updateHostVideoConfig()
 					}

@@ -332,6 +332,7 @@ struct MainView: View
 
 			// Settings screen
 			SettingsView(visible:$inSettings)
+			.environmentObject(SettingsHandler.shared)
 
 			// Loading elements
 			if isConnecting

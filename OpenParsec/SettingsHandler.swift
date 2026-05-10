@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-final class SettingsHandler {
+final class SettingsHandler: ObservableObject {
 	// 全局配置中軀
 	static let shared = SettingsHandler()   // 單例，全局共用
 

@@ -29,8 +29,8 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let bytesPerRow = Int(size.width) * 4
 
-        let bitmapInfo = CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue
-
+        let bitmapInfo = CGImageAlphaInfo.premultipliedFirst.rawValue
+                    | CGBitmapInfo.byteOrder32Little.rawValue
 
         guard let context = CGContext(data: nil,
                                     width: Int(size.width),
@@ -45,7 +45,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         context.translateBy(x: 0, y: size.height)
         context.scaleBy(x: 1.0, y: -1.0)
 
-        // 背景透明（先不要黑底，方便 debug）
+        // 背景透明（方便 debug）
         context.setFillColor(UIColor.clear.cgColor)
         context.fill(CGRect(origin: .zero, size: size))
 
@@ -55,12 +55,8 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
             .foregroundColor: UIColor.red
         ]
         let attrString = NSAttributedString(string: text, attributes: attributes)
-
         let textSize = attrString.size()
-
-        // 用 draw(at:) 確保字不被裁掉
         attrString.draw(at: CGPoint(x: 10, y: size.height - textSize.height - 10))
-
 
         // 建立 Metal Texture
         let textureDesc = MTLTextureDescriptor.texture2DDescriptor(
@@ -81,6 +77,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
         return texture
     }
+
 
 
 

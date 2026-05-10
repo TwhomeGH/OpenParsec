@@ -247,21 +247,24 @@ class ParsecSDKBridge: ParsecService
 
 	// 在 CParsec 封裝層
 	func renderMetalFrame(
-		parsec: OpaquePointer,
-		timeout: UInt32 = 16,
-		onFrame: @escaping (ParsecFrame) -> Void
+    parsec: OpaquePointer,
+    timeout: UInt32 = 16,
+    onFrame: @escaping (ParsecFrame, UnsafeRawPointer) -> Void
 	) -> ParsecStatus {
 		return ParsecClientPollFrame(
 			parsec,
-			0, // stream index
-			{ framePtr, opaque, user in
+			0,
+			{ framePtr, imagePtr, opaque in
 				guard let frame = framePtr?.pointee else { return }
-				onFrame(frame)
+				if let image = imagePtr {
+					onFrame(frame, image)
+				}
 			},
 			timeout,
 			nil
 		)
 	}
+
 
 
 

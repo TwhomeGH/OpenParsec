@@ -16,6 +16,60 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     // 主NV12 Texture
     private var yTexture: MTLTexture?
     private var uvTexture: MTLTexture?
+    private var textTexture: MTLTexture?
+
+
+    func makeTextTexture(device: MTLDevice,
+                        text: String,
+                        size: CGSize = CGSize(width: 256, height: 64)) -> MTLTexture? {
+        // 建立 CoreGraphics context
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bytesPerRow = Int(size.width) * 4
+        guard let context = CGContext(data: nil,
+                                    width: Int(size.width),
+                                    height: Int(size.height),
+                                    bitsPerComponent: 8,
+                                    bytesPerRow: bytesPerRow,
+                                    space: colorSpace,
+                                    bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return nil }
+
+        // 填透明背景
+        context.setFillColor(UIColor.clear.cgColor)
+        context.fill(CGRect(origin: .zero, size: size))
+
+        // 畫字
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 24, weight: .bold),
+            .foregroundColor: UIColor.white
+        ]
+        let attrString = NSAttributedString(string: text, attributes: attributes)
+        attrString.draw(in: CGRect(x: 10, y: 10, width: size.width - 20, height: size.height - 20))
+
+        // 轉成 CGImage
+        guard let cgImage = context.makeImage() else { return nil }
+
+        // 建立 Metal texture
+        let textureDesc = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .bgra8Unorm,
+            width: Int(size.width),
+            height: Int(size.height),
+            mipmapped: false
+        )
+        textureDesc.usage = [.shaderRead]
+        guard let texture = device.makeTexture(descriptor: textureDesc) else { return nil }
+
+        // 複製像素資料
+        let region = MTLRegionMake2D(0, 0, Int(size.width), Int(size.height))
+        let data = context.data!
+        texture.replace(region: region,
+                        mipmapLevel: 0,
+                        withBytes: data,
+                        bytesPerRow: bytesPerRow)
+
+        return texture
+    }
+
 
 
 
@@ -24,8 +78,12 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         self.updateImage = updateImage
         super.init()
 
+
         guard let device = view.device else { fatalError("Metal device not found") }
         commandQueue = device.makeCommandQueue()
+
+        self.textTexture = makeTextTexture(device: device, text: "Metal Test 測試")
+
 
         // 建立簡單的 passthrough pipeline
         if let library = device.makeDefaultLibrary(),
@@ -109,24 +167,32 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     }
 
     func draw(in view: MTKView) {
-        pollFrame() // 每次 draw 前先 poll 一次 frame
+        pollFrame()
 
         guard let drawable = view.currentDrawable,
             let commandBuffer = commandQueue.makeCommandBuffer(),
             let renderPass = view.currentRenderPassDescriptor,
-            let yTex = yTexture,   // Y 平面
-            let uvTex = uvTexture  // UV 平面
-        else { return }
+            let yTex = yTexture,
+            let uvTex = uvTexture,
+            let textTex = textTexture else { return }
 
         let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass)!
         encoder.setRenderPipelineState(pipelineState)
 
-        // 綁定 NV12 的兩個平面
+        // 傳入 viewSize 給頂點着色器
+        var viewSize = SIMD2<Float>(Float(view.drawableSize.width),
+                                    Float(view.drawableSize.height))
+        let viewSizeBuffer = mtkView.device!.makeBuffer(bytes: &viewSize,
+                                                        length: MemoryLayout<SIMD2<Float>>.stride,
+                                                        options: [])
+        encoder.setVertexBuffer(viewSizeBuffer, offset: 0, index: 0)
+
+        // 綁定 NV12 的兩個平面 + overlay
         encoder.setFragmentTexture(yTex, index: 0)
         encoder.setFragmentTexture(uvTex, index: 1)
+        encoder.setFragmentTexture(textTex, index: 2) // Metal Test overlay
 
-
-        // 用 triangleStrip + 4 頂點畫全螢幕 quad
+        // 畫全螢幕 quad
         encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
 
         encoder.endEncoding()

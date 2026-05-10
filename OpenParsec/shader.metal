@@ -6,40 +6,50 @@ struct VertexOut {
     float2 texCoord;
 };
 
-// 頂點着色器：四個頂點 + triangle_strip
-vertex VertexOut vertexPassthrough(uint vertexID [[vertex_id]]) {
+// 頂點着色器：保持 16:9 比例
+vertex VertexOut vertexPassthrough(uint vertexID [[vertex_id]],
+                                   constant float2 &viewSize [[buffer(0)]]) {
     VertexOut out;
 
     float2 positions[4] = {
-        float2(-1.0, -1.0), // 左下
-        float2( 1.0, -1.0), // 右下
-        float2(-1.0,  1.0), // 左上
-        float2( 1.0,  1.0)  // 右上
+        float2(-1.0, -1.0),
+        float2( 1.0, -1.0),
+        float2(-1.0,  1.0),
+        float2( 1.0,  1.0)
     };
 
     float2 texCoords[4] = {
-        float2(0.0, 1.0), // 左下 → UV (0,1)
-        float2(1.0, 1.0), // 右下 → UV (1,1)
-        float2(0.0, 0.0), // 左上 → UV (0,0)
-        float2(1.0, 0.0)  // 右上 → UV (1,0)
+        float2(0.0, 1.0),
+        float2(1.0, 1.0),
+        float2(0.0, 0.0),
+        float2(1.0, 0.0)
     };
 
-    out.position = float4(positions[vertexID], 0.0, 1.0);
+    // 固定目標比例 16:9
+    float targetAspect = 16.0 / 9.0;
+    float viewAspect = viewSize.x / viewSize.y;
+
+    float scaleX = (viewAspect > targetAspect) ? targetAspect / viewAspect : 1.0;
+    float scaleY = (viewAspect < targetAspect) ? viewAspect / targetAspect : 1.0;
+
+    out.position = float4(positions[vertexID].x * scaleX,
+                          positions[vertexID].y * scaleY,
+                          0.0, 1.0);
     out.texCoord = texCoords[vertexID];
     return out;
 }
 
-// 片段着色器：NV12 → RGB
+// 片段着色器：NV12 → RGB + 左上角文字 overlay
 fragment float4 fragmentNV12(VertexOut in [[stage_in]],
                              texture2d<float, access::sample> texY [[texture(0)]],
-                             texture2d<float, access::sample> texUV [[texture(1)]]) {
+                             texture2d<float, access::sample> texUV [[texture(1)]],
+                             texture2d<float, access::sample> textOverlay [[texture(2)]]) {
     constexpr sampler s(address::clamp_to_edge, filter::linear);
 
-    // 取樣 Y 與 UV
+    // NV12 取樣
     float y = texY.sample(s, in.texCoord).r;
     float2 uv = texUV.sample(s, in.texCoord).rg;
 
-    // NV12 → RGB 轉換
     float Y = 1.1643 * (y - 0.0625);
     float U = uv.x - 0.5;
     float V = uv.y - 0.5;
@@ -48,5 +58,11 @@ fragment float4 fragmentNV12(VertexOut in [[stage_in]],
     float G = Y - 0.39173 * U - 0.81290 * V;
     float B = Y + 2.017 * U;
 
-    return float4(R, G, B, 1.0);
+    float4 color = float4(R, G, B, 1.0);
+
+    // 疊加文字貼圖 (左上角 Metal Test)
+    float4 overlay = textOverlay.sample(s, in.texCoord);
+    color = mix(color, overlay, overlay.a);
+
+    return color;
 }

@@ -24,28 +24,31 @@ final class ParsecMetalTarget {
 }
 
 
-// 新的處理方式測試
 
-final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,  ParsecRenderController,MTKViewDelegate {
+// 新的處理方式測試 Metal FPS
 
-    // MARK: - Properties
-    let viewController: UIViewController
-    var mtkView: MTKView!
-
-	// FPS
+extension ParsecMetalRenderer: ParsecRenderController {
     var preferredFPS: Int {
         get { mtkView.preferredFramesPerSecond }
         set { mtkView.preferredFramesPerSecond = newValue }
     }
 
-
-    var updateImage: () -> Void
-    private var framesDisplayedCounter = 0
-
-
-	func getFramesDisplayed() -> Int {
+    func getFramesDisplayed() -> Int {
         return framesDisplayedCounter
     }
+}
+
+
+
+// 新的處理方式測試
+
+final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,MTKViewDelegate {
+
+    // MARK: - Properties
+    let viewController: UIViewController
+    var mtkView: MTKView!
+
+	var updateImage: () -> Void
 
     private var metalDevice: MTLDevice!
     private var renderer: ParsecMetalRenderer?
@@ -73,7 +76,20 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,  Parse
         mtkView.enableSetNeedsDisplay = false
         mtkView.framebufferOnly = false
         mtkView.backgroundColor = .red
-        mtkView.preferredFramesPerSecond = preferredFPS
+
+
+
+		// Use configured FPS or device max (for ProMotion displays)
+		let fps = SettingsHandler.shared.preferredFramesPerSecond
+
+		
+		if fps == 0 {
+			// Use device's maximum refresh rate (120Hz on ProMotion iPads)
+			mtkView.preferredFramesPerSecond = Int(UIScreen.main.maximumFramesPerSecond)
+		} else {
+			mtkView.preferredFramesPerSecond = fps
+		}
+
 
         viewController.view.addSubview(mtkView)
 
@@ -103,8 +119,7 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,  Parse
         }
     }
 
-    // MARK: - ParsecRenderController
-    func drawFrameCompleted() { framesDisplayedCounter += 1 }
+
 
     // MARK: - MTKViewDelegate
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
@@ -113,7 +128,6 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,  Parse
 
     func draw(in view: MTKView) {
         renderer?.draw(in: view)
-        drawFrameCompleted()
     }
 
     // MARK: - Clean

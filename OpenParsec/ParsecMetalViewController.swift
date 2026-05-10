@@ -24,241 +24,101 @@ final class ParsecMetalTarget {
 }
 
 
-
-
-class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRenderController, MTKViewDelegate {
-
-	// MARK: - Properties
-	let viewController: UIViewController
-	var mtkView: MTKView!
-	var preferredFPS: Int = 60 {
-		didSet { mtkView?.preferredFramesPerSecond = preferredFPS }
-	}
-	var updateImage: () -> Void
-	private var framesDisplayedCounter = 0
-
-	private var commandQueue: MTLCommandQueue?
-
-	private var metalDevice: MTLDevice!
-
-	// 自己持有的 Parsec target texture
-	private var metalTexture: MTLTexture?
-
-	private var lastWidth: CGFloat = 1.0
-	private var lastHeight: CGFloat = 1.0
-
-	func createParsecTexture(
-		device: MTLDevice,
-		width: Int,
-		height: Int
-	) {
-		let desc = MTLTextureDescriptor.texture2DDescriptor(
-			pixelFormat: .bgra8Unorm,
-			width: width,
-			height: height,
-			mipmapped: false
-		)
-
-		desc.usage = [.shaderRead, .shaderWrite, .renderTarget]
-		desc.storageMode = .private
-	
-		let tex = device.makeTexture(descriptor: desc)!
-
-		// Swift 強引用
-		ParsecMetalTarget.shared.texture = tex
-
-		// ⚠️ C SDK 用的指標
-		ParsecMetalTarget.shared.texturePtr.pointee =
-			Unmanaged.passUnretained(tex).toOpaque()
-	}
-
-
-	// MARK: - Init
-	required init(viewController: UIViewController, updateImage: @escaping () -> Void) {
-		self.viewController = viewController
-		self.updateImage = updateImage
-
-		super.init()
-
-
-		metalDevice = MTLCreateSystemDefaultDevice()
-
-		
-
-
-		ParsecMetalTarget.shared.cqQueue = metalDevice.makeCommandQueue()
-
-		let width = viewController.view.frame.width
-		let height = viewController.view.frame.height
-
-		let alignedWidth = ((width + 15) / 16) * 16
-		let alignedHeight = ((height + 15) / 16) * 16
-
-		self.createParsecTexture(
-			device: metalDevice,
-			width: Int(alignedWidth),
-			height: Int(alignedHeight)
-		)
-		
-
-
-
-
-
-
-	}
-
-
-	
-
-	var renderView: UIView { mtkView }
-
-	// MARK: - Setup
-	func loadViewIfNeeded() {
-		mtkView = MTKView(frame: viewController.view.bounds)
-
-		mtkView.colorPixelFormat = .bgra8Unorm
-		mtkView.device = metalDevice
-		mtkView.isPaused = false
-		mtkView.enableSetNeedsDisplay = false
-		mtkView.framebufferOnly = true
-		
-		mtkView.isHidden = false
-		mtkView.backgroundColor = .red
-		mtkView.preferredFramesPerSecond = preferredFPS
-		mtkView.delegate = self
-
-
-		viewController.view.addSubview(mtkView)
-
-		DispatchQueue.main.async { [weak self] in
-			guard let self = self else { return }
-			self.mtkView.contentScaleFactor = self.viewController.view.window?.screen.nativeScale ?? UIScreen.main.nativeScale
-		}
-
-
-		ParsecMetalViewControllerWrapper.sharedWrapper = self
-	}
-
-	private func aligned(_ x: Int) -> Int { return (x + 1) & ~1 } // 對齊到偶數
-
-	func updateSize(width: CGFloat, height: CGFloat) {
-		guard let view = mtkView else { return }
-
-		let deltaW = abs(width - lastWidth)
-		let deltaH = abs(height - lastHeight)
-		if deltaW > 1 || deltaH > 1 {
-			lastWidth = width
-			lastHeight = height
-
-			DispatchQueue.main.async { [weak self] in
-				guard self != nil else { return }
-
-
-				CParsec.setFrame(width, height, view.contentScaleFactor)
-
-				print("SCALE",view.contentScaleFactor)
-				print("Width:\(width)x\(height)")
-
-			}
-		}
-	}
-
-	// MARK: - ParsecRenderController
-	func drawFrameCompleted() { framesDisplayedCounter += 1 }
-	func getFramesDisplayed() -> Int { framesDisplayedCounter }
-
-	// MARK: - MTKViewDelegate
-	func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
-		//updateSize(width: size.width, height: size.height)
-	}
-
-	func draw(in view: MTKView) {
-
-
-
-		let deltaWidth: CGFloat = view.frame.size.width - lastWidth
-		if deltaWidth > 0.1 || deltaWidth < -0.1
-		{
-			CParsec.setFrame(view.frame.size.width, view.frame.size.height, view.contentScaleFactor)
-			lastWidth = view.frame.size.width
-			print("SCALE",view.contentScaleFactor)
-			print("Width:\(view.frame.size.width)x\( view.frame.size.height)")
-		}
-		
-
-		let cq = ParsecMetalTarget.shared.cqQueue!
-		let tex = ParsecMetalTarget.shared.texture!
-
-
-		print("MTL Device:", metalDevice ?? "none")
-		print("CQ Device",String(describing: cq.device))
-		print("TEX Device",String(describing: tex.device))
-
-
-
-
-
-			// 渲染 Parsec 到自持有 texture
-			let status = CParsec.renderMetalFrame(
-				queue: cq ,
-				texture: tex,
-				timeout: 16
-			)
-
-			print("Parsec render status:", status)
-
-
-
-
-
-
-		
-		drawFrameCompleted()
-		updateImage()
-	}
-
-	func olddraw(in view: MTKView) {
-		guard let drawable = view.currentDrawable,
-			  let rpd = view.currentRenderPassDescriptor,
-			  let commandQueue = commandQueue else {
-			return
-		}
-
-		// 🔴 清成紅色
-		rpd.colorAttachments[0].clearColor =
-			MTLClearColor(red: 1, green: 0, blue: 0, alpha: 1)
-		rpd.colorAttachments[0].loadAction = .clear
-		rpd.colorAttachments[0].storeAction = .store
-
-		let commandBuffer = commandQueue.makeCommandBuffer()!
-		let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: rpd)!
-		encoder.endEncoding()
-
-		commandBuffer.present(drawable)
-		commandBuffer.commit()
-
-		print("TEX size:", drawable.texture.width, drawable.texture.height )
-
-		print("TEX type:", String(describing: drawable.texture.textureType) )
-
-		print("TEX format:", String(describing: drawable.texture.pixelFormat) )
-
-
-
-
-	}
-
-	// MARK: - Clean
-	func cleanUp() {
-		mtkView?.removeFromSuperview()
-		mtkView = nil
-		metalTexture = nil
-	}
-
-	// MARK: - Shared
-	static var sharedWrapper: ParsecMetalViewControllerWrapper?
+// 新的處理方式測試
+
+final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRenderController, MTKViewDelegate {
+
+    // MARK: - Properties
+    let viewController: UIViewController
+    var mtkView: MTKView!
+    var preferredFPS: Int = 60 {
+        didSet { mtkView?.preferredFramesPerSecond = preferredFPS }
+    }
+    var updateImage: () -> Void
+    private var framesDisplayedCounter = 0
+
+    private var metalDevice: MTLDevice!
+    private var renderer: ParsecMetalRenderer?
+
+    private var lastWidth: CGFloat = 1.0
+    private var lastHeight: CGFloat = 1.0
+
+    // MARK: - Init
+    required init(viewController: UIViewController, updateImage: @escaping () -> Void) {
+        self.viewController = viewController
+        self.updateImage = updateImage
+        super.init()
+
+        metalDevice = MTLCreateSystemDefaultDevice()
+    }
+
+    var renderView: UIView { mtkView }
+
+    // MARK: - Setup
+    func loadViewIfNeeded() {
+        mtkView = MTKView(frame: viewController.view.bounds)
+        mtkView.colorPixelFormat = .bgra8Unorm
+        mtkView.device = metalDevice
+        mtkView.isPaused = false
+        mtkView.enableSetNeedsDisplay = false
+        mtkView.framebufferOnly = false
+        mtkView.backgroundColor = .red
+        mtkView.preferredFramesPerSecond = preferredFPS
+
+        viewController.view.addSubview(mtkView)
+
+        // 初始化新的 PollFrame Renderer
+        renderer = ParsecMetalRenderer(mtkView, updateImage: updateImage)
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.mtkView.contentScaleFactor = self.viewController.view.window?.screen.nativeScale ?? UIScreen.main.nativeScale
+        }
+
+        ParsecMetalViewControllerWrapper.sharedWrapper = self
+    }
+
+    func updateSize(width: CGFloat, height: CGFloat) {
+        guard let view = mtkView else { return }
+        let deltaW = abs(width - lastWidth)
+        let deltaH = abs(height - lastHeight)
+        if deltaW > 1 || deltaH > 1 {
+            lastWidth = width
+            lastHeight = height
+            DispatchQueue.main.async {
+                CParsec.setFrame(width, height, view.contentScaleFactor)
+                print("SCALE", view.contentScaleFactor)
+                print("Width:\(width)x\(height)")
+            }
+        }
+    }
+
+    // MARK: - ParsecRenderController
+    func drawFrameCompleted() { framesDisplayedCounter += 1 }
+    func getFramesDisplayed() -> Int { framesDisplayedCounter }
+
+    // MARK: - MTKViewDelegate
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        // 可以在這裡更新尺寸
+    }
+
+    func draw(in view: MTKView) {
+        renderer?.draw(in: view)
+        drawFrameCompleted()
+    }
+
+    // MARK: - Clean
+    func cleanUp() {
+        mtkView?.removeFromSuperview()
+        mtkView = nil
+        renderer = nil
+    }
+
+    // MARK: - Shared
+    static var sharedWrapper: ParsecMetalViewControllerWrapper?
 }
+
+
 
 
 //

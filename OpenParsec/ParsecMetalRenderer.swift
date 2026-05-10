@@ -2,47 +2,113 @@ import MetalKit
 import ParsecSDK
 import OSLog
 
-//
-//class ParsecMetalRenderer:NSObject, MTKViewDelegate
-//{
-//	var parent:ParsecMetalViewController
-//	var onBeforeRender:() -> Void
-//	var metalDevice:MTLDevice!
-//	var metalCommandQueue:MTLCommandQueue!
-//	var metalTexture:MTLTexture!
-//	var metalTexturePtr: UnsafeMutableRawPointer?
-//
-//	var lastWidth:CGFloat = 1.0
-//
-//	init(_ parent:ParsecMetalViewController, _ beforeRender:@escaping () -> Void)
-//	{
-//		self.parent = parent;
-//		onBeforeRender = beforeRender
-//		if let metalDevice = MTLCreateSystemDefaultDevice()
-//		{
-//			self.metalDevice = metalDevice
-//		}
-//		self.metalCommandQueue = metalDevice.makeCommandQueue()
-//		metalTexture = metalDevice.makeTexture(descriptor:MTLTextureDescriptor())
-//		metalTexturePtr = createTextureRef(&metalTexture)
-//
-//		super.init()
-//	}
-//
-//	func mtkView(_ view:MTKView, drawableSizeWillChange size: CGSize) { }
-//
-//	func draw(in view:MTKView)
-//	{
-//		onBeforeRender()
-//		let deltaWidth: CGFloat = view.frame.size.width - lastWidth
-//		if deltaWidth > 0.1 || deltaWidth < -0.1
-//		{
-//			CParsec.setFrame(view.frame.size.width, view.frame.size.height, view.contentScaleFactor)
-//			lastWidth = view.frame.size.width
-//		}
-//		CParsec.renderMetalFrame(&metalCommandQueue, &metalTexturePtr)
-//	}
-//}
+class ParsecMetalRenderer: NSObject, MTKViewDelegate {
+    var mtkView: MTKView
+    var updateImage: () -> Void
+
+    private var commandQueue: MTLCommandQueue!
+    private var pipelineState: MTLRenderPipelineState!
+    private var currentTexture: MTLTexture?
+
+    private var lastWidth: CGFloat = 1.0
+    private var lastHeight: CGFloat = 1.0
+
+    init(_ view: MTKView, updateImage: @escaping () -> Void) {
+        self.mtkView = view
+        self.updateImage = updateImage
+        super.init()
+
+        guard let device = view.device else { fatalError("Metal device not found") }
+        commandQueue = device.makeCommandQueue()
+
+        // 建立簡單的 passthrough pipeline
+        if let library = device.makeDefaultLibrary(),
+           let vertexFunc = library.makeFunction(name: "vertexPassthrough"),
+           let fragmentFunc = library.makeFunction(name: "fragmentPassthrough") {
+
+            let pipelineDesc = MTLRenderPipelineDescriptor()
+            pipelineDesc.vertexFunction = vertexFunc
+            pipelineDesc.fragmentFunction = fragmentFunc
+            pipelineDesc.colorAttachments[0].pixelFormat = view.colorPixelFormat
+
+            pipelineState = try? device.makeRenderPipelineState(descriptor: pipelineDesc)
+        }
+
+        view.delegate = self
+        view.enableSetNeedsDisplay = false
+        view.isPaused = false
+        view.framebufferOnly = false
+        view.colorPixelFormat = .bgra8Unorm
+    }
+
+    // PollFrame → 取得最新畫面
+    func pollFrame() {
+        let status = ParsecClientPollFrame(
+            _parsec,
+            0, // stream index
+            { framePtr, opaque in
+                guard let frame = framePtr?.pointee else { return }
+                self.handleFrame(frame)
+            },
+            16, // timeout ms
+            nil
+        )
+        print("PollFrame status:", status)
+    }
+
+    // 把 ParsecFrame 複製到 Metal Texture
+    private func handleFrame(_ frame: ParsecFrame) {
+        let width = Int(frame.width)
+        let height = Int(frame.height)
+
+        let desc = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .bgra8Unorm,
+            width: width,
+            height: height,
+            mipmapped: false
+        )
+        desc.usage = [.shaderRead, .shaderWrite]
+        desc.storageMode = .shared
+
+        guard let tex = mtkView.device?.makeTexture(descriptor: desc) else { return }
+
+        tex.replace(
+            region: MTLRegionMake2D(0, 0, width, height),
+            mipmapLevel: 0,
+            withBytes: frame.data,
+            bytesPerRow: Int(frame.stride)
+        )
+
+        currentTexture = tex
+    }
+
+    // MTKViewDelegate
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
+        lastWidth = size.width
+        lastHeight = size.height
+        CParsec.setFrame(size.width, size.height, view.contentScaleFactor)
+    }
+
+    func draw(in view: MTKView) {
+        pollFrame() // 每次 draw 前先 poll 一次 frame
+
+        guard let drawable = view.currentDrawable,
+              let commandBuffer = commandQueue.makeCommandBuffer(),
+              let renderPass = view.currentRenderPassDescriptor,
+              let tex = currentTexture else { return }
+
+        let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPass)!
+        encoder.setRenderPipelineState(pipelineState)
+        encoder.setFragmentTexture(tex, index: 0)
+        encoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: 6)
+        encoder.endEncoding()
+
+        commandBuffer.present(drawable)
+        commandBuffer.commit()
+
+        updateImage()
+    }
+}
 
 
 

@@ -457,6 +457,7 @@ struct ParsecView: View
 
 		ParsecRenderCenter.shared.requestResolutionUpdate()
 		ParsecRenderCenter.shared.applyIfPossible()
+		
 
 	}
 

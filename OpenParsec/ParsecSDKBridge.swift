@@ -113,8 +113,8 @@ class ParsecSDKBridge: ParsecService
 
 		var parsecClientCfg = ParsecClientConfig()
 		parsecClientCfg.video.0.decoderIndex = 1
-		parsecClientCfg.video.0.resolutionX = Int32(SettingsHandler.shared.resolution.width)
-		parsecClientCfg.video.0.resolutionY = Int32(SettingsHandler.shared.resolution.height)
+		parsecClientCfg.video.0.resolutionX = 0
+		parsecClientCfg.video.0.resolutionY = 0
 
 		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.shared.decoderCompatibility
 		parsecClientCfg.video.0.decoder444 = SettingsHandler.shared.decoder444
@@ -126,12 +126,12 @@ class ParsecSDKBridge: ParsecService
 
 		print("Debug H265? -> \(parsecClientCfg.video.0.decoderH265)")
 
-//		parsecClientCfg.video.1.decoderIndex = 1
-//		parsecClientCfg.video.1.resolutionX = 0
-//		parsecClientCfg.video.1.resolutionY = 0
-//		parsecClientCfg.video.1.decoderCompatibility = false
-//		parsecClientCfg.video.1.decoderH265 = true
-//
+		//		parsecClientCfg.video.1.decoderIndex = 1
+		//		parsecClientCfg.video.1.resolutionX = 0
+		//		parsecClientCfg.video.1.resolutionY = 0
+		//		parsecClientCfg.video.1.decoderCompatibility = false
+		//		parsecClientCfg.video.1.decoderH265 = true
+		//
 		
 		parsecClientCfg.mediaContainer = 0
 		parsecClientCfg.protocol = 1
@@ -146,6 +146,34 @@ class ParsecSDKBridge: ParsecService
 		self.startBackgroundTask()
 
 		return status
+	}
+
+
+	func applyConfig() {
+
+		var parsecClientCfg = ParsecClientConfig()
+
+		parsecClientCfg.video.0.decoderIndex = 1
+		parsecClientCfg.video.0.resolutionX = 0
+		parsecClientCfg.video.0.resolutionY = 0
+		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.shared.decoderCompatibility
+		parsecClientCfg.video.0.decoderH265 = SettingsHandler.shared.decoder == .h265
+		parsecClientCfg.video.0.decoder444 = SettingsHandler.shared.decoder444
+
+		//可能是多餘的流
+		//		parsecClientCfg.video.1.decoderIndex = 1
+		//		parsecClientCfg.video.1.resolutionX = 0
+		//		parsecClientCfg.video.1.resolutionY = 0
+		//		parsecClientCfg.video.1.decoderCompatibility = false
+		//		parsecClientCfg.video.1.decoderH265 = SettingsHandler.shared.decoder == .h265
+		//
+
+		parsecClientCfg.mediaContainer = mediaContainer
+		parsecClientCfg.protocol = netProtocol
+		//parsecClientCfg.secret = ""
+		parsecClientCfg.pngCursor = pngCursor
+
+		ParsecClientSetConfig(_parsec, &parsecClientCfg);
 	}
 
 
@@ -407,32 +435,7 @@ class ParsecSDKBridge: ParsecService
 		audio_mute(muted, _audioPtr)
 	}
 	
-	func applyConfig() {
-
-		var parsecClientCfg = ParsecClientConfig()
-
-		parsecClientCfg.video.0.decoderIndex = 1
-		parsecClientCfg.video.0.resolutionX = 0
-		parsecClientCfg.video.0.resolutionY = 0
-		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.shared.decoderCompatibility
-		parsecClientCfg.video.0.decoderH265 = SettingsHandler.shared.decoder == .h265
-		parsecClientCfg.video.0.decoder444 = SettingsHandler.shared.decoder444
-
-		//可能是多餘的流
-//		parsecClientCfg.video.1.decoderIndex = 1
-//		parsecClientCfg.video.1.resolutionX = 0
-//		parsecClientCfg.video.1.resolutionY = 0
-//		parsecClientCfg.video.1.decoderCompatibility = false
-//		parsecClientCfg.video.1.decoderH265 = SettingsHandler.shared.decoder == .h265
-//
-
-		parsecClientCfg.mediaContainer = mediaContainer
-		parsecClientCfg.protocol = netProtocol
-		//parsecClientCfg.secret = ""
-		parsecClientCfg.pngCursor = pngCursor
-
-		ParsecClientSetConfig(_parsec, &parsecClientCfg);
-	}
+	
 	
 	func sendMouseMessage(_ button:ParsecMouseButton, _ x:Int32, _ y:Int32, _ pressed: Bool)
 	{

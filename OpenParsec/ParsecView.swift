@@ -96,7 +96,7 @@ struct ParsecStatusBar : View {
 			let decoderName = String.fromBuffer(&pcs.decoder.0.name.0, length: 16)
 			
 			// ✅ 新增 FPS 參數（舉例，你的 GLK FPS）
-			let glkFPS = SettingsHandler.preferredFramesPerSecond
+			let glkFPS = SettingsHandler.shared.preferredFramesPerSecond
             let glkCFPS = ParsecRenderCenter.shared.currentFPS()
 			// 查增量實際 FPS（可每秒刷新）
 			let deltaFPS = ParsecRenderCenter.shared.deltaFPS()
@@ -353,7 +353,7 @@ struct ParsecView: View
 						// 主按鈕
 						mainButton
 
-						if SettingsHandler.showKeyboardButton {
+						if SettingsHandler.shared.showKeyboardButton {
 							// 快速呼出keyboard
 							keyboardButton
 						}
@@ -375,7 +375,7 @@ struct ParsecView: View
 			.zIndex(2)
 
 		}
-		.statusBarHidden(SettingsHandler.hideStatusBar)
+		.statusBarHidden(SettingsHandler.shared.hideStatusBar)
 		.alert(isPresented:$showDCAlert)
 		{
 			Alert(title: Text(DCAlertText), dismissButton:.default(Text("Close"), action:disconnect))
@@ -388,7 +388,7 @@ struct ParsecView: View
 	{
 
 	
-		hideOverlay = SettingsHandler.noOverlay
+		hideOverlay = SettingsHandler.shared.noOverlay
 
         // Setup callback to update local state
         parsecViewController.onKeyboardVisibilityChanged = { visible in

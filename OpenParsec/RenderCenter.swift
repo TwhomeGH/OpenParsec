@@ -38,7 +38,7 @@ final class ParsecRenderCenter {
 	var viewController: ParsecViewController? // Metal/OpenGL
 
 
-	var rendererType: RendererType = SettingsHandler.renderer
+	var rendererType: RendererType = SettingsHandler.shared.renderer
 
 	private(set) var isInitialized = false
 	private(set) var isClientInitialized = false

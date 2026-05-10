@@ -69,7 +69,7 @@ class ParsecGLKViewController : ParsecPlayground{
 
 
 		// Use configured FPS or device max (for ProMotion displays)
-		let fps = SettingsHandler.preferredFramesPerSecond
+		let fps = SettingsHandler.shared.preferredFramesPerSecond
 
 		
 		if fps == 0 {

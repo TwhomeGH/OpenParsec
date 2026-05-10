@@ -70,7 +70,7 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 	var lastPanLocation: CGPoint = .zero
 	var lastPanTranslation: CGPoint = .zero
 	
-	var mouseSensitivity: Float = Float(SettingsHandler.mouseSensitivity)
+	var mouseSensitivity: Float = Float(SettingsHandler.shared.mouseSensitivity)
 	var activatedPanFingerNumber: Int = 0
 	
 	var keyboardAccessoriesView : UIView?
@@ -126,10 +126,10 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 			}
 
 			// Using tracked values for bounds
-			let newFrame = CGRect(x: Int(currentMouseX) - Int(Double(CParsec.mouseInfo.cursorHotX) * SettingsHandler.cursorScale),
-							  y: Int(currentMouseY) - Int(Double(CParsec.mouseInfo.cursorHotY) * SettingsHandler.cursorScale),
-							  width: Int(Double(CParsec.mouseInfo.cursorWidth) * SettingsHandler.cursorScale),
-							  height: Int(Double(CParsec.mouseInfo.cursorHeight) * SettingsHandler.cursorScale))
+			let newFrame = CGRect(x: Int(currentMouseX) - Int(Double(CParsec.mouseInfo.cursorHotX) * SettingsHandler.shared.cursorScale),
+							  y: Int(currentMouseY) - Int(Double(CParsec.mouseInfo.cursorHotY) * SettingsHandler.shared.cursorScale),
+							  width: Int(Double(CParsec.mouseInfo.cursorWidth) * SettingsHandler.shared.cursorScale),
+							  height: Int(Double(CParsec.mouseInfo.cursorHeight) * SettingsHandler.shared.cursorScale))
 
 			if u?.frame != newFrame {
 				u?.frame = newFrame
@@ -273,7 +273,7 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 
 		scrollView.contentSize = view.bounds.size
 
-		let RenderType = SettingsHandler.renderer
+		let RenderType = SettingsHandler.shared.renderer
 
 		renderer = createRenderer(type: RenderType)
 
@@ -577,7 +577,7 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 				accumulatedDeltaY = 0.0
 				lastPanTranslation = .zero
 
-				if SettingsHandler.cursorMode == .direct {
+				if SettingsHandler.shared.cursorMode == .direct {
 					let button = ParsecMouseButton.init(rawValue: 1)
 					CParsec.sendMouseClickMessage(button, false)
 				}
@@ -602,14 +602,14 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 				CParsec.sendWheelMsg(x: 0, y: Int32(Float(velocity.y) / 20 * mouseSensitivity))
 				return
 			}
-			if SettingsHandler.cursorMode == .direct {
+			if SettingsHandler.shared.cursorMode == .direct {
 				let location = gestureRecognizer.location(in:gestureRecognizer.view)
 				touchController.onTouch(typeOfTap: 1, location: location, state: gestureRecognizer.state)
 			}
 		} else if activatedPanFingerNumber == 1 || (gestureRecognizer.numberOfTouches == 1 && activatedPanFingerNumber == 0) {
 			activatedPanFingerNumber = 1
 			// move mouse
-			if SettingsHandler.cursorMode == .direct {
+			if SettingsHandler.shared.cursorMode == .direct {
                 // Map screen tap to content coordinates
 				let position = gestureRecognizer.location(in: gestureRecognizer.view)
                 // Convert to content coordinates
@@ -646,7 +646,7 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 				}
 			}
 
-			if gestureRecognizer.state == .began && SettingsHandler.cursorMode == .direct {
+			if gestureRecognizer.state == .began && SettingsHandler.shared.cursorMode == .direct {
 				let button = ParsecMouseButton.init(rawValue: 1)
 				CParsec.sendMouseClickMessage(button, true)
 			}
@@ -664,7 +664,7 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 	@objc func handleTwoFingerTap(_ gestureRecognizer: UITapGestureRecognizer) {
 		
 		let location : CGPoint;
-		switch SettingsHandler.rightClickPosition {
+		switch SettingsHandler.shared.rightClickPosition {
 		case .firstFinger:
 			location = gestureRecognizer.location(ofTouch: 0, in: gestureRecognizer.view)
 			break;
@@ -684,7 +684,7 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 	}
 	
 	@objc func handleLongPress(_ gestureRecognizer: UIGestureRecognizer) {
-		if SettingsHandler.cursorMode != .touchpad {
+		if SettingsHandler.shared.cursorMode != .touchpad {
 			return
 		}
 		let button = ParsecMouseButton.init(rawValue: 1)

@@ -34,7 +34,7 @@ class TouchController
 
 		let parsecTap = ParsecMouseButton(rawValue: UInt32(typeOfTap))
 
-		if SettingsHandler.cursorMode == .direct {
+		if SettingsHandler.shared.cursorMode == .direct {
 			let x = Int32(location.x)
 			let y = Int32(location.y)
 

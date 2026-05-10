@@ -493,7 +493,7 @@ class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground, ParsecRender
 //
 //		mtkView.colorPixelFormat = .bgra8Unorm
 //
-//        mtkView.preferredFramesPerSecond = SettingsHandler.fpsPerFrame
+//        mtkView.preferredFramesPerSecond = SettingsHandler.shared.fpsPerFrame
 //
 //		mtkView.clearColor = MTLClearColor(
 //			red: 1.0,

@@ -51,8 +51,15 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 	}
 
 	func getFramesDisplayed() -> Int {
-		return framesDisplayedCounter
+		let RES = framesDisplayedCounter
+
+		ParsecRenderCenter.shared.Update_DebugMES("MetalFPS:\(RES)")
+
+		return RES 
 	}
+
+
+	
 
     private var lastWidth: CGFloat = 1.0
     private var lastHeight: CGFloat = 1.0

@@ -196,6 +196,17 @@ final class ParsecRenderCenter {
 
 	}
 
+	var Debug_MES: String = ""
+
+	func DebugMes() {
+
+		return Debug_MES 
+	}
+
+
+	func Update_DebugMes(_ text:String) {
+		Debug_MES = text
+	}
 
 
 	func updateFPS(_ fps: Int) {

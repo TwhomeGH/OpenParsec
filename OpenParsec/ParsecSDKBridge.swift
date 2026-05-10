@@ -113,8 +113,8 @@ class ParsecSDKBridge: ParsecService
 
 		var parsecClientCfg = ParsecClientConfig()
 		parsecClientCfg.video.0.decoderIndex = 1
-		parsecClientCfg.video.0.resolutionX = SettingsHandler.shared.resolution.width
-		parsecClientCfg.video.0.resolutionY = SettingsHandler.shared.resolution.height
+		parsecClientCfg.video.0.resolutionX = Int32(SettingsHandler.shared.resolution.width)
+		parsecClientCfg.video.0.resolutionY = Int32(SettingsHandler.shared.resolution.height)
 
 		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.shared.decoderCompatibility
 		parsecClientCfg.video.0.decoder444 = SettingsHandler.shared.decoder444

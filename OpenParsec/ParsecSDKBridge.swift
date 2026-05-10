@@ -252,17 +252,18 @@ class ParsecSDKBridge: ParsecService
 		}
 	}
 
-	// C-compatible callback
 	private func parsecFrameCallback(
-		framePtr: UnsafeMutablePointer<ParsecFrame>?,
+		framePtr: UnsafePointer<ParsecFrame>?,
 		imagePtr: UnsafeRawPointer?,
-		opaque: UnsafeRawPointer?
+		opaque: UnsafeMutableRawPointer?
 	) {
 		guard let frame = framePtr?.pointee, let image = imagePtr else { return }
-
 		let handler = Unmanaged<FrameHandler>.fromOpaque(opaque!).takeUnretainedValue()
 		handler.onFrame(frame, image)
 	}
+
+
+
 	// 在 CParsec 封裝層
 	// Swift wrapper
 

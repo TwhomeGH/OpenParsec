@@ -184,9 +184,11 @@
 				FC16A7AC29A97BDA00BB70A7 /* Shared.swift */,
 				27A923DF29E8E53000F54BDA /* TouchHandlingView.swift */,
 				27A923E129E8FEE900F54BDA /* UIViewControllerWrapper.swift */,
+
 				99AABBCCDDEEFF0011223344 /* Logger.swift */,
 				88AABBCCDDEEFF0011223344 /* LogViewController.swift */,
 				77AABBCCDDEEFF0011223344 /* LogViewWrapper.swift */,
+
 				27AC751729EA339B00E8CAF7 /* URLImage.swift */,
 				17CD1E022BF07BC3003D2102 /* ViewContainerPatch.swift */,
 			);
@@ -309,6 +311,10 @@
 				17374D412CB8E35D00EDCEE7 /* KeyCodeTranslators.swift in Sources */,
 				271D14F9292E90EB00D7F1D6 /* ParsecView.swift in Sources */,
 				CE02CB082F14482F003714A3 /* shader.metal in Sources */,
+
+				99AABBCCDDEEFF0011223344 /* Logger.swift */,
+				88AABBCCDDEEFF0011223344 /* LogViewController.swift */,
+				77AABBCCDDEEFF0011223344 /* LogViewWrapper.swift */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

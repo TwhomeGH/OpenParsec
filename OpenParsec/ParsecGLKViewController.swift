@@ -74,8 +74,7 @@ class ParsecGLKViewController : ParsecPlayground{
 		glkViewController.view = glkView
 
 		glkView.contentScaleFactor = UIScreen.main.scale
-		glkView.drawableWidth  = Int(glkView.bounds.width  * UIScreen.main.scale)
-		glkView.drawableHeight = Int(glkView.bounds.height * UIScreen.main.scale)
+
 
 
 

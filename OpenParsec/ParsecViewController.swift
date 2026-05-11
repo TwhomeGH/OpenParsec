@@ -64,7 +64,6 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
     var lastMouseX: Int32 = -1
     var lastMouseY: Int32 = -1
     var lastCursorHidden: Bool = false
-	var lastVideoFrame: CGRect = .zero
 	var isPinching = false
 	var zoomEnabled = false
 	var lastLongPressPoint : CGPoint = CGPoint()
@@ -98,97 +97,6 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 		self.gamePadController = GamepadController(viewController: self)
 		self.touchController = TouchController(viewController: self)
 	}
-
-	private func videoFrameInContent() -> CGRect {
-		guard let contentView = contentView else { return .zero }
-
-		let bounds = contentView.bounds
-		guard bounds.width > 0, bounds.height > 0 else { return bounds }
-
-		let targetAspect: CGFloat
-		if SettingsHandler.shared.renderer == .metal {
-			// The Metal shader currently renders the remote video aspect-fit at 16:9.
-			targetAspect = 16.0 / 9.0
-		} else {
-			// The GL SDK renderer sets its own viewport from SetDimensions.
-			let hostWidth = CGFloat(max(CParsec.hostWidth, 1.0))
-			let hostHeight = CGFloat(max(CParsec.hostHeight, 1.0))
-			targetAspect = hostWidth / hostHeight
-		}
-
-		let viewAspect = bounds.width / bounds.height
-
-		if viewAspect > targetAspect {
-			let width = bounds.height * targetAspect
-			let x = bounds.minX + (bounds.width - width) / 2.0
-			return CGRect(x: x, y: bounds.minY, width: width, height: bounds.height)
-		}
-
-		let height = bounds.width / targetAspect
-		let y = bounds.minY + (bounds.height - height) / 2.0
-		return CGRect(x: bounds.minX, y: y, width: bounds.width, height: height)
-	}
-
-	private func clamp(_ value: CGFloat, min minValue: CGFloat, max maxValue: CGFloat) -> CGFloat {
-		return min(max(value, minValue), maxValue)
-	}
-
-	private func clientSize() -> CGSize {
-		return CGSize(
-			width: max(CGFloat(CParsec.clientWidth), 1.0),
-			height: max(CGFloat(CParsec.clientHeight), 1.0)
-		)
-	}
-
-	private func contentPoint(fromClientX x: Int32, y: Int32) -> CGPoint {
-		let frame = videoFrameInContent()
-
-		if SettingsHandler.shared.renderer == .opengl {
-			return CGPoint(
-				x: clamp(CGFloat(x), min: frame.minX, max: frame.maxX),
-				y: clamp(CGFloat(y), min: frame.minY, max: frame.maxY)
-			)
-		}
-
-		let size = clientSize()
-		return CGPoint(
-			x: frame.minX + CGFloat(x) / size.width * frame.width,
-			y: frame.minY + CGFloat(y) / size.height * frame.height
-		)
-	}
-
-	private func clientPoint(fromContentPoint point: CGPoint) -> CGPoint {
-		if SettingsHandler.shared.renderer == .opengl {
-			let size = clientSize()
-			return CGPoint(
-				x: clamp(point.x, min: 0.0, max: size.width),
-				y: clamp(point.y, min: 0.0, max: size.height)
-			)
-		}
-
-		let frame = videoFrameInContent()
-		let size = clientSize()
-		guard frame.width > 0, frame.height > 0 else { return .zero }
-
-		let normalizedX = max(0.0, min((point.x - frame.minX) / frame.width, 1.0))
-		let normalizedY = max(0.0, min((point.y - frame.minY) / frame.height, 1.0))
-		return CGPoint(x: normalizedX * size.width, y: normalizedY * size.height)
-	}
-
-	private func clientDelta(fromContentDelta delta: CGSize) -> CGSize {
-		if SettingsHandler.shared.renderer == .opengl {
-			return delta
-		}
-
-		let frame = videoFrameInContent()
-		let size = clientSize()
-		guard frame.width > 0, frame.height > 0 else { return .zero }
-
-		return CGSize(
-			width: delta.width * size.width / frame.width,
-			height: delta.height * size.height / frame.height
-		)
-	}
 	
 	required init?(coder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
@@ -200,21 +108,18 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
         let currentMouseY = CParsec.mouseInfo.mouseY
         let currentHidden = CParsec.mouseInfo.cursorHidden
         let currentImg = CParsec.mouseInfo.cursorImg
-		let currentVideoFrame = videoFrameInContent()
         
         // Skip if nothing changed
         if currentMouseX == lastMouseX &&
            currentMouseY == lastMouseY &&
            currentHidden == lastCursorHidden &&
-           currentImg == lastImg &&
-		   currentVideoFrame == lastVideoFrame {
+           currentImg == lastImg {
             return
         }
         
         lastMouseX = currentMouseX
         lastMouseY = currentMouseY
         lastCursorHidden = currentHidden
-		lastVideoFrame = currentVideoFrame
         
 		if currentImg != nil && !currentHidden {
 			if lastImg != currentImg || u?.image == nil {
@@ -222,18 +127,11 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 				lastImg = currentImg!
 			}
 
-			let cursorPoint = contentPoint(fromClientX: currentMouseX, y: currentMouseY)
-			let size = clientSize()
-			let displayScale = SettingsHandler.shared.renderer == .opengl
-				? 1.0
-				: min(currentVideoFrame.width / size.width, currentVideoFrame.height / size.height)
-			let cursorScale = CGFloat(SettingsHandler.shared.cursorScale) * displayScale
-			let newFrame = CGRect(
-				x: cursorPoint.x - CGFloat(CParsec.mouseInfo.cursorHotX) * cursorScale,
-				y: cursorPoint.y - CGFloat(CParsec.mouseInfo.cursorHotY) * cursorScale,
-				width: CGFloat(CParsec.mouseInfo.cursorWidth) * cursorScale,
-				height: CGFloat(CParsec.mouseInfo.cursorHeight) * cursorScale
-			)
+			// Using tracked values for bounds
+			let newFrame = CGRect(x: Int(currentMouseX) - Int(Double(CParsec.mouseInfo.cursorHotX) * SettingsHandler.shared.cursorScale),
+							  y: Int(currentMouseY) - Int(Double(CParsec.mouseInfo.cursorHotY) * SettingsHandler.shared.cursorScale),
+							  width: Int(Double(CParsec.mouseInfo.cursorWidth) * SettingsHandler.shared.cursorScale),
+							  height: Int(Double(CParsec.mouseInfo.cursorHeight) * SettingsHandler.shared.cursorScale))
 
 			if u?.frame != newFrame {
 				u?.frame = newFrame
@@ -715,9 +613,7 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 			}
 			if SettingsHandler.shared.cursorMode == .direct {
 				let location = gestureRecognizer.location(in:gestureRecognizer.view)
-				let adjustedLocation = contentView.convert(location, from: view)
-				let clientLocation = clientPoint(fromContentPoint: adjustedLocation)
-				touchController.onTouch(typeOfTap: 1, location: clientLocation, state: gestureRecognizer.state)
+				touchController.onTouch(typeOfTap: 1, location: location, state: gestureRecognizer.state)
 			}
 		} else if activatedPanFingerNumber == 1 || (gestureRecognizer.numberOfTouches == 1 && activatedPanFingerNumber == 0) {
 			activatedPanFingerNumber = 1
@@ -727,8 +623,7 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 				let position = gestureRecognizer.location(in: gestureRecognizer.view)
                 // Convert to content coordinates
 				let adjustedPosition = contentView.convert(position, from: view)
-				let clientPosition = clientPoint(fromContentPoint: adjustedPosition)
-				CParsec.sendMousePosition(Int32(clientPosition.x), Int32(clientPosition.y))
+				CParsec.sendMousePosition(Int32(adjustedPosition.x), Int32(adjustedPosition.y))
 			} else {
 				// Simple translation-based movement with sub-pixel accumulation
 				let currentTranslation = gestureRecognizer.translation(in: gestureRecognizer.view)
@@ -740,13 +635,8 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 				}
 
 				// Calculate delta since last update
-				let contentDelta = CGSize(
-					width: (currentTranslation.x - lastPanTranslation.x) / max(scrollView.zoomScale, 1.0),
-					height: (currentTranslation.y - lastPanTranslation.y) / max(scrollView.zoomScale, 1.0)
-				)
-				let clientMovement = clientDelta(fromContentDelta: contentDelta)
-				let deltaX = Float(clientMovement.width) * mouseSensitivity
-				let deltaY = Float(clientMovement.height) * mouseSensitivity
+				let deltaX = Float(currentTranslation.x - lastPanTranslation.x) * mouseSensitivity
+				let deltaY = Float(currentTranslation.y - lastPanTranslation.y) * mouseSensitivity
 
 				lastPanTranslation = currentTranslation
 
@@ -777,8 +667,7 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 		
 		let location = gestureRecognizer.location(in:gestureRecognizer.view)
 		let adjustedLocation = contentView.convert(location, from: view)
-		let clientLocation = clientPoint(fromContentPoint: adjustedLocation)
-		touchController.onTap(typeOfTap: 1, location: clientLocation)
+		touchController.onTap(typeOfTap: 1, location: adjustedLocation)
 	}
 	
 	@objc func handleTwoFingerTap(_ gestureRecognizer: UITapGestureRecognizer) {
@@ -796,8 +685,7 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 		}
 
 		let adjustedLocation = contentView.convert(location, from: view)
-		let clientLocation = clientPoint(fromContentPoint: adjustedLocation)
-		touchController.onTap(typeOfTap: 3, location: clientLocation)
+		touchController.onTap(typeOfTap: 3, location: adjustedLocation)
 	}
 	
 	@objc func handleThreeFinderTap(_ gestureRecognizer: UITapGestureRecognizer) {
@@ -819,15 +707,9 @@ extension ParsecViewController : UIGestureRecognizerDelegate {
 		} else if gestureRecognizer.state == .changed {
 			let newLocation = gestureRecognizer.location(in: gestureRecognizer.view)
             let adjustedNewLocation = contentView.convert(newLocation, from: view)
-			let clientMovement = clientDelta(
-				fromContentDelta: CGSize(
-					width: adjustedNewLocation.x - lastLongPressPoint.x,
-					height: adjustedNewLocation.y - lastLongPressPoint.y
-				)
-			)
 			CParsec.sendMouseDelta(
-				Int32(Float(clientMovement.width) * mouseSensitivity),
-				Int32(Float(clientMovement.height) * mouseSensitivity)
+				Int32(Float(adjustedNewLocation.x - lastLongPressPoint.x) * mouseSensitivity),
+				Int32(Float(adjustedNewLocation.y - lastLongPressPoint.y) * mouseSensitivity)
 			)
 			lastLongPressPoint = adjustedNewLocation
 		}

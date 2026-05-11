@@ -302,7 +302,7 @@ class ParsecSDKBridge: ParsecService
 	{
 		let status: ParsecStatus = ParsecClientPollAudio(_parsec, audio_cb, timeout, _audioPtr)
 		// log non-zero status for debugging
-		if status != 0 {
+		if status != PARSEC_OK {
 			let msg = "ParsecClientPollAudio returned \(status)"
 			print(msg)
 			msg.withCString { cstr in

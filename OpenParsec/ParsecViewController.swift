@@ -509,6 +509,8 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 
 			panLockedByKeyboard = true
 
+			renderer.viewController.view.frame = UIScreen.main.bounds
+
 
             // Allow scrolling past current bottom to see hidden content
 			scrollView.contentInset = UIEdgeInsets(

@@ -504,12 +504,11 @@ struct ParsecView: View
 	
 	func toggleH265() {
 		DispatchQueue.main.async {
-			settings.decoder = settings.decoder == .h264 ? .h265 : .h264
-
-			DataManager.model.decoder = settings.decoder
+			SettingsHandler.shared.decoder = SettingsHandler.shared.decoder == .h264 ? .h265 : .h264
+			DataManager.model.decoder = SettingsHandler.shared.decoder
 
 			CParsec.updateHostVideoConfig()
-			write_log_from_swift("decoder \(settings.decoder == .h264 ? "H264" : "H265")")
+			write_log_from_swift("decoder \(SettingsHandler.shared.decoder == .h264 ? "H264" : "H265")")
 
 			// 這裡不需要直接調用 applyIfPossible，因為 updateHostVideoConfig 已經在內部處理了。
 		}
@@ -518,11 +517,11 @@ struct ParsecView: View
 
 	func toggleConstantFps() {
 		DispatchQueue.main.async {
-			settings.savedConstantFps.toggle()
-			DataManager.model.constantFps = settings.savedConstantFps
+			SettingsHandler.shared.savedConstantFps.toggle()
+			DataManager.model.constantFps = SettingsHandler.shared.savedConstantFps
 
 			CParsec.updateHostVideoConfig()
-			write_log_from_swift("constantFps \(settings.savedConstantFps ? "true" : "false")")
+			write_log_from_swift("constantFps \(SettingsHandler.shared.savedConstantFps ? "true" : "false")")
 			// 這裡不需要直接調用 applyIfPossible，因為 updateHostVideoConfig 已經在內部處理了。
 		}
 	}
@@ -538,10 +537,10 @@ struct ParsecView: View
 	
 	func toggleZoom() {
 		DispatchQueue.main.async {
-			settings.savedZoom.toggle()
-			parsecViewController.setZoomEnabled(settings.savedZoom)
+			SettingsHandler.shared.savedZoom.toggle()
+			parsecViewController.setZoomEnabled(SettingsHandler.shared.savedZoom)
 
-			write_log_from_swift("zoomEnabled \(settings.savedZoom ? "true" : "false")")
+			write_log_from_swift("zoomEnabled \(SettingsHandler.shared.savedZoom ? "true" : "false")")
 		}
 	}
 	

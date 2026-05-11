@@ -622,7 +622,7 @@ class ParsecSDKBridge: ParsecService
 	}
 
 	private func sendUnicodeScalar(_ scalar: UnicodeScalar) {
-		switch settings.remoteTextInputMode {
+		switch SettingsHandler.shared.remoteTextInputMode {
 		case .keycodeOnly:
 			os_log("Unsupported virtual keyboard text without unicode input mode: \(String(scalar))")
 		case .linuxUnicode:

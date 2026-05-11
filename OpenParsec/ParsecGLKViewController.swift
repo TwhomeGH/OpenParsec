@@ -155,8 +155,8 @@ class ParsecGLKViewController : ParsecPlayground{
 		print("w:\(width) h:\(height) scale:\(scale)")
 
 
-		glkView.frame.size.width = width
-		glkView.frame.size.height = height
+		glkView.frame = CGRect(x: 0, y: 0, width: width, height: height)
+		CParsec.setFrame(width, height, scale)
 
 	}
 

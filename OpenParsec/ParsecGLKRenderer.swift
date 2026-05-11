@@ -7,6 +7,8 @@ class ParsecGLKRenderer:NSObject, GLKViewDelegate, GLKViewControllerDelegate
 	var glkViewController:GLKViewController
 	
 	var lastWidth:CGFloat = 1.0
+	var lastHeight: CGFloat = 1.0
+	var lastScale: CGFloat = 0.0
 
 	var lastImg: CGImage?
 	let updateImage: () -> Void
@@ -32,13 +34,22 @@ class ParsecGLKRenderer:NSObject, GLKViewDelegate, GLKViewControllerDelegate
 
 	func glkView(_ view:GLKView, drawIn rect:CGRect)
 	{
-		let deltaWidth: CGFloat = view.frame.size.width - lastWidth
-		if deltaWidth > 0.1 || deltaWidth < -0.1
+		let width = view.bounds.size.width
+		let height = view.bounds.size.height
+		let scale = view.contentScaleFactor
+
+		let deltaWidth = abs(width - lastWidth)
+		let deltaHeight = abs(height - lastHeight)
+		let deltaScale = abs(scale - lastScale)
+
+		if deltaWidth > 0.1 || deltaHeight > 0.1 || deltaScale > 0.001
 		{
-		    CParsec.setFrame(view.frame.size.width, view.frame.size.height, view.contentScaleFactor)
-	        lastWidth = view.frame.size.width
-			print("SCALE",view.contentScaleFactor)
-			print("Width:\(view.frame.size.width)x\( view.frame.size.height)")
+		    CParsec.setFrame(width, height, scale)
+	        lastWidth = width
+			lastHeight = height
+			lastScale = scale
+			print("SCALE", scale)
+			print("Width:\(width)x\(height)")
 		}
 
 		// Calculate timeout based on configured/device frame rate

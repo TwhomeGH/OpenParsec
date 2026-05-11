@@ -8,7 +8,11 @@
 
 #define LOG_FILENAME "openparsec_logs.txt"
 #include <limits.h>
+static bool logging_enabled = true;
+
 static void write_log(const char *msg) {
+    if (!logging_enabled) return;
+
     const char *tmpdir = getenv("TMPDIR");
     char path[PATH_MAX];
     if (tmpdir && tmpdir[0] != '\0') {
@@ -28,6 +32,11 @@ static void write_log(const char *msg) {
         fclose(f);
     }
 }
+
+void set_logging_enabled(bool enabled) {
+    logging_enabled = enabled;
+}
+
 
 // non-static wrapper exposed to Swift via bridging header
 void write_log_from_swift(const char *msg) {

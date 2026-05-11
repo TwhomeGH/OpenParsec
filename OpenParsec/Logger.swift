@@ -14,6 +14,7 @@ final class OpenParsecLogger {
     }
 
     func append(_ msg: String) {
+        guard SettingsHandler.shared.enableLogging else { return }
         let line = "\(Date()) - \(msg)\n"
         queue.async {
             if let fh = try? FileHandle(forWritingTo: self.fileURL) {

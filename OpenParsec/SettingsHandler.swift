@@ -13,6 +13,11 @@ final class SettingsHandler: ObservableObject {
 	// 全局配置中軀
 	static let shared = SettingsHandler()   // 單例，全局共用
 
+	private init() {
+		// Initialize C logging flag to current setting
+		set_logging_enabled(enableLogging)
+	}
+
 
 	@AppStorage("renderer") public var renderer: RendererType = .opengl
 
@@ -36,6 +41,7 @@ final class SettingsHandler: ObservableObject {
 
 	@AppStorage("showKeyboardButton") public var showKeyboardButton: Bool = true
 	@AppStorage("remoteTextInputMode") public var remoteTextInputMode: RemoteTextInputMode = .keycodeOnly
+	@AppStorage("enableLogging") public var enableLogging: Bool = true
 
 	// 識別是不是Metal分辨用的文本
 	@AppStorage("MetalText") public var MetalText: Bool = false

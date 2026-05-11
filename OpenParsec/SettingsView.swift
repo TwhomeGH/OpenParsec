@@ -194,7 +194,15 @@ struct SettingsView:View
 								Toggle("", isOn:$settings.showKeyboardButton)
 									.frame(width:80)
 							}
-							CatItem("Remote Text Input")
+							CatItem("Enable Logging")
+				{
+					Toggle("", isOn:$settings.enableLogging)
+						.frame(width:80)
+						.onChange(of: settings.enableLogging) { newValue in
+							set_logging_enabled(newValue)
+						}
+				}
+				CatItem("Remote Text Input")
 							{
 								MultiPicker(selection: $settings.remoteTextInputMode, options:
 								[

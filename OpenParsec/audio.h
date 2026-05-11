@@ -13,4 +13,6 @@ void audio_mute(bool muted, const void *opaque);
 
 // bridge for Swift to write logs from C
 void write_log_from_swift(const char *msg);
+void set_logging_enabled(bool enabled);
+
 

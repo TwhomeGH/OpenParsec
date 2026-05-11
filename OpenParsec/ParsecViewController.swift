@@ -128,11 +128,21 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 			}
 
 			// Using tracked values for bounds
-			let newFrame = CGRect(x: Int(currentMouseX) - Int(Double(CParsec.mouseInfo.cursorHotX) * SettingsHandler.shared.cursorScale),
-							  y: Int(currentMouseY) - Int(Double(CParsec.mouseInfo.cursorHotY) * SettingsHandler.shared.cursorScale),
-							  width: Int(Double(CParsec.mouseInfo.cursorWidth) * SettingsHandler.shared.cursorScale),
-							  height: Int(Double(CParsec.mouseInfo.cursorHeight) * SettingsHandler.shared.cursorScale))
 
+
+
+			// 判斷是否是 GLKView 模式
+			let isGLK = renderer is ParsecGLKViewController
+			let adjustedY = isGLK ? Int(view.bounds.height) - Int(currentMouseY) : Int(currentMouseY)
+
+			let newFrame = CGRect(
+				x: Int(currentMouseX) - Int(Double(CParsec.mouseInfo.cursorHotX) * SettingsHandler.shared.cursorScale),
+				y: adjustedY - Int(Double(CParsec.mouseInfo.cursorHotY) * SettingsHandler.shared.cursorScale),
+				width: Int(Double(CParsec.mouseInfo.cursorWidth) * SettingsHandler.shared.cursorScale),
+				height: Int(Double(CParsec.mouseInfo.cursorHeight) * SettingsHandler.shared.cursorScale)
+			)
+
+			
 			if u?.frame != newFrame {
 				u?.frame = newFrame
 			}

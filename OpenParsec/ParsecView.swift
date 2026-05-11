@@ -158,11 +158,14 @@ struct ParsecView: View
 	@State var showMenu: Bool = false
 
 	@State var showKeyboard: Bool = false
-	@State var zoomEnabled: Bool = false
+	
+	// 已遷義至 SettingsHandler
+	//@State var zoomEnabled: Bool = false
 
-	@State var muted: Bool = false
-    @State var preferH265: Bool = true
-	@State var constantFps = false
+	// 已遷義至 SettingsHandler
+	// @State var muted: Bool = false
+	// @State var preferH265: Bool = true
+	// @State var constantFps = false
 	
 	@State var resolutions: [ParsecResolution]
 	@State var bitrates: [Int]
@@ -246,7 +249,7 @@ struct ParsecView: View
 			}
 			Button(action: toggleMute)
 			{
-				Text("Sound: \(muted ? "OFF" : "ON")")
+				Text("Sound: \(SettingsHandler.shared.savedMuted ? "OFF" : "ON")")
 					.padding(8)
 					.frame(maxWidth:.infinity)
 					.multilineTextAlignment(.center)
@@ -305,16 +308,23 @@ struct ParsecView: View
 				}
 			}
 
+			Button(action: toggleH265)
+			{
+				Text("Codec: \(SettingsHandler.shared.decoder == .h264 ? "H264" : "H265")")
+					.padding(8)
+					.frame(maxWidth:.infinity)
+					.multilineTextAlignment(.center)
+			}
 			Button(action: toggleConstantFps)
 			{
-				Text("Constant FPS: \(constantFps ? "ON" : "OFF")")
+				Text("Constant FPS: \(SettingsHandler.shared.savedConstantFps ? "ON" : "OFF")")
 					.padding(8)
 					.frame(maxWidth:.infinity)
 					.multilineTextAlignment(.center)
 			}
 			Button(action: toggleZoom)
 			{
-				Text("Zoom: \(zoomEnabled ? "ON" : "OFF")")
+				Text("Zoom: \(SettingsHandler.shared.savedZoom ? "ON" : "OFF")")
 					.padding(8)
 					.frame(maxWidth:.infinity)
 					.multilineTextAlignment(.center)
@@ -413,8 +423,11 @@ struct ParsecView: View
 	
 	func toggleMute()
 	{
-		muted.toggle()
-		ParsecRenderCenter.shared.setMuted(muted)
+		SettingsHandler.shared.savedMuted.toggle()
+		ParsecRenderCenter.shared.setMuted(SettingsHandler.shared.savedMuted)
+
+		write_log_from_swift("muted", SettingsHandler.shared.savedMuted ? "true" : "false")
+
 	}
 	
 	/*func genDisplaySheet() -> ActionSheet
@@ -451,6 +464,8 @@ struct ParsecView: View
 		parsecViewController.scrollView.zoomScale = 1.0
 		parsecViewController.scrollView.contentOffset = .zero
 
+		write_log_from_swift("Disconnected", "User initiated disconnect")
+
 		setView(.main)
 	}
 
@@ -468,20 +483,35 @@ struct ParsecView: View
 		ParsecRenderCenter.shared.requestResolutionUpdate()
 		ParsecRenderCenter.shared.applyIfPossible()
 		
+		write_log_from_swift("resolution", "\(res.width)x\(res.height)")
 
 	}
 
 	func changeBitRate(bitrate: Int) {
 		DataManager.model.bitrate = bitrate
 
+		write_log_from_swift("bitrate", "\(bitrate)")
+
 		ParsecRenderCenter.shared.requestBitrateUpdate()
 	}
 	
+	func toggleH265() {
+		DispatchQueue.main.async {
+			SettingsHandler.shared.decoder = SettingsHandler.shared.decoder == .h264 ? .h265 : .h264
+			CParsec.updateHostVideoConfig()
+			write_log_from_swift("decoder", SettingsHandler.shared.decoder == .h264 ? "H264" : "H265")
+			// 這裡不需要直接調用 applyIfPossible，因為 updateHostVideoConfig 已經在內部處理了。
+		}
+	}
+
+
 	func toggleConstantFps() {
 		DispatchQueue.main.async {
-			DataManager.model.constantFps.toggle()
-			constantFps = DataManager.model.constantFps
+			SettingsHandler.shared.savedConstantFps.toggle()
+			DataManager.model.constantFps = SettingsHandler.shared.savedConstantFps
+
 			CParsec.updateHostVideoConfig()
+			write_log_from_swift("constantFps", SettingsHandler.shared.savedConstantFps ? "true" : "false")
 		}
 	}
 
@@ -490,12 +520,16 @@ struct ParsecView: View
 		showKeyboard.toggle()
 		parsecViewController.setKeyboardVisible(showKeyboard)
 
+		write_log_from_swift("keyboardVisible", showKeyboard ? "true" : "false")
+
 	}
 	
 	func toggleZoom() {
 		DispatchQueue.main.async {
-			zoomEnabled.toggle()
-			parsecViewController.setZoomEnabled(zoomEnabled)
+			SettingsHandler.shared.savedZoom.toggle()
+			parsecViewController.setZoomEnabled(SettingsHandler.shared.savedZoom)
+
+			write_log_from_swift("zoomEnabled", SettingsHandler.shared.savedZoom ? "true" : "false")
 		}
 	}
 	
@@ -503,6 +537,9 @@ struct ParsecView: View
 		DispatchQueue.main.async {
 			DataManager.model.output = displayId
 			CParsec.updateHostVideoConfig()
+			
+			write_log_from_swift("display", displayId)
+			// 這裡不需要直接調用 applyIfPossible，因為 updateHostVideoConfig 已經在內部處理了。
 		}
 	}
 	

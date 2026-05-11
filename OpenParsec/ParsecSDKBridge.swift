@@ -346,6 +346,9 @@ class ParsecSDKBridge: ParsecService
 				let config = try decoder.decode(ParsecUserDataVideoConfig.self, from: Data(bytesNoCopy: pointer!, count: strlen(pointer!), deallocator: .none))
 				let videoConfig = config.video[0]
 
+				write_log_from_swift("取得Host寬高: \(videoConfig.resolutionX)x\(videoConfig.resolutionY)")
+				write_log_from_swift("Bitrate \(videoConfig.encoderMaxBitrate) bps, constantFps: \(videoConfig.fullFPS ? "true" : "false"), output: \(videoConfig.output)")
+
 				DispatchQueue.main.async {
 					DataManager.model.resolutionX = videoConfig.resolutionX
 					DataManager.model.resolutionY = videoConfig.resolutionY
@@ -360,8 +363,12 @@ class ParsecSDKBridge: ParsecService
 						DataManager.model.resolutionX = SettingsHandler.shared.resolution.width
 						DataManager.model.resolutionY = SettingsHandler.shared.resolution.height
 
+						write_log_from_swift("Applying resolution from settings: \(SettingsHandler.shared.resolution.width)x\(SettingsHandler.shared.resolution.height)")
+
 						if SettingsHandler.shared.bitrate != 0 {
 							DataManager.model.bitrate = SettingsHandler.shared.bitrate
+
+							write_log_from_swift("Applying bitrate from settings: \(SettingsHandler.shared.bitrate) bps")
 						}
 
 						self.updateHostVideoConfig()

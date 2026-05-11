@@ -2,8 +2,18 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include <AudioToolbox/AudioToolbox.h>
+
+#define LOG_PATH "/tmp/openparsec_logs.txt"
+static void write_log(const char *msg) {
+    FILE *f = fopen(LOG_PATH, "a");
+    if (f) {
+        fprintf(f, "%s", msg);
+        fclose(f);
+    }
+}
 
 #define NUM_AUDIO_BUF 16
 #define BUFFER_SIZE 4096
@@ -299,7 +309,13 @@ void audio_clear(struct audio **ctx_out)
 void audio_cb(const int16_t *pcm, uint32_t frames, void *opaque)
 {
     if ( frames == 0 || opaque == NULL || isMuted )
+	{
+		printf("audio_cb: early return frames=%u opaque=%p isMuted=%d\n", frames, opaque, isMuted);
+		char tmp[256];
+		snprintf(tmp, sizeof(tmp), "audio_cb: early return frames=%u opaque=%p isMuted=%d\n", frames, opaque, isMuted);
+		write_log(tmp);
 		return;
+	}
 	
 	struct audio *ctx = (struct audio *) opaque;
     AudioQueueBufferRef *find_idle = NULL;
@@ -308,6 +324,7 @@ void audio_cb(const int16_t *pcm, uint32_t frames, void *opaque)
 	if ((*find_idle)->mAudioDataByteSize != FAKE_SIZE)
 	{
 		++ctx->fail_num;
+		printf("audio_cb: buffer busy, fail_num=%d\n", ctx->fail_num);
 		if(ctx->fail_num > 10) audio_clear(&ctx);	
 		return;
 	}
@@ -326,11 +343,17 @@ void audio_cb(const int16_t *pcm, uint32_t frames, void *opaque)
 	//ctx->rcm.last_use = find_idle;
 	
 	ctx->in_use += frames *4;
-	//if (!isStart && (ctx->in_use > 1600))
-	if (ctx->in_use > 1000)
+	printf("audio_cb: frames=%u, in_use=%d, fail_num=%d\n", frames, ctx->in_use, ctx->fail_num);
+	char tmp2[128];
+	snprintf(tmp2, sizeof(tmp2), "audio_cb: frames=%u, in_use=%d, fail_num=%d\n", frames, ctx->in_use, ctx->fail_num);
+	write_log(tmp2);
+
+	if (!isStart)
 	{
 		AudioQueueStart(ctx->q, NULL);
 		isStart = true;
+		printf("audio_cb: AudioQueueStart called\n");
+		write_log("audio_cb: AudioQueueStart called\n");
 	}
 }
 

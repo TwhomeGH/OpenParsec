@@ -32,6 +32,7 @@ struct MainView: View
 	@State var isRefreshing: Bool = false
 
 	@State var inSettings: Bool = false
+	@State var showLogs: Bool = false
 
 	var busy: Bool
 	{
@@ -104,6 +105,8 @@ struct MainView: View
 						}
 					}
 					Spacer()
+					Button(action:{ showLogs = true }, label:{ Image(systemName:"waveform") })
+						.padding()
 					Button(action:{ inSettings = true }, label:{ Image(systemName:"gear") })
 						.padding()
 				}
@@ -390,6 +393,7 @@ struct MainView: View
 				}
 			}
 		}
+		.sheet(isPresented: $showLogs) { LogViewControllerWrapper() }
 		.foregroundColor(Color("Foreground"))
 	}
 

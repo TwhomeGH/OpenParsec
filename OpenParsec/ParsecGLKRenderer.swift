@@ -34,9 +34,12 @@ class ParsecGLKRenderer:NSObject, GLKViewDelegate, GLKViewControllerDelegate
 
 	func glkView(_ view:GLKView, drawIn rect:CGRect)
 	{
-		let width = view.bounds.size.width
-		let height = view.bounds.size.height
+
+		// 用 drawableWidth/Height 而不是 bounds
+		let width = CGFloat(view.drawableWidth)
+		let height = CGFloat(view.drawableHeight)
 		let scale = view.contentScaleFactor
+
 
 		let deltaWidth = abs(width - lastWidth)
 		let deltaHeight = abs(height - lastHeight)
@@ -45,6 +48,10 @@ class ParsecGLKRenderer:NSObject, GLKViewDelegate, GLKViewControllerDelegate
 		if deltaWidth > 0.1 || deltaHeight > 0.1 || deltaScale > 0.001
 		{
 		    CParsec.setFrame(width, height, scale)
+
+			// 確保 OpenGL viewport 和 GLKView 對齊
+			glViewport(0, 0, GLsizei(width), GLsizei(height))
+			
 	        lastWidth = width
 			lastHeight = height
 			lastScale = scale

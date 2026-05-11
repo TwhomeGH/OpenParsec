@@ -133,7 +133,10 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 
 			// 判斷是否是 GLKView 模式
 			let isGLK = renderer is ParsecGLKViewController
-			let adjustedY = isGLK ? Int(view.bounds.height) - Int(currentMouseY) : Int(currentMouseY)
+			let scale = UIScreen.main.scale
+
+			// UIKit 用 mouseY，GLK 需要乘上 scale 修正
+			let adjustedY = isGLK ? Int(Double(currentMouseY) / Double(scale)) : Int(currentMouseY)
 
 			let newFrame = CGRect(
 				x: Int(currentMouseX) - Int(Double(CParsec.mouseInfo.cursorHotX) * SettingsHandler.shared.cursorScale),

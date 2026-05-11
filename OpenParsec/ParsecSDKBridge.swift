@@ -133,7 +133,7 @@ class ParsecSDKBridge: ParsecService
 		ParsecDestroy(_parsec)
 		audio_destroy(&_audio)
 		print("清理Parsec 與Audio管線")
-		write_log("清理Parsec 與Audio管線")
+		write_log_from_swift("清理Parsec 與Audio管線")
 
 	}
 

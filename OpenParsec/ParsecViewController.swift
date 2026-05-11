@@ -138,7 +138,7 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 
 			if isGLK {
 				// 用 drawableHeight 對齊 GLK 的座標系
-				adjustedY = Int(CGFloat(CParsec.mouseInfo.mouseY) * (contentView.bounds.height / CGFloat(renderer.glkView.drawableHeight)))
+				adjustedY = Int(CGFloat(CParsec.mouseInfo.mouseY) * (contentView.bounds.height / CGFloat(renderer.glkRenderer.drawableHeight)))
 			} else {
 				adjustedY = Int(currentMouseY)
 			}

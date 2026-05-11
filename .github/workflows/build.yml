@@ -68,7 +68,7 @@ jobs:
         run: |
           set -o pipefail
           echo "Running a fast build on iOS Simulator to surface compile errors quickly"
-          xcodebuild -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -sdk iphonesimulator -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 14' clean build CODE_SIGNING_ALLOWED=NO | xcpretty || true
+          xcodebuild -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -sdk iphonesimulator -configuration Debug -destination 'platform=iOS Simulator' clean build CODE_SIGNING_ALLOWED=NO | xcpretty || true
           EXIT_CODE=${PIPESTATUS[0]}
           echo "Fast build exit code: $EXIT_CODE"
           # Do not fail the workflow here; the main Archive step will still run.

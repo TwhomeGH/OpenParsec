@@ -49,8 +49,6 @@ class ParsecGLKViewController : ParsecPlayground{
 
 		glkRenderer = ParsecGLKRenderer(glkView, glkViewController, updateImage)
 
-		self.viewController.view.addSubview(glkView)
-
 		setupGLKViewController()
 		
 

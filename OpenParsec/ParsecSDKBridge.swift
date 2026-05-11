@@ -145,8 +145,6 @@ class ParsecSDKBridge: ParsecService
 
 		let status = ParsecClientConnect(_parsec, &cfg, NetworkHandler.clinfo?.session_id, peerID)
 
-
-
 		self.startBackgroundTask()
 
 		return status
@@ -733,73 +731,45 @@ class ParsecSDKBridge: ParsecService
 		ParsecClientSendMessage(_parsec, &pmsg)
 	}
 	
+
+
+	private var audioTimer: DispatchSourceTimer?
+	private var eventTimer: DispatchSourceTimer?
+
+
+	let audioQueue = DispatchQueue(label: "audio.background.queue", qos: .userInitiated)
+	let eventQueue = DispatchQueue(label: "event.background.queue", qos: .userInitiated)
+
+
+
 	func startBackgroundTask() {
+		guard audioTimer == nil, eventTimer == nil else { return }
 
-		guard audioWorkItem == nil, eventWorkItem == nil else {
-			return
+		// audio timer
+		let aTimer = DispatchSource.makeTimerSource(queue: audioQueue)
+		aTimer.schedule(deadline: .now(), repeating: .milliseconds(10)) // 每 10ms
+		aTimer.setEventHandler { [weak self] in
+			self?.pollAudio()
 		}
+		aTimer.resume()
+		audioTimer = aTimer
 
-		// audio
-		audioWorkItem = DispatchWorkItem { [weak self] in
-			guard let self else { return }
-			while !(self.audioWorkItem?.isCancelled ?? true) {
-				//os_log("WorkAudio")
-				self.pollAudio()
-				Thread.sleep(forTimeInterval: 0.01) // 適度 yield CPU
-			}
+		// event timer
+		let eTimer = DispatchSource.makeTimerSource(queue: eventQueue)
+		eTimer.schedule(deadline: .now(), repeating: .milliseconds(10))
+		eTimer.setEventHandler { [weak self] in
+			self?.pollEvent()
 		}
-		// event
-		eventWorkItem = DispatchWorkItem { [weak self] in
-			guard let self else { return }
-			while !(self.eventWorkItem?.isCancelled ?? true) {
-				//os_log("WorkEvent")
-				self.pollEvent()
-				Thread.sleep(forTimeInterval: 0.01)
-			}
-		}
-
-
-
-		DispatchQueue.global().async(execute: audioWorkItem!)
-		DispatchQueue.global().async(execute: eventWorkItem!)
-
+		eTimer.resume()
+		eventTimer = eTimer
 	}
 
 	func stopBackgroundTask() {
+		audioTimer?.cancel()
+		audioTimer = nil
 
-		guard let audioWorkItem = audioWorkItem, let eventWorkItem = eventWorkItem else {
-			return
-		}
-
-		// 安全停止
-		audioWorkItem.cancel()
-		eventWorkItem.cancel()
-
-		// 用 DispatchGroup 等待
-		let group = DispatchGroup()
-
-		group.enter()
-		DispatchQueue.global().async {
-			while !audioWorkItem.isCancelled {
-				Thread.sleep(forTimeInterval: 0.01)
-			}
-			group.leave()
-		}
-
-		group.enter()
-		DispatchQueue.global().async {
-			while !eventWorkItem.isCancelled {
-				Thread.sleep(forTimeInterval: 0.01)
-			}
-			group.leave()
-		}
-
-		// 阻塞等待完成
-		group.wait()
-
-		// 可選：釋放引用
-		self.audioWorkItem = nil
-		self.eventWorkItem = nil
+		eventTimer?.cancel()
+		eventTimer = nil
 	}
 
 

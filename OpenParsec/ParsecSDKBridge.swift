@@ -305,7 +305,9 @@ class ParsecSDKBridge: ParsecService
 		if status != 0 {
 			let msg = "ParsecClientPollAudio returned \(status)"
 			print(msg)
-			OpenParsecLogger.shared.append(msg)
+			msg.withCString { cstr in
+				write_log_from_swift(cstr)
+			}
 		}
 	}
 	

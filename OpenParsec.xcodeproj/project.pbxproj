@@ -43,6 +43,10 @@
 		CE2E6EAA2F19E1AC00844FB7 /* ParsecSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CE2E6EA82F19E1A200844FB7 /* ParsecSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CEC7D21E2F16AC0F006FBF99 /* Metal.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC7D21D2F16AC0B006FBF99 /* Metal.m */; };
 		FC16A7AD29A97BDA00BB70A7 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A7AC29A97BDA00BB70A7 /* Shared.swift */; };
+		99AABBCCDDEEFF0011223345 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99AABBCCDDEEFF0011223344 /* Logger.swift */; };
+		88AABBCCDDEEFF0011223345 /* LogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88AABBCCDDEEFF0011223344 /* LogViewController.swift */; };
+		77AABBCCDDEEFF0011223345 /* LogViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77AABBCCDDEEFF0011223344 /* LogViewWrapper.swift */; };
+
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -101,6 +105,10 @@
 		CEC7D21C2F16ABEC006FBF99 /* Metal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Metal.h; sourceTree = "<group>"; };
 		CEC7D21D2F16AC0B006FBF99 /* Metal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Metal.m; sourceTree = "<group>"; };
 		FC16A7AC29A97BDA00BB70A7 /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
+		99AABBCCDDEEFF0011223344 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		88AABBCCDDEEFF0011223344 /* LogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogViewController.swift; sourceTree = "<group>"; };
+		77AABBCCDDEEFF0011223344 /* LogViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogViewWrapper.swift; sourceTree = "<group>"; };
+
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -173,6 +181,9 @@
 				FC16A7AC29A97BDA00BB70A7 /* Shared.swift */,
 				27A923DF29E8E53000F54BDA /* TouchHandlingView.swift */,
 				27A923E129E8FEE900F54BDA /* UIViewControllerWrapper.swift */,
+			99AABBCCDDEEFF0011223344 /* Logger.swift */,
+			88AABBCCDDEEFF0011223344 /* LogViewController.swift */,
+			77AABBCCDDEEFF0011223344 /* LogViewWrapper.swift */,
 				27AC751729EA339B00E8CAF7 /* URLImage.swift */,
 				17CD1E022BF07BC3003D2102 /* ViewContainerPatch.swift */,
 			);

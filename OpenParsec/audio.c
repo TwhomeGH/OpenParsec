@@ -15,6 +15,11 @@ static void write_log(const char *msg) {
     }
 }
 
+// non-static wrapper exposed to Swift via bridging header
+void write_log_from_swift(const char *msg) {
+    write_log(msg);
+}
+
 #define NUM_AUDIO_BUF 16
 #define BUFFER_SIZE 4096
 #define SILENT_SIZE 4096

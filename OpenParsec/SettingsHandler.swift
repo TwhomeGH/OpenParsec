@@ -1,24 +1,45 @@
 import Foundation
 import SwiftUI
 
-struct SettingsHandler {
-	//public static var renderer:RendererType = .opengl
-	@AppStorage("resolution") public static var resolution: ParsecResolution = .client
-	@AppStorage("bitrate") public static var bitrate: Int = 0
-	@AppStorage("decoder") public static var decoder: DecoderPref = .h264
-	@AppStorage("cursorMode") public static var cursorMode: CursorMode = .touchpad
-	@AppStorage("cursorScale") public static var cursorScale: Double = 0.5
-	@AppStorage("mouseSensitivity") public static var mouseSensitivity: Double = 1.0
-	@AppStorage("noOverlay") public static var noOverlay: Bool = false
-	@AppStorage("cursorScale") public static var hideStatusBar: Bool = true
-	@AppStorage("rightClickPosition") public static var rightClickPosition: RightClickPosition = .firstFinger
-	@AppStorage("preferredFramesPerSecond") public static var preferredFramesPerSecond: Int = 60 // 0 = use device max (ProMotion)
-	@AppStorage("decoderCompatibility") public static var decoderCompatibility: Bool = false // Enable for stutter issues on some devices
-	@AppStorage("showKeyboardButton") public static var showKeyboardButton: Bool = true
+enum RemoteTextInputMode: Int
+{
+	case keycodeOnly
+	case linuxUnicode
+	case macUnicodeHex
+	case windowsHexNumpad
+}
 
-	@AppStorage("saveSessionSettings") public static var saveSessionSettings: Bool = true
-	@AppStorage("savedZoomEnabled") public static var savedZoomEnabled: Bool = false
-	@AppStorage("savedConstantFps") public static var savedConstantFps: Bool = false
-	@AppStorage("savedMuted") public static var savedMuted: Bool = false
+final class SettingsHandler: ObservableObject {
+	// 全局配置中軀
+	static let shared = SettingsHandler()   // 單例，全局共用
+
+
+	@AppStorage("renderer") public var renderer: RendererType = .opengl
+
+	@AppStorage("resolution") public var resolution: ParsecResolution = .client
+	@AppStorage("bitrate") public var bitrate: Int = 0
+	@AppStorage("decoder") public var decoder: DecoderPref = .h264
+	@AppStorage("decoder444") public var decoder444: Bool = true
+
+	@AppStorage("decoderCompatibility") public var decoderCompatibility: Bool = false // Enable for stutter issues on some devices
+	@AppStorage("preferredFramesPerSecond") public var preferredFramesPerSecond: Int = 60 // 0 = use device max (ProMotion)
+	
+	@AppStorage("cursorMode") public var cursorMode: CursorMode = .touchpad
+	@AppStorage("cursorScale") public var cursorScale: Double = 0.5
+	@AppStorage("rightClickPosition") public var rightClickPosition: RightClickPosition = .firstFinger
+	
+	@AppStorage("hideStatusBar") public var hideStatusBar: Bool = true
+	
+
+	@AppStorage("mouseSensitivity") public var mouseSensitivity: Double = 1.0
+	@AppStorage("noOverlay") public var noOverlay: Bool = false
+
+	@AppStorage("showKeyboardButton") public var showKeyboardButton: Bool = true
+	@AppStorage("remoteTextInputMode") public var remoteTextInputMode: RemoteTextInputMode = .keycodeOnly
+
+	// 識別是不是Metal分辨用的文本
+	@AppStorage("MetalText") public var MetalText: Bool = false
+
+
 
 }

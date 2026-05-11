@@ -46,9 +46,9 @@ final class SettingsHandler: ObservableObject {
 	// 識別是不是Metal分辨用的文本
 	@AppStorage("MetalText") public var MetalText: Bool = false
 
-	@AppStorage("savedConstantFps") public static var savedConstantFps: Bool = false
-	@AppStorage("savedMuted") public static var savedMuted: Bool = false
-	@AppStorage("savedZoom") public static var savedZoom: Bool = false
+	@AppStorage("savedConstantFps") public var savedConstantFps: Bool = false
+	@AppStorage("savedMuted") public var savedMuted: Bool = false
+	@AppStorage("savedZoom") public var savedZoom: Bool = false
 
 
 

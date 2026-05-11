@@ -49,6 +49,8 @@ class ParsecGLKViewController : ParsecPlayground{
 
 		glkRenderer = ParsecGLKRenderer(glkView, glkViewController, updateImage)
 
+		self.viewController.view.addSubview(glkView)
+
 		setupGLKViewController()
 		
 
@@ -70,19 +72,8 @@ class ParsecGLKViewController : ParsecPlayground{
 		glkView.context = EAGLContext(api: .openGLES3)!
 		EAGLContext.setCurrent(glkView.context)
 
-
 		glkViewController.view = glkView
-
 		glkView.contentScaleFactor = UIScreen.main.scale
-
-
-		// 確保 OpenGL viewport 和 GLKView 對齊
-		glViewport(0, 0,
-				GLsizei(glkView.drawableWidth),
-				GLsizei(glkView.drawableHeight))
-
-
-
 
 		// Use configured FPS or device max (for ProMotion displays)
 		let fps = SettingsHandler.shared.preferredFramesPerSecond
@@ -98,19 +89,9 @@ class ParsecGLKViewController : ParsecPlayground{
 		// ✅ 開始渲染
 		glkViewController.isPaused = false
 
-
-
-
-
-		glkViewController.view.frame = viewController.view.bounds
-		glkViewController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-
 		self.viewController.addChild(glkViewController)
 		self.viewController.view.addSubview(glkViewController.view)
-
-
 		self.glkViewController.didMove(toParent: self.viewController)
-
 
 
 		print("GLK VC view window:", glkViewController.view.window as Any)

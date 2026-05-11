@@ -131,7 +131,9 @@ class ParsecSDKBridge: ParsecService
 
 	func destroy() {
 		ParsecDestroy(_parsec)
-		print("清理Parsec")
+		audio_destroy(&_audio)
+		print("清理Parsec 與Audio管線")
+		write_log("清理Parsec 與Audio管線")
 
 	}
 

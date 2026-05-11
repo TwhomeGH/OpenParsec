@@ -1,27 +1,30 @@
 import SwiftUI
 
+
+
+
+
 struct SettingsView:View
 {
 	@Binding var visible: Bool
 
-	//@State var renderer:RendererType = SettingsHandler.renderer
-	@AppStorage("resolution") var resolution: ParsecResolution = .client
-	@AppStorage("bitrate") var bitrate: Int = 0
-	@AppStorage("decoder") var decoder: DecoderPref = .h264
-	@AppStorage("cursorMode") var cursorMode: CursorMode = .touchpad
-	@AppStorage("cursorScale") var cursorScale: Double = 0.5
-	@AppStorage("mouseSensitivity") var mouseSensitivity: Double = 1.0
-	@AppStorage("noOverlay") var noOverlay: Bool = false
-	@AppStorage("cursorScale") var hideStatusBar: Bool = true
-	@AppStorage("rightClickPosition") var rightClickPosition: RightClickPosition = .firstFinger
-	@AppStorage("preferredFramesPerSecond") var preferredFramesPerSecond: Int = 60 // 0 = use device max (ProMotion)
-	@AppStorage("decoderCompatibility") var decoderCompatibility: Bool = false // Enable for stutter issues on some devices
-	@AppStorage("showKeyboardButton") var showKeyboardButton: Bool = true
-	@AppStorage("saveSessionSettings") var saveSessionSettings: Bool = true
-	
+	@EnvironmentObject var settings: SettingsHandler
+
+
+
+	let bitrateChoices: [Choice<Int>] = ParsecResolution.bitrates.map { value in
+
+		if value == 0 {
+			return Choice("不指定 Not Setting [Auto]", value)
+		} else {
+			return Choice("\(value) Mbps", value)
+		}
+
+	}
+
 	let resolutionChoices: [Choice<ParsecResolution>]
 
-	init(visible: Binding<Bool>) {
+	init(visible: Binding<Bool> ) {
 		_visible = visible
 		var tmp: [Choice<ParsecResolution>] = []
 		for res in ParsecResolution.resolutions {
@@ -63,7 +66,7 @@ struct SettingsView:View
 							HStack()
 							{
 								Button(action: saveAndExit, label:{ Image(systemName:"xmark").scaleEffect(x:-1) })
-								 .padding()
+								.padding()
 								Spacer()
 							}
 							Text("Settings")
@@ -83,7 +86,7 @@ struct SettingsView:View
                         {
                             CatItem("Mouse Movement")
                             {
-                                MultiPicker(selection:$cursorMode, options:
+                                MultiPicker(selection:$settings.cursorMode, options:
 								[
 									Choice("Touchpad", CursorMode.touchpad),
 									Choice("Direct", CursorMode.direct)
@@ -91,7 +94,7 @@ struct SettingsView:View
                             }
 							CatItem("Right Click Position")
 							{
-								MultiPicker(selection:$rightClickPosition, options:
+								MultiPicker(selection:$settings.rightClickPosition, options:
 								[
 									Choice("First Finger", RightClickPosition.firstFinger),
 									Choice("Middle", RightClickPosition.middle),
@@ -100,44 +103,63 @@ struct SettingsView:View
 							}
                             CatItem("Cursor Scale")
                             {
-                                Slider(value: $cursorScale, in:0.1...4, step:0.1)
+                                Slider(value: $settings.cursorScale, in:0.1...4, step:0.1)
 									.frame(width: 200)
-								Text(String(format: "%.1f", cursorScale))
+								Text(String(format: "%.1f", settings.cursorScale))
                             }
 							CatItem("Mouse Sensitivity")
 							{
-								Slider(value: $mouseSensitivity, in:0.1...4, step:0.1)
+								Slider(value: $settings.mouseSensitivity, in:0.1...4, step:0.1)
 									.frame(width: 200)
-								Text(String(format: "%.1f", mouseSensitivity))
+								Text(String(format: "%.1f", settings.mouseSensitivity))
 							}
                         }
                         CatTitle("Graphics")
                         CatList()
                         {
-                            /*CatItem("Renderer")
+                            CatItem("Renderer")
                             {
-								SegmentPicker(selection:$renderer, options:
+								SegmentPicker(selection:$settings.renderer, options:
 								[
 									Choice("OpenGL", RendererType.opengl),
 									Choice("Metal", RendererType.metal)
 								])
                                 .frame(width:165)
-                            }*/
+
+                            }
+						
 							CatItem("Default Resolution")
 							{
-								MultiPicker(selection: $resolution, options:resolutionChoices)
+								MultiPicker(selection: $settings.resolution, options:resolutionChoices)
 							}
+							CatItem("BitRate")
+							{
+								MultiPicker(selection: $settings.bitrate, options:bitrateChoices)
+							}
+
                             CatItem("Decoder")
                             {
-								MultiPicker(selection: $decoder, options:
+								MultiPicker(selection: $settings.decoder, options:
 								[
 									Choice("H.264", DecoderPref.h264),
 									Choice("Prefer H.265", DecoderPref.h265)
 								])
                             }
+
+							CatItem("Decoder 444")
+							{
+								Toggle("", isOn:$settings.decoder444)
+									.frame(width:80)
+							}
+							CatItem("Decoder Compatibility")
+							{
+								Toggle("", isOn:$settings.decoderCompatibility)
+									.frame(width:80)
+							}
+							
 							CatItem("Frame Rate")
 							{
-								MultiPicker(selection: $preferredFramesPerSecond, options:
+								MultiPicker(selection: $settings.preferredFramesPerSecond, options:
 								[
 									Choice("Auto (Device Max)", 0),
 									Choice("120 FPS", 120),
@@ -145,37 +167,45 @@ struct SettingsView:View
 									Choice("30 FPS", 30)
 								])
 							}
-							CatItem("Decoder Compatibility")
-							{
-								Toggle("", isOn:$decoderCompatibility)
-									.frame(width:80)
-							}
+							
+							
                         }
                         CatTitle("Misc")
                         CatList()
                         {
+
+							CatItem("Metal 顯示的可見確認用提示文本")
+							{
+								Toggle("", isOn:$settings.MetalText)
+									.frame(width:80)
+							}
                             CatItem("Never Show Overlay")
                             {
-                                Toggle("", isOn:$noOverlay)
+                                Toggle("", isOn:$settings.noOverlay)
                                     .frame(width:80)
                             }
 							CatItem("Hide Status Bar")
 							{
-								Toggle("", isOn:$hideStatusBar)
+								Toggle("", isOn:$settings.hideStatusBar)
 									.frame(width:80)
 							}
 							CatItem("Show Keyboard Button")
 							{
-								Toggle("", isOn:$showKeyboardButton)
+								Toggle("", isOn:$settings.showKeyboardButton)
 									.frame(width:80)
 							}
-							CatItem("Save Session Settings")
+							CatItem("Remote Text Input")
 							{
-								Toggle("", isOn:$saveSessionSettings)
-									.frame(width:80)
+								MultiPicker(selection: $settings.remoteTextInputMode, options:
+								[
+									Choice("Keycodes Only", RemoteTextInputMode.keycodeOnly),
+									Choice("Linux Ctrl+Shift+U", RemoteTextInputMode.linuxUnicode),
+									Choice("macOS Unicode Hex", RemoteTextInputMode.macUnicodeHex),
+									Choice("Windows Hex Numpad", RemoteTextInputMode.windowsHexNumpad)
+								])
 							}
 						}
-						Text(getVersionInfo())
+						Text("More options coming soon.")
 							.multilineTextAlignment(.center)
 							.opacity(0.5)
 							.padding()
@@ -195,12 +225,8 @@ struct SettingsView:View
 	
 	func saveAndExit()
 	{
-		//SettingsHandler.renderer = renderer
+		//settings.renderer = renderer
 		visible = false
-	}
-	
-	func getVersionInfo() -> String {
-		return "Version \(Bundle.main.infoDictionary!["CFBundleShortVersionString"] ?? "Unknown versino")-\(Bundle.main.infoDictionary!["GitCommitInfo"] ?? "Unknown commit")"
 	}
 }
 
@@ -210,6 +236,7 @@ struct SettingsView_Previews:PreviewProvider
 
 	static var previews: some View
 	{
+
 		SettingsView(visible:$value)
 	}
 }

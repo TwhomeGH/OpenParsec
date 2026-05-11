@@ -76,6 +76,12 @@ class ParsecGLKViewController : ParsecPlayground{
 		glkView.contentScaleFactor = UIScreen.main.scale
 
 
+		// 確保 OpenGL viewport 和 GLKView 對齊
+		glViewport(0, 0,
+				GLsizei(glkView.drawableWidth),
+				GLsizei(glkView.drawableHeight))
+
+
 
 
 		// Use configured FPS or device max (for ProMotion displays)

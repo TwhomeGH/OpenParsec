@@ -33,7 +33,7 @@ class ParsecGLKViewController : ParsecPlayground{
 	var glkRenderer: ParsecGLKRenderer!
 	let updateImage:() -> Void
 
-	@ObservedObject private var settings = SettingsHandler.shared
+	private var settings = SettingsHandler.shared
     
 	
 	let viewController: UIViewController

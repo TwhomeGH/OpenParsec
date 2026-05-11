@@ -86,8 +86,8 @@ class ParsecSDKBridge: ParsecService
 	public var mediaContainer: Int32 = 0
 	public var pngCursor: Bool = false
 
-	// 觀察全局設定變更
-	@ObservedObject private var settings = SettingsHandler.shared
+	// 觀察全局設定
+	private var settings = SettingsHandler.shared
     
 
 	private var audioWorkItem: DispatchWorkItem?

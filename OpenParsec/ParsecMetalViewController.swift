@@ -41,7 +41,7 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 
     // MARK: - Properties
 
-	@ObservedObject private var settings = SettingsHandler.shared
+	private var settings = SettingsHandler.shared
     
 
     weak var viewController: UIViewController?

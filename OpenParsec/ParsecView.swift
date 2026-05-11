@@ -426,7 +426,7 @@ struct ParsecView: View
 		SettingsHandler.shared.savedMuted.toggle()
 		ParsecRenderCenter.shared.setMuted(SettingsHandler.shared.savedMuted)
 
-		write_log_from_swift("muted", SettingsHandler.shared.savedMuted ? "true" : "false")
+		write_log_from_swift("muted \(SettingsHandler.shared.savedMuted ? "true" : "false")")
 
 	}
 	
@@ -464,7 +464,7 @@ struct ParsecView: View
 		parsecViewController.scrollView.zoomScale = 1.0
 		parsecViewController.scrollView.contentOffset = .zero
 
-		write_log_from_swift("Disconnected", "User initiated disconnect")
+		write_log_from_swift("Disconnected User initiated disconnect")
 
 		setView(.main)
 	}
@@ -483,14 +483,14 @@ struct ParsecView: View
 		ParsecRenderCenter.shared.requestResolutionUpdate()
 		ParsecRenderCenter.shared.applyIfPossible()
 		
-		write_log_from_swift("resolution", "\(res.width)x\(res.height)")
+		write_log_from_swift("resolution \(res.width)x\(res.height)")
 
 	}
 
 	func changeBitRate(bitrate: Int) {
 		DataManager.model.bitrate = bitrate
 
-		write_log_from_swift("bitrate", "\(bitrate)")
+		write_log_from_swift("bitrate \(bitrate)")
 
 		ParsecRenderCenter.shared.requestBitrateUpdate()
 	}
@@ -499,7 +499,8 @@ struct ParsecView: View
 		DispatchQueue.main.async {
 			SettingsHandler.shared.decoder = SettingsHandler.shared.decoder == .h264 ? .h265 : .h264
 			CParsec.updateHostVideoConfig()
-			write_log_from_swift("decoder", SettingsHandler.shared.decoder == .h264 ? "H264" : "H265")
+			write_log_from_swift("decoder \(SettingsHandler.shared.decoder == .h264 ? "H264" : "H265")")
+
 			// 這裡不需要直接調用 applyIfPossible，因為 updateHostVideoConfig 已經在內部處理了。
 		}
 	}
@@ -511,7 +512,8 @@ struct ParsecView: View
 			DataManager.model.constantFps = SettingsHandler.shared.savedConstantFps
 
 			CParsec.updateHostVideoConfig()
-			write_log_from_swift("constantFps", SettingsHandler.shared.savedConstantFps ? "true" : "false")
+			write_log_from_swift("constantFps \(SettingsHandler.shared.savedConstantFps ? "true" : "false")")
+			// 這裡不需要直接調用 applyIfPossible，因為 updateHostVideoConfig 已經在內部處理了。
 		}
 	}
 
@@ -520,7 +522,7 @@ struct ParsecView: View
 		showKeyboard.toggle()
 		parsecViewController.setKeyboardVisible(showKeyboard)
 
-		write_log_from_swift("keyboardVisible", showKeyboard ? "true" : "false")
+		write_log_from_swift("keyboardVisible \(showKeyboard ? "true" : "false")")
 
 	}
 	
@@ -529,8 +531,8 @@ struct ParsecView: View
 			SettingsHandler.shared.savedZoom.toggle()
 			parsecViewController.setZoomEnabled(SettingsHandler.shared.savedZoom)
 
-			write_log_from_swift("zoomEnabled", SettingsHandler.shared.savedZoom ? "true" : "false")
-		}
+			write_log_from_swift("zoomEnabled \(SettingsHandler.shared.savedZoom ? "true" : "false")")
+		 }
 	}
 	
 	func changeDisplay(displayId: String) {
@@ -538,7 +540,7 @@ struct ParsecView: View
 			DataManager.model.output = displayId
 			CParsec.updateHostVideoConfig()
 			
-			write_log_from_swift("display", displayId)
+			write_log_from_swift("display \(displayId)")
 			// 這裡不需要直接調用 applyIfPossible，因為 updateHostVideoConfig 已經在內部處理了。
 		}
 	}

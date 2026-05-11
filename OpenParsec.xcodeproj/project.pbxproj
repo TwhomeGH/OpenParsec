@@ -44,9 +44,12 @@
 		CEC7D21E2F16AC0F006FBF99 /* Metal.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC7D21D2F16AC0B006FBF99 /* Metal.m */; };
 		FC16A7AD29A97BDA00BB70A7 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A7AC29A97BDA00BB70A7 /* Shared.swift */; };
 
-		99AABBCCDDEEFF0011223344 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99AABBCCDDEEFF0011223344 /* Logger.swift */; };
-		88AABBCCDDEEFF0011223344 /* LogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88AABBCCDDEEFF0011223344 /* LogViewController.swift */; };
-		77AABBCCDDEEFF0011223344 /* LogViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77AABBCCDDEEFF0011223344 /* LogViewWrapper.swift */; };
+		CE5A1F9B2D3C4E6F7A8B9C0D /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5A1F9B2D3C4E6F7A8B9C0D /* Logger.swift */; };
+		D4F7E2A1B9C8D6E5F0A3B2C1 /* LogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F7E2A1B9C8D6E5F0A3B2C1 /* LogViewController.swift */; };
+		A9B8C7D6E5F4A3B2C1D0E9F8  /* LogViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B8C7D6E5F4A3B2C1D0E9F8  /* LogViewWrapper.swift */; };
+
+
+
 
 
 /* End PBXBuildFile section */
@@ -108,9 +111,10 @@
 		CEC7D21D2F16AC0B006FBF99 /* Metal.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Metal.m; sourceTree = "<group>"; };
 		FC16A7AC29A97BDA00BB70A7 /* Shared.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shared.swift; sourceTree = "<group>"; };
 
-		99AABBCCDDEEFF0011223344 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
-		88AABBCCDDEEFF0011223344 /* LogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogViewController.swift; sourceTree = "<group>"; };
-		77AABBCCDDEEFF0011223344 /* LogViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogViewWrapper.swift; sourceTree = "<group>"; };
+		CE5A1F9B2D3C4E6F7A8B9C0D /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		D4F7E2A1B9C8D6E5F0A3B2C1 /* LogViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogViewController.swift; sourceTree = "<group>"; };
+		A9B8C7D6E5F4A3B2C1D0E9F8 /* LogViewWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogViewWrapper.swift; sourceTree = "<group>"; };
+
 
 
 /* End PBXFileReference section */
@@ -186,9 +190,9 @@
 				27A923DF29E8E53000F54BDA /* TouchHandlingView.swift */,
 				27A923E129E8FEE900F54BDA /* UIViewControllerWrapper.swift */,
 
-				99AABBCCDDEEFF0011223344 /* Logger.swift */,
-				88AABBCCDDEEFF0011223344 /* LogViewController.swift */,
-				77AABBCCDDEEFF0011223344 /* LogViewWrapper.swift */,
+				CE5A1F9B2D3C4E6F7A8B9C0D /* Logger.swift */,
+				D4F7E2A1B9C8D6E5F0A3B2C1 /* LogViewController.swift */,
+				A9B8C7D6E5F4A3B2C1D0E9F8 /* LogViewWrapper.swift */,
 
 				27AC751729EA339B00E8CAF7 /* URLImage.swift */,
 				17CD1E022BF07BC3003D2102 /* ViewContainerPatch.swift */,
@@ -312,10 +316,10 @@
 				17374D412CB8E35D00EDCEE7 /* KeyCodeTranslators.swift in Sources */,
 				271D14F9292E90EB00D7F1D6 /* ParsecView.swift in Sources */,
 				CE02CB082F14482F003714A3 /* shader.metal in Sources */,
-
-				99AABBCCDDEEFF0011223344 /* Logger.swift */,
-				88AABBCCDDEEFF0011223344 /* LogViewController.swift */,
-				77AABBCCDDEEFF0011223344 /* LogViewWrapper.swift */,
+				
+				CE5A1F9B2D3C4E6F7A8B9C0D /* Logger.swift */,
+				D4F7E2A1B9C8D6E5F0A3B2C1 /* LogViewController.swift */,
+				A9B8C7D6E5F4A3B2C1D0E9F8 /* LogViewWrapper.swift */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

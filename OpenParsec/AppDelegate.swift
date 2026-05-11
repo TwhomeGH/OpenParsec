@@ -26,6 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 
 	func applicationWillTerminate(_ application: UIApplication)
 	{
-		//CParsec.destroy()
+		// 系統終止應用程序時的回調，這裡可以進行清理工作
+		CParsec.destroy()
 	}
 }

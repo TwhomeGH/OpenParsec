@@ -345,6 +345,7 @@ struct ParsecView: View
 		ZStack {
 
 			UIViewControllerWrapper(self.parsecViewController)
+			.ignoresSafeArea(.keyboard)   // 🚫 禁止鍵盤影響 layout
 			.zIndex(-1)
 				
 

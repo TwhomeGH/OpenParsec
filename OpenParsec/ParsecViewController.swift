@@ -149,7 +149,7 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 			// Only pan if we are zoomed in OR if the keyboard is visible (to allow scrolling up)
 
 			if (!panLockedByKeyboard && scrollView.zoomScale > 1.0  && zoomEnabled)  || (
-				keyboardVisible && scrollView.contentInset.bottom > 0
+				keyboardVisible && scrollView.contentInset.bottom > 0 && !panLockedByKeyboard
 			) {
 				let margin: CGFloat = 50.0
                 

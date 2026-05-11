@@ -1,6 +1,7 @@
 #include "audio.h"
 
 #include <stdlib.h>
+#include <stdint.h>
 
 #include <AudioToolbox/AudioToolbox.h>
 
@@ -12,7 +13,7 @@
 #define LOWEST_NUM_BUFFER 3
 bool isMuted = false;
 bool isStart = false;
-int lastbuf = 0;
+intptr_t lastbuf = 0;
 
 unsigned int silence_inqueue = 0;
 unsigned int silence_outqueue = 0;
@@ -33,17 +34,20 @@ typedef struct RecycleChainMgr {
 struct audio {
     AudioQueueRef q;
     AudioQueueBufferRef audio_buf[NUM_AUDIO_BUF];
-	char *mem[NUM_AUDIO_BUF * 2];
-	int loc[NUM_AUDIO_BUF];
 	RecycleChainMgr rcm;
 	int32_t fail_num;
     int32_t in_use;
+    bool isStopping;
 };
 
 static void audio_queue_callback(void *opaque, AudioQueueRef queue, AudioQueueBufferRef buffer)
 {
-    struct audio *ctx = (struct audio *) opaque;
-    int deltaBuf = 0;
+
+	struct audio *ctx = (struct audio *) opaque;
+
+	if (!ctx || ctx->isStopping) return;
+
+	intptr_t deltaBuf = 0;
 	//int silence_use_count = (int)(silence_buf->mUserData);
 	
     if (ctx == NULL)
@@ -57,7 +61,7 @@ static void audio_queue_callback(void *opaque, AudioQueueRef queue, AudioQueueBu
     if(buffer != silence_buf)
 	{
 		buffer->mAudioDataByteSize = FAKE_SIZE;
-		lastbuf = *((int *)(buffer->mUserData));	
+		lastbuf = (int)(intptr_t)buffer->mUserData;
 	}
 	else
 	{
@@ -68,10 +72,14 @@ static void audio_queue_callback(void *opaque, AudioQueueRef queue, AudioQueueBu
 	
 	if (isMuted) return;
 	
-	deltaBuf = *((int *)((*ctx->rcm.first->curt)->mUserData));
-	deltaBuf = deltaBuf - lastbuf - 1;
-	if (deltaBuf < 0) deltaBuf += NUM_AUDIO_BUF;
 	
+	deltaBuf = (int)(intptr_t)(*ctx->rcm.first->curt)->mUserData;
+
+	deltaBuf = deltaBuf - lastbuf - 1;
+
+
+	if (deltaBuf < 0) deltaBuf += NUM_AUDIO_BUF;
+
 	while(ctx->rcm.last_to_queue->next != ctx->rcm.first)
 	{
 		AudioQueueEnqueueBuffer(ctx->q, (*(ctx->rcm.last_to_queue->next->curt)), 0, NULL);
@@ -80,7 +88,10 @@ static void audio_queue_callback(void *opaque, AudioQueueRef queue, AudioQueueBu
 	
 	if (deltaBuf + silence_inqueue < LOWEST_NUM_BUFFER + silence_outqueue)
 	{
-		int numAddBuffer = ((silence_inqueue >= silence_outqueue) ? (LOWEST_NUM_BUFFER - deltaBuf - (int)(silence_inqueue-silence_outqueue)) : (LOWEST_NUM_BUFFER - deltaBuf - (int)((unsigned int)(0xFFFFFFFF)-silence_outqueue + silence_inqueue + 1)));
+		intptr_t numAddBuffer = ((silence_inqueue >= silence_outqueue)
+			? (LOWEST_NUM_BUFFER - deltaBuf - (intptr_t)(silence_inqueue - silence_outqueue))
+			: (LOWEST_NUM_BUFFER - deltaBuf - (intptr_t)((unsigned int)0xFFFFFFFF - silence_outqueue + silence_inqueue + 1)));
+
 		if (numAddBuffer > LOWEST_NUM_BUFFER)
 		{
 			numAddBuffer = LOWEST_NUM_BUFFER - deltaBuf;
@@ -168,27 +179,28 @@ void audio_init(struct audio **ctx_out)
 
 	//ctx->rcm.first = ctx->audio_buf[0];
 	//ctx->rcm.first  = ctx->audio_buf[NUM_AUDIO_BUF-1];
-	ctx->rcm.rc = (RecycleChain *)(&ctx->mem[0]);
+	//ctx->rcm.rc = (RecycleChain *)(&ctx->mem[0]);
+
+	ctx->isStopping = false;
+	ctx->rcm.rc = calloc(NUM_AUDIO_BUF, sizeof(RecycleChain));
 	ctx->rcm.first = ctx->rcm.rc;
+	
+	
 	rcTraverse = ctx->rcm.rc;
+
+
     // Create buffers for the queue
     for (int32_t x = 0; x < NUM_AUDIO_BUF; x++) {
-        AudioQueueAllocateBuffer(ctx->q, BUFFER_SIZE, &ctx->audio_buf[x]);
-        ctx->audio_buf[x]->mAudioDataByteSize = FAKE_SIZE;
-		ctx->loc[x] = x;
-		ctx->audio_buf[x]->mUserData = (void *)(&ctx->loc[x]);
-		rcTraverse->curt = &ctx->audio_buf[x];
-		if( x != NUM_AUDIO_BUF - 1)
-		{
-			rcTraverse->next = (RecycleChain *)(&ctx->mem[2*(x+1)]);
-			rcTraverse = rcTraverse->next;
-		}
-		else
-		{
-			//ctx->rcm.first = rcTraverse;
-			rcTraverse->next = ctx->rcm.rc;
-		}
+     AudioQueueAllocateBuffer(ctx->q, BUFFER_SIZE, &ctx->audio_buf[x]);
+     ctx->audio_buf[x]->mAudioDataByteSize = FAKE_SIZE;
+
+     ctx->audio_buf[x]->mUserData = (void *)(intptr_t)x;
+
+     rcTraverse[x].curt = &ctx->audio_buf[x];
+     rcTraverse[x].next = &rcTraverse[(x + 1) % NUM_AUDIO_BUF];
     }
+	
+	
 	isStart = false;
 	ctx->fail_num = 0;
 	ctx->in_use = 0;
@@ -205,37 +217,66 @@ void audio_destroy(struct audio **ctx_out)
 {
     if (!ctx_out || !*ctx_out)
         return;
-    
-    struct audio *ctx = *ctx_out;
-    //AudioQueueStop(ctx->q, true);
-	
-    for (int32_t x = 0; x < NUM_AUDIO_BUF; x++) {
-        if (ctx->audio_buf[x])
-            AudioQueueFreeBuffer(ctx->q, ctx->audio_buf[x]);
-    }
-    
-    if (ctx->q)
-        AudioQueueDispose(ctx->q, true);
 
+    struct audio *ctx = *ctx_out;
+
+    // 1️⃣ 明確標記「正在銷毀」，避免 callback 再做事
+    ctx->isStopping = true;
+
+    // 2️⃣ 停掉 queue（同步等待 callback 完成）
+    if (ctx->q) {
+		AudioQueueFlush(ctx->q);
+        AudioQueueStop(ctx->q, true);
+
+        // 3️⃣ 釋放所有 AudioQueueBuffer
+        for (int i = 0; i < NUM_AUDIO_BUF; i++)
+            if (ctx->audio_buf[i])
+                AudioQueueFreeBuffer(ctx->q, ctx->audio_buf[i]);
+
+        if (silence_buf)
+            AudioQueueFreeBuffer(ctx->q, silence_buf);
+
+        // 4️⃣ Dispose queue
+        AudioQueueDispose(ctx->q, true);
+        ctx->q = NULL;
+    }
+
+
+    
+    
+    // 5️⃣ 釋放 RecycleChain
+    if (ctx->rcm.rc) {
+        free(ctx->rcm.rc);
+        ctx->rcm.rc = NULL;
+    }
+
+    // 6️⃣ 最後釋放 ctx 本身
     free(ctx);
     *ctx_out = NULL;
-	isStart = false;
-	AudioQueueFreeBuffer(ctx->q, silence_buf);
-	silence_inqueue = silence_outqueue = 0;
+
+    isStart = false;
+	silence_inqueue = 0;
+	silence_outqueue = 0;
 }
 
 void audio_clear(struct audio **ctx_out)
 {
+
+	
     if (!ctx_out || !*ctx_out)
         return;
     
 	//RecycleChain *rcTraverse = NULL;
     struct audio *ctx = *ctx_out;
-    if (ctx->q)
-        AudioQueueStop(ctx->q, true);
+	if (ctx->q) {
+		AudioQueueFlush(ctx->q);
+		AudioQueueStop(ctx->q, true);
+	}
+	else return;
     
 	//rcTraverse = ctx->rcm.rc;
 	for (int32_t x = 0; x < NUM_AUDIO_BUF; x++) {
+		if (!ctx->audio_buf[x]) continue;
         ctx->audio_buf[x]->mAudioDataByteSize = FAKE_SIZE;
 		/*rcTraverse->curt = &ctx->audio_buf[x];
 		if( x != NUM_AUDIO_BUF - 1)
@@ -284,7 +325,7 @@ void audio_cb(const int16_t *pcm, uint32_t frames, void *opaque)
 	ctx->rcm.first = ctx->rcm.first->next;
 	//ctx->rcm.last_use = find_idle;
 	
-	ctx->in_use += frames;
+	ctx->in_use += frames *4;
 	//if (!isStart && (ctx->in_use > 1600))
 	if (ctx->in_use > 1000)
 	{

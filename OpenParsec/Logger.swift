@@ -6,8 +6,8 @@ final class OpenParsecLogger {
     private let queue = DispatchQueue(label: "openparsec.logger")
 
     private init() {
-        // Use a shared path so C and Swift logs go to the same file
-        fileURL = URL(fileURLWithPath: "/tmp/openparsec_logs.txt")
+        let tmp = URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+        fileURL = tmp.appendingPathComponent("openparsec_logs.txt")
         if !FileManager.default.fileExists(atPath: fileURL.path) {
             FileManager.default.createFile(atPath: fileURL.path, contents: nil, attributes: nil)
         }

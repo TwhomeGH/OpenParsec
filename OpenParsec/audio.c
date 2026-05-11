@@ -6,9 +6,23 @@
 
 #include <AudioToolbox/AudioToolbox.h>
 
-#define LOG_PATH "/tmp/openparsec_logs.txt"
+#define LOG_FILENAME "openparsec_logs.txt"
+#include <limits.h>
 static void write_log(const char *msg) {
-    FILE *f = fopen(LOG_PATH, "a");
+    const char *tmpdir = getenv("TMPDIR");
+    char path[PATH_MAX];
+    if (tmpdir && tmpdir[0] != '\0') {
+        size_t len = strlen(tmpdir);
+        if (tmpdir[len-1] == '/') {
+            snprintf(path, sizeof(path), "%s%s", tmpdir, LOG_FILENAME);
+        } else {
+            snprintf(path, sizeof(path), "%s/%s", tmpdir, LOG_FILENAME);
+        }
+    } else {
+        snprintf(path, sizeof(path), "/tmp/%s", LOG_FILENAME);
+    }
+
+    FILE *f = fopen(path, "a");
     if (f) {
         fprintf(f, "%s", msg);
         fclose(f);

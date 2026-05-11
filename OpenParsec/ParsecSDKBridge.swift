@@ -300,7 +300,17 @@ class ParsecSDKBridge: ParsecService
 
 	func pollAudio(timeout:UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	{
+<<<<<<< HEAD
 		ParsecClientPollAudio(_parsec, audio_cb, timeout, _audioPtr)
+=======
+		let status: ParsecStatus = ParsecClientPollAudio(_parsec, audio_cb, timeout, _audioPtr)
+		// log non-zero status for debugging
+		if status != 0 {
+			let msg = "ParsecClientPollAudio returned \(status)"
+			print(msg)
+			OpenParsecLogger.shared.append(msg)
+		}
+>>>>>>> cc4c160 (修正名稱衝突)
 	}
 	
 	var getFirstCursor = false

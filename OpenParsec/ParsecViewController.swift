@@ -10,6 +10,7 @@ protocol ParsecPlayground {
 
 
 	var renderView: UIView { get }
+	var renderViewIfLoaded: UIView? { get }
 	func loadViewIfNeeded()
 
 	func cleanUp()
@@ -224,7 +225,7 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 		if scrollView?.zoomScale == 1.0 {
 			contentView?.frame = scrollView.bounds
 			scrollView?.contentSize = scrollView.bounds.size
-			renderer?.renderView.frame = contentView.bounds
+			renderer?.renderViewIfLoaded?.frame = contentView.bounds
 		}
 
 		//print("Debug:\(contentView.bounds.size)")

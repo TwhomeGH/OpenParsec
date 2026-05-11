@@ -88,6 +88,8 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 
     var renderView: UIView { mtkView }
 
+	var renderViewIfLoaded: UIView? { mtkView }
+
     // MARK: - Setup
     func loadViewIfNeeded() {
 		guard mtkView == nil, let viewController = viewController else { return }

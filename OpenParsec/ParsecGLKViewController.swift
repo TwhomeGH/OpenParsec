@@ -91,6 +91,11 @@ class ParsecGLKViewController : ParsecPlayground{
 		self.viewController.view.addSubview(glkViewController.view)
 		self.glkViewController.didMove(toParent: self.viewController)
 
+		// 🚫 禁止自動縮放
+		self.viewController.view.autoresizesSubviews = false
+		self.viewController.view.autoresizingMask = []
+		
+
 
 		print("GLK VC view window:", glkViewController.view.window as Any)
 

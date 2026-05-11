@@ -43,9 +43,9 @@
 		CE2E6EAA2F19E1AC00844FB7 /* ParsecSDK.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CE2E6EA82F19E1A200844FB7 /* ParsecSDK.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CEC7D21E2F16AC0F006FBF99 /* Metal.m in Sources */ = {isa = PBXBuildFile; fileRef = CEC7D21D2F16AC0B006FBF99 /* Metal.m */; };
 		FC16A7AD29A97BDA00BB70A7 /* Shared.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC16A7AC29A97BDA00BB70A7 /* Shared.swift */; };
-		CE5A1F9B2D3C4E6F7A8B9C0D /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5A1F9B2D3C4E6F7A8B9C0D /* Logger.swift */; };
-		D4F7E2A1B9C8D6E5F0A3B2C1 /* LogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F7E2A1B9C8D6E5F0A3B2C1 /* LogViewController.swift */; };
-		A9B8C7D6E5F4A3B2C1D0E9F8  /* LogViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B8C7D6E5F4A3B2C1D0E9F8  /* LogViewWrapper.swift */; };
+		CE5A1F9B2D3C4E6F7A8B9C0E /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE5A1F9B2D3C4E6F7A8B9C0D /* Logger.swift */; };
+		D4F7E2A1B9C8D6E5F0A3B2D1 /* LogViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F7E2A1B9C8D6E5F0A3B2C1 /* LogViewController.swift */; };
+		A9B8C7D6E5F4A3B2C1D0E9G8  /* LogViewWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9B8C7D6E5F4A3B2C1D0E9F8  /* LogViewWrapper.swift */; };
 
 
 
@@ -314,9 +314,9 @@
 				17374D412CB8E35D00EDCEE7 /* KeyCodeTranslators.swift in Sources */,
 				271D14F9292E90EB00D7F1D6 /* ParsecView.swift in Sources */,
 				CE02CB082F14482F003714A3 /* shader.metal in Sources */,
-				CE5A1F9B2D3C4E6F7A8B9C0D /* Logger.swift in Sources */,
-				D4F7E2A1B9C8D6E5F0A3B2C1 /* LogViewController.swift in Sources */,
-				A9B8C7D6E5F4A3B2C1D0E9F8  /* LogViewWrapper.swift in Sources */ 
+				CE5A1F9B2D3C4E6F7A8B9C0E /* Logger.swift in Sources */,
+				D4F7E2A1B9C8D6E5F0A3B2D1 /* LogViewController.swift in Sources */,
+				A9B8C7D6E5F4A3B2C1D0E9G8  /* LogViewWrapper.swift in Sources */ 
 			);
 			
 			runOnlyForDeploymentPostprocessing = 0;

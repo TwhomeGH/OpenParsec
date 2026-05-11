@@ -1,6 +1,11 @@
 import ParsecSDK
 import MetalKit
 import UIKit
+import OSLog
+
+
+import Metal
+
 
 enum RendererType: Int
 {
@@ -32,13 +37,39 @@ struct KeyBoardKeyEvent {
 	var isPressBegin: Bool
 }
 
+
+
+
+// 包裝 closure 的 class
+final class FrameHandler {
+	let onFrame: (ParsecFrame, UnsafeRawPointer) -> Void
+	init(onFrame: @escaping (ParsecFrame, UnsafeRawPointer) -> Void) {
+		self.onFrame = onFrame
+	}
+}
+
+
+
+func parsecFrameCallback(
+	framePtr: UnsafePointer<ParsecFrame>?,
+	imagePtr: UnsafeRawPointer?,
+	opaque: UnsafeMutableRawPointer?
+) {
+	guard let frame = framePtr?.pointee, let image = imagePtr else { return }
+	let handler = Unmanaged<FrameHandler>.fromOpaque(opaque!).takeUnretainedValue()
+	handler.onFrame(frame, image)
+}
+
+
+
+
 class ParsecSDKBridge: ParsecService
 {
 	var hostWidth: Float = 1920
 	
 	var hostHeight: Float = 1080
-	
-	
+
+
 	static let PARSEC_VER: UInt32 = UInt32((PARSEC_VER_MAJOR << 16) | PARSEC_VER_MINOR)
 	
 	private var _parsec: OpaquePointer!
@@ -46,6 +77,7 @@ class ParsecSDKBridge: ParsecService
 	private let _audioPtr: UnsafeRawPointer
 	
 	private var isVirtualShiftOn = false
+	private let keyboardQueue = DispatchQueue(label: "openparsec.keyboard.input")
 	
 	public var clientWidth: Float = 1920
 	public var clientHeight: Float = 1080
@@ -53,7 +85,13 @@ class ParsecSDKBridge: ParsecService
 	public var netProtocol: Int32 = 1
 	public var mediaContainer: Int32 = 0
 	public var pngCursor: Bool = false
-	var backgroundTaskRunning = true
+
+
+
+	private var audioWorkItem: DispatchWorkItem?
+	private var eventWorkItem: DispatchWorkItem?
+
+
 	var didSetResolution = false
 	
 	public var mouseInfo = MouseInfo()
@@ -90,63 +128,117 @@ class ParsecSDKBridge: ParsecService
 		ParsecDestroy(_parsec)
 		audio_destroy(&_audio)
 	}
-	
+
+	func destroy() {
+		ParsecDestroy(_parsec)
+		print("清理Parsec")
+
+	}
+
+
 	func connect(_ peerID: String) -> ParsecStatus {
 
-		var parsecClientCfg = ParsecClientConfig()
-		parsecClientCfg.video.0.decoderIndex = 1
-        // Use saved resolution from SettingsHandler
-		parsecClientCfg.video.0.resolutionX = Int32(SettingsHandler.resolution.width)
-		parsecClientCfg.video.0.resolutionY = Int32(SettingsHandler.resolution.height)
-		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.decoderCompatibility
-		parsecClientCfg.video.0.decoderH265 = SettingsHandler.decoder == .h265
+		self.applyConfig()
 
-		parsecClientCfg.video.1.decoderIndex = 1
-		parsecClientCfg.video.1.resolutionX = Int32(SettingsHandler.resolution.width)
-		parsecClientCfg.video.1.resolutionY = Int32(SettingsHandler.resolution.height)
-		parsecClientCfg.video.1.decoderCompatibility = SettingsHandler.decoderCompatibility
-		parsecClientCfg.video.1.decoderH265 = SettingsHandler.decoder == .h265
+		var cfg = buildConfig()
 
-		parsecClientCfg.mediaContainer = 0
-		parsecClientCfg.protocol = 1
-		//parsecClientCfg.secret = ""
-		parsecClientCfg.pngCursor = false
+
+		let status = ParsecClientConnect(_parsec, &cfg, NetworkHandler.clinfo?.session_id, peerID)
 
 		self.startBackgroundTask()
-		
-		let status = ParsecClientConnect(_parsec, &parsecClientCfg, NetworkHandler.clinfo?.session_id, peerID)
-		
-		if status == PARSEC_OK || status == PARSEC_CONNECTING {
-			ParsecBackgroundManager.shared.connectionDidStart(peerId: peerID)
-		}
 
 		return status
 	}
-	
-	func disconnect() {
-		
-		audio_clear(&_audio)
-		ParsecClientDisconnect(_parsec)
-		backgroundTaskRunning = false
-		
-		ParsecBackgroundManager.shared.connectionDidEnd()
+
+	// 配置建立
+	func buildConfig() -> ParsecClientConfig {
+		var parsecClientCfg = ParsecClientConfig()
+
+		parsecClientCfg.video.0.decoderIndex = 1
+		parsecClientCfg.video.0.resolutionX = Int32(SettingsHandler.shared.resolution.width)
+		parsecClientCfg.video.0.resolutionY = Int32(SettingsHandler.shared.resolution.height)
+
+		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.shared.decoderCompatibility
+		parsecClientCfg.video.0.decoderH265 = SettingsHandler.shared.decoder == .h265
+		parsecClientCfg.video.0.decoder444 = SettingsHandler.shared.decoder444
+
+		parsecClientCfg.mediaContainer = mediaContainer
+		parsecClientCfg.protocol = netProtocol
+		parsecClientCfg.pngCursor = pngCursor
+		//parsecClientCfg.secret = ""
+
+		return parsecClientCfg
 	}
-	
+
+
+	// 套用配置
+	func applyConfig() {
+
+		var cfg = buildConfig()
+
+		print(
+			"Debug Compatibility? -> \(cfg.video.0.decoderCompatibility)"
+		)
+
+		print("Debug H265? -> \(cfg.video.0.decoderH265)")
+
+		ParsecClientSetConfig(_parsec, &cfg);
+
+		
+	}
+
+
+
+	func disconnect() {
+
+		mouseInfo.cursorImg = nil
+		getFirstCursor = false
+
+		stopBackgroundTask()
+
+		audio_clear(&_audio)
+
+		ParsecClientDisconnect(_parsec)
+
+
+	}
+
+
+
 	func getStatus() -> ParsecStatus {
 		
 		return ParsecClientGetStatus(_parsec, nil)
 	}
-	
-	func getStatusEx(_ pcs:inout ParsecClientStatus) -> ParsecStatus {
-		let ans = ParsecClientGetStatus(_parsec, &pcs)
-		self.hostHeight = Float(pcs.decoder.0.height)
-		self.hostWidth = Float(pcs.decoder.0.width)
 
-		return ans;
-	}
-	
-	func setFrame(_ width:CGFloat, _ height:CGFloat, _ scale: CGFloat) {
+	func getOutputs(maxCount: Int = 10) -> [ParsecDecoder] {
+		// 1️⃣ 创建一个 C 数组
+		var outputs = [ParsecDecoder](
+			repeating: ParsecDecoder(),
+			count: maxCount
+		)
+
+		// 2️⃣ 调用 SDK
+		let count = outputs.withUnsafeMutableBufferPointer { buffer -> UInt32 in
+			return ParsecGetDecoders(buffer.baseAddress, UInt32(buffer.count))
+		}
+		// 3️⃣ 返回 Swift 数组
+		return Array(outputs.prefix(Int(count)))
 		
+	}
+
+
+	func getStatusEx(_ pcs: inout ParsecClientStatus) -> ParsecStatus {
+
+		let status = ParsecClientGetStatus(_parsec, &pcs)
+		if status == PARSEC_OK {
+			hostWidth  = Float(pcs.decoder.0.width)
+			hostHeight = Float(pcs.decoder.0.height)
+		}
+		return status
+	}
+
+	func setFrame(_ width:CGFloat, _ height:CGFloat, _ scale:CGFloat)
+	{
 		ParsecClientSetDimensions(_parsec, UInt8(DEFAULT_STREAM), UInt32(width), UInt32(height), Float(scale))
 		
 		clientWidth = Float(width)
@@ -154,21 +246,67 @@ class ParsecSDKBridge: ParsecService
 		mouseInfo.mouseX = Int32(width / 2)
 		mouseInfo.mouseY = Int32(height / 2)
 	}
-	
+
+
+
+
 	// timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	func renderGLFrame(timeout: UInt32 = 16) {
 		
 		ParsecClientGLRenderFrame(_parsec, UInt8(DEFAULT_STREAM), nil, nil, timeout)
 	}
-	
+
+	func clearGL(){
+		os_log("ClearGL")
+		ParsecClientGLDestroy(_parsec,UInt8(DEFAULT_STREAM))
+
+	}
+
 	/*static func renderMetalFrame(_ queue:inout MTLCommandQueue, _ texturePtr: UnsafeMutablePointer<UnsafeMutableRawPointer?>, timeout: UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	 {
 	 ParsecClientMetalRenderFrame(_parsec, UInt8(DEFAULT_STREAM), &queue, texturePtr, nil, nil, timeout)
 	 }*/
+
+
 	
-	func pollAudio(timeout: UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
+	
+	// 在 CParsec 封裝層
+	// Swift wrapper
+
+
+	
+
+	func renderMetalFrame(
+    timeout: UInt32 = 16,
+    onFrame: @escaping (ParsecFrame, UnsafeRawPointer) -> Void
+	) -> ParsecStatus {
+		let handler = FrameHandler(onFrame: onFrame)
+		let opaque = Unmanaged.passUnretained(handler).toOpaque()
+
+		let status: ParsecStatus = ParsecClientPollFrame(
+			_parsec,
+			UInt8(DEFAULT_STREAM),
+			parsecFrameCallback,
+			timeout,
+			opaque
+		)
+		return status
+	}
+
+
+	
+
+
+
+	func pollAudio(timeout:UInt32 = 16) // timeout in ms, 16 == 60 FPS, 8 == 120 FPS, etc.
 	{
-		ParsecClientPollAudio(_parsec, audio_cb, timeout, _audioPtr)
+		let status: ParsecStatus = ParsecClientPollAudio(_parsec, audio_cb, timeout, _audioPtr)
+		// log non-zero status for debugging
+		if status != 0 {
+			let msg = "ParsecClientPollAudio returned \(status)"
+			print(msg)
+			OpenParsecLogger.shared.append(msg)
+		}
 	}
 	
 	var getFirstCursor = false
@@ -192,7 +330,8 @@ class ParsecSDKBridge: ParsecService
 			handleUserDataEvent(event: e.userData)
 		}
 	}
-	
+
+
 	func handleUserDataEvent(event: ParsecClientUserDataEvent) {
 		
 		let pointer = ParsecGetBuffer(_parsec, event.key)
@@ -206,14 +345,25 @@ class ParsecSDKBridge: ParsecService
 				DispatchQueue.main.async {
 					DataManager.model.resolutionX = videoConfig.resolutionX
 					DataManager.model.resolutionY = videoConfig.resolutionY
+
+					
 					DataManager.model.bitrate = videoConfig.encoderMaxBitrate
 					DataManager.model.constantFps = videoConfig.fullFPS
+					DataManager.model.output = videoConfig.output
+
 					if !self.didSetResolution {
 						self.didSetResolution = true
-						DataManager.model.resolutionX = SettingsHandler.resolution.width
-						DataManager.model.resolutionY = SettingsHandler.resolution.height
+						DataManager.model.resolutionX = SettingsHandler.shared.resolution.width
+						DataManager.model.resolutionY = SettingsHandler.shared.resolution.height
+
+						if SettingsHandler.shared.bitrate != 0 {
+							DataManager.model.bitrate = SettingsHandler.shared.bitrate
+						}
+
 						self.updateHostVideoConfig()
 					}
+
+
 				}
 				
 			} catch {
@@ -236,73 +386,63 @@ class ParsecSDKBridge: ParsecService
 		ParsecFree(pointer)
 		
 	}
+
 	
+
 	func handleCursorEvent(event: ParsecClientCursorEvent) {
-		let prevHidden = mouseInfo.cursorHidden
+
+		//let prevHidden = mouseInfo.cursorHidden
 		mouseInfo.cursorHidden = event.cursor.hidden
 		mouseInfo.mousePositionRelative = event.cursor.relative
-		
-		if event.cursor.imageUpdate || !getFirstCursor{
-			getFirstCursor = true
-			let imgKey = event.key
-			let pointer = ParsecGetBuffer(_parsec, imgKey)
-			if pointer == nil{
-				return
-			}
-			let size = event.cursor.size
-			let width = event.cursor.width
-			let height = event.cursor.height
-			mouseInfo.cursorWidth = Int(width)
-			mouseInfo.cursorHeight = Int(height)
-			
-			if prevHidden && !event.cursor.hidden {
-				mouseInfo.mouseX = Int32(event.cursor.positionX)
-				mouseInfo.mouseY = Int32(event.cursor.positionY)
-			}
-			
-			mouseInfo.cursorHotX = Int(event.cursor.hotX)
-			mouseInfo.cursorHotY = Int(event.cursor.hotY)
-			
-			let elmentLength: Int = 4
-			let render: CGColorRenderingIntent = CGColorRenderingIntent.defaultIntent
-			let rgbColorSpace = CGColorSpaceCreateDeviceRGB()
-			let bitmapInfo: CGBitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue)
-			let providerRef: CGDataProvider? = CGDataProvider(data: NSData(bytes: pointer, length: Int(size)))
-			let cgimage: CGImage? = CGImage(width: Int(width), height: Int(height), bitsPerComponent: 8, bitsPerPixel: 32, bytesPerRow: Int(width) * elmentLength, space: rgbColorSpace, bitmapInfo: bitmapInfo, provider: providerRef!, decode: nil, shouldInterpolate: true, intent: render)
-			if cgimage != nil {
-				mouseInfo.cursorImg = cgimage
-			}
+
+		guard event.cursor.imageUpdate || !getFirstCursor else {
+			return
+		}
+		getFirstCursor = true
+
+		guard let pointer = ParsecGetBuffer(_parsec, event.key) else {
+			return
+		}
+
+		defer {
 			ParsecFree(pointer)
 		}
+
+		let size = Int(event.cursor.size)
+		let width = Int(event.cursor.width)
+		let height = Int(event.cursor.height)
+		mouseInfo.cursorWidth = width
+		mouseInfo.cursorHeight = height
+		mouseInfo.cursorHotX = Int(event.cursor.hotX)
+		mouseInfo.cursorHotY = Int(event.cursor.hotY)
+
+		let data = Data(bytes: pointer, count: size)   // ✅ Swift 管理
+
+		let provider = CGDataProvider(data: data as CFData)!
+
+		let cgimage = CGImage(
+			width: width,
+			height: height,
+			bitsPerComponent: 8,
+			bitsPerPixel: 32,
+			bytesPerRow: width * 4,
+			space: CGColorSpaceCreateDeviceRGB(),
+			bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.last.rawValue),
+			provider: provider,
+			decode: nil,
+			shouldInterpolate: true,
+			intent: .defaultIntent
+		)
+
+		if let cgimage {
+			mouseInfo.cursorImg = cgimage   // 舊的會被 ARC 釋放
+		}
 	}
-	
 	func setMuted(_ muted: Bool) {
 		audio_mute(muted, _audioPtr)
 	}
 	
-	func applyConfig() {
-
-		var parsecClientCfg = ParsecClientConfig()
-
-		parsecClientCfg.video.0.decoderIndex = 1
-		parsecClientCfg.video.0.resolutionX = 0
-		parsecClientCfg.video.0.resolutionY = 0
-		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.decoderCompatibility
-		parsecClientCfg.video.0.decoderH265 = SettingsHandler.decoder == .h265
-
-		parsecClientCfg.video.1.decoderIndex = 1
-		parsecClientCfg.video.1.resolutionX = 0
-		parsecClientCfg.video.1.resolutionY = 0
-		parsecClientCfg.video.1.decoderCompatibility = SettingsHandler.decoderCompatibility
-		parsecClientCfg.video.1.decoderH265 = SettingsHandler.decoder == .h265
-
-		parsecClientCfg.mediaContainer = mediaContainer
-		parsecClientCfg.protocol = netProtocol
-		//parsecClientCfg.secret = ""
-		parsecClientCfg.pngCursor = pngCursor
-
-		ParsecClientSetConfig(_parsec, &parsecClientCfg);
-	}
+	
 	
 	func sendMouseMessage(_ button:ParsecMouseButton, _ x:Int32, _ y:Int32, _ pressed: Bool)
 	{
@@ -339,12 +479,14 @@ class ParsecSDKBridge: ParsecService
 	
 	func sendMousePosition(_ x:Int32, _ y:Int32)
 	{
-		mouseInfo.mouseX = ParsecSDKBridge.clamp(x, minValue: 0, maxValue: Int32(self.clientWidth))
-		mouseInfo.mouseY = ParsecSDKBridge.clamp(y, minValue: 0, maxValue: Int32(self.clientHeight))
+		let clampedX = ParsecSDKBridge.clamp(x, minValue: 0, maxValue: Int32(self.clientWidth))
+		let clampedY = ParsecSDKBridge.clamp(y, minValue: 0, maxValue: Int32(self.clientHeight))
+		mouseInfo.mouseX = clampedX
+		mouseInfo.mouseY = clampedY
 		var motionMessage = ParsecMessage()
 		motionMessage.type = MESSAGE_MOUSE_MOTION
-		motionMessage.mouseMotion.x = x
-		motionMessage.mouseMotion.y = y
+		motionMessage.mouseMotion.x = clampedX
+		motionMessage.mouseMotion.y = clampedY
 		ParsecClientSendMessage(_parsec, &motionMessage)
 	}
 	
@@ -361,6 +503,8 @@ class ParsecSDKBridge: ParsecService
 	func getKeyCodeByText(text: String) -> (ParsecKeycode?, Bool) {
 		var keyCode : ParsecKeycode?
 		var useShift = false
+
+
 		if text.count == 1 {
 			let char = Character(text)
 			if char.isLetter || char.isNumber {
@@ -368,6 +512,7 @@ class ParsecSDKBridge: ParsecService
 				if char.isUppercase {
 					useShift = true
 				}
+
 			} else if char.isNewline {
 				keyCode = ParsecKeycode(40)
 			} else if char.isWhitespace{
@@ -384,35 +529,128 @@ class ParsecSDKBridge: ParsecService
 		} else {
 			keyCode = KeyCodeTranslators.parsecKeyCodeTranslator(text)
 		}
-		
+
+		if let key = keyCode {
+			os_log("KeyCode:\(key.rawValue)-\(text)")
+		}
+
 		return (keyCode, useShift)
 	}
 	
-	func sendVirtualKeyboardInput(text: String) {
-		let (keyCode, useShift) = getKeyCodeByText(text: text)
-		
-		guard let keyCode else {
-			return
-		}
-		var keyboardMessagePress = ParsecMessage()
-		keyboardMessagePress.type = MESSAGE_KEYBOARD
+	private func sendKeyboardCode(_ code: ParsecKeycode, pressed: Bool) {
+		var keyboardMessage = ParsecMessage()
+		keyboardMessage.type = MESSAGE_KEYBOARD
+		keyboardMessage.keyboard.code = code
+		keyboardMessage.keyboard.pressed = pressed
+		ParsecClientSendMessage(_parsec, &keyboardMessage)
+	}
+
+	private func tapKeyboardCode(_ code: ParsecKeycode, useShift: Bool = false, holdFor delay: TimeInterval = 0.02) {
 		if !isVirtualShiftOn && useShift {
-			keyboardMessagePress.keyboard = ParsecKeyboardMessage(code: KEY_LSHIFT, mod: MOD_NONE, pressed: true, __pad: (0,0,0))
-			ParsecClientSendMessage(_parsec, &keyboardMessagePress)
+			sendKeyboardCode(ParsecKeycode(rawValue: 225), pressed: true)
 		}
-		keyboardMessagePress.keyboard = ParsecKeyboardMessage(code: keyCode, mod: MOD_NONE, pressed: true, __pad: (0,0,0))
-		ParsecClientSendMessage(_parsec, &keyboardMessagePress)
-		
-		// add release delay in case some games ignore instant key release
-		DispatchQueue.global().asyncAfter(deadline: .now() + 0.02) {
-			keyboardMessagePress.keyboard = ParsecKeyboardMessage(code: keyCode, mod: MOD_NONE, pressed: false, __pad: (0,0,0))
-			if !self.isVirtualShiftOn && useShift {
-				keyboardMessagePress.keyboard = ParsecKeyboardMessage(code: KEY_LSHIFT, mod: MOD_NONE, pressed: false, __pad: (0,0,0))
-			}
-			ParsecClientSendMessage(self._parsec, &keyboardMessagePress)
+
+		sendKeyboardCode(code, pressed: true)
+		Thread.sleep(forTimeInterval: delay)
+		sendKeyboardCode(code, pressed: false)
+
+		if useShift && !isVirtualShiftOn {
+			sendKeyboardCode(ParsecKeycode(rawValue: 225), pressed: false)
 		}
 	}
-	
+
+	private func tapTextKey(_ text: String) -> Bool {
+		let (keyCode, useShift) = getKeyCodeByText(text: text)
+
+		guard let keyCode else {
+			return false
+		}
+
+		os_log("KeyCode:\(keyCode.rawValue)-\(text)")
+		tapKeyboardCode(keyCode, useShift: useShift, holdFor: 0.05)
+		return true
+	}
+
+	private func tapHexDigit(_ digit: Character) {
+		_ = tapTextKey(String(digit))
+	}
+
+	private func sendLinuxUnicodeScalar(_ scalar: UnicodeScalar) {
+		let hex = String(scalar.value, radix: 16, uppercase: false)
+
+		sendKeyboardCode(ParsecKeycode(rawValue: 224), pressed: true)
+		sendKeyboardCode(ParsecKeycode(rawValue: 225), pressed: true)
+		tapKeyboardCode(ParsecKeycode(rawValue: 24))
+		sendKeyboardCode(ParsecKeycode(rawValue: 225), pressed: false)
+		sendKeyboardCode(ParsecKeycode(rawValue: 224), pressed: false)
+
+		Thread.sleep(forTimeInterval: 0.02)
+		for digit in hex {
+			tapHexDigit(digit)
+		}
+		tapKeyboardCode(ParsecKeycode(rawValue: 40))
+	}
+
+	private func sendMacUnicodeHexCodeUnit(_ codeUnit: UInt16) {
+		let hex = String(format: "%04x", codeUnit)
+
+		sendKeyboardCode(ParsecKeycode(rawValue: 226), pressed: true)
+		for digit in hex {
+			tapHexDigit(digit)
+		}
+		sendKeyboardCode(ParsecKeycode(rawValue: 226), pressed: false)
+	}
+
+	private func sendWindowsHexNumpadScalar(_ scalar: UnicodeScalar) {
+		let hex = String(scalar.value, radix: 16, uppercase: false)
+
+		sendKeyboardCode(ParsecKeycode(rawValue: 226), pressed: true)
+		tapKeyboardCode(ParsecKeycode(rawValue: 87))
+		for digit in hex {
+			tapHexDigit(digit)
+		}
+		sendKeyboardCode(ParsecKeycode(rawValue: 226), pressed: false)
+	}
+
+	private func sendUnicodeScalar(_ scalar: UnicodeScalar) {
+		switch SettingsHandler.shared.remoteTextInputMode {
+		case .keycodeOnly:
+			os_log("Unsupported virtual keyboard text without unicode input mode: \(String(scalar))")
+		case .linuxUnicode:
+			sendLinuxUnicodeScalar(scalar)
+		case .macUnicodeHex:
+			for codeUnit in String(scalar).utf16 {
+				sendMacUnicodeHexCodeUnit(codeUnit)
+			}
+		case .windowsHexNumpad:
+			sendWindowsHexNumpadScalar(scalar)
+		}
+	}
+
+	private func sendVirtualKeyboardText(_ text: String) {
+		if tapTextKey(text) {
+			return
+		}
+
+		for character in text {
+			let characterText = String(character)
+			if tapTextKey(characterText) {
+				continue
+			}
+
+			for scalar in characterText.unicodeScalars {
+				sendUnicodeScalar(scalar)
+			}
+		}
+	}
+
+	func sendVirtualKeyboardInput(text: String) {
+		keyboardQueue.async { [weak self] in
+			self?.sendVirtualKeyboardText(text)
+		}
+	}
+
+
 	func sendVirtualKeyboardInput(text: String, isOn: Bool) {
 		let (keyCode, _) = getKeyCodeByText(text: text)
 		
@@ -423,7 +661,9 @@ class ParsecSDKBridge: ParsecService
 		if keyCode.rawValue == 225 {
 			isVirtualShiftOn = isOn
 		}
-		
+
+
+
 		var keyboardMessagePress = ParsecMessage()
 		keyboardMessagePress.type = MESSAGE_KEYBOARD
 		keyboardMessagePress.keyboard.pressed = isOn
@@ -434,15 +674,21 @@ class ParsecSDKBridge: ParsecService
 
 	func sendKeyboardMessage(event:KeyBoardKeyEvent)
 	{
+
 		if event.input == nil {
 			return
 		}
-		
+
+		os_log("")
+
 		var keyboardMessagePress = ParsecMessage()
 		keyboardMessagePress.type = MESSAGE_KEYBOARD
 		keyboardMessagePress.keyboard.code = ParsecKeycode(UInt32(KeyCodeTranslators.uiKeyCodeToInt(key: event.input?.keyCode ?? UIKeyboardHIDUsage.keyboardErrorUndefined)))
+
 		keyboardMessagePress.keyboard.pressed = event.isPressBegin
+
 		ParsecClientSendMessage(_parsec, &keyboardMessagePress)
+
 	}
 	
 	func sendGameControllerButtonMessage(controllerId: UInt32, _ button:ParsecGamepadButton, pressed: Bool)
@@ -491,29 +737,49 @@ class ParsecSDKBridge: ParsecService
 		ParsecClientSendMessage(_parsec, &pmsg)
 	}
 	
-	func startBackgroundTask(){
-	
-		
-		let item1 = DispatchWorkItem {
-			while self.backgroundTaskRunning {
-				self.pollAudio()
-			}
-			
-		}
 
-		let item2 = DispatchWorkItem {
-			while self.backgroundTaskRunning {
-				self.pollEvent()
-	
-				
-			}
-			
+
+	private var audioTimer: DispatchSourceTimer?
+	private var eventTimer: DispatchSourceTimer?
+
+
+	let audioQueue = DispatchQueue(label: "audio.background.queue", qos: .userInitiated)
+	let eventQueue = DispatchQueue(label: "event.background.queue", qos: .userInitiated)
+
+
+
+	func startBackgroundTask() {
+		guard audioTimer == nil, eventTimer == nil else { return }
+
+		// audio timer
+		let aTimer = DispatchSource.makeTimerSource(queue: audioQueue)
+		aTimer.schedule(deadline: .now(), repeating: .milliseconds(10)) // 每 10ms
+		aTimer.setEventHandler { [weak self] in
+			self?.pollAudio()
 		}
-		let mainQueue = DispatchQueue.global()
-		mainQueue.async(execute: item1)
-		mainQueue.async(execute: item2)
+		aTimer.resume()
+		audioTimer = aTimer
+
+		// event timer
+		let eTimer = DispatchSource.makeTimerSource(queue: eventQueue)
+		eTimer.schedule(deadline: .now(), repeating: .milliseconds(10))
+		eTimer.setEventHandler { [weak self] in
+			self?.pollEvent()
+		}
+		eTimer.resume()
+		eventTimer = eTimer
 	}
-	
+
+	func stopBackgroundTask() {
+		audioTimer?.cancel()
+		audioTimer = nil
+
+		eventTimer?.cancel()
+		eventTimer = nil
+	}
+
+
+
 	func sendUserData(type: ParsecUserDataType, message: Data) {
         var nullTerminatedMessage = message
         nullTerminatedMessage.append(0)

@@ -214,7 +214,10 @@ This is a nightly release [created automatically with GitHub Actions workflow]({
 
 
 def main():
-    repo_url = "hugeBlack/OpenParsec"
+    # Define the GitHub repository in the format "owner/repo"
+    # 目前在自己的倉庫里，正式PR 應拆分忽略此部分 改回hugeBlack/OpenParsec
+
+    repo_url = "TwhomeGH/OpenParsec"
     is_nightly = "NIGHTLY_LINK" in os.environ
 
     try:

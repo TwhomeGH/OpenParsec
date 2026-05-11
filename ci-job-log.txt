@@ -1,0 +1,294 @@
+﻿2026-05-11T20:50:18.6221570Z Current runner version: '2.334.0'
+2026-05-11T20:50:18.6249810Z ##[group]Runner Image Provisioner
+2026-05-11T20:50:18.6251430Z Hosted Compute Agent
+2026-05-11T20:50:18.6252280Z Version: 20260422.526
+2026-05-11T20:50:18.6253380Z Commit: e1a9e573f4d0838b3a7c1b07401aeb29ed3635a9
+2026-05-11T20:50:18.6255150Z Build Date: 2026-04-22T09:31:31Z
+2026-05-11T20:50:18.6256760Z Worker ID: {0c81ddd6-48fe-4e5a-8c7b-0e593e3ac213}
+2026-05-11T20:50:18.6258150Z Azure Region: westus
+2026-05-11T20:50:18.6259360Z ##[endgroup]
+2026-05-11T20:50:18.6261770Z ##[group]Operating System
+2026-05-11T20:50:18.6262690Z macOS
+2026-05-11T20:50:18.6263410Z 15.7.4
+2026-05-11T20:50:18.6264110Z 24G517
+2026-05-11T20:50:18.6264820Z ##[endgroup]
+2026-05-11T20:50:18.6265630Z ##[group]Runner Image
+2026-05-11T20:50:18.6266510Z Image: macos-15-arm64
+2026-05-11T20:50:18.6267540Z Version: 20260427.0018.1
+2026-05-11T20:50:18.6269670Z Included Software: https://github.com/actions/runner-images/blob/macos-15-arm64/20260427.0018/images/macos/macos-15-arm64-Readme.md
+2026-05-11T20:50:18.6272580Z Image Release: https://github.com/actions/runner-images/releases/tag/macos-15-arm64%2F20260427.0018
+2026-05-11T20:50:18.6273290Z ##[endgroup]
+2026-05-11T20:50:18.6275570Z ##[group]GITHUB_TOKEN Permissions
+2026-05-11T20:50:18.6277460Z Actions: write
+2026-05-11T20:50:18.6277820Z ArtifactMetadata: write
+2026-05-11T20:50:18.6278140Z Attestations: write
+2026-05-11T20:50:18.6278470Z Checks: write
+2026-05-11T20:50:18.6278760Z CodeQuality: write
+2026-05-11T20:50:18.6279080Z Contents: write
+2026-05-11T20:50:18.6279380Z Deployments: write
+2026-05-11T20:50:18.6279710Z Discussions: write
+2026-05-11T20:50:18.6280020Z Issues: write
+2026-05-11T20:50:18.6280330Z Metadata: read
+2026-05-11T20:50:18.6280650Z Models: read
+2026-05-11T20:50:18.6280960Z Packages: write
+2026-05-11T20:50:18.6281350Z Pages: write
+2026-05-11T20:50:18.6281660Z PullRequests: write
+2026-05-11T20:50:18.6282010Z RepositoryProjects: write
+2026-05-11T20:50:18.6282370Z SecurityEvents: write
+2026-05-11T20:50:18.6282720Z Statuses: write
+2026-05-11T20:50:18.6283060Z VulnerabilityAlerts: read
+2026-05-11T20:50:18.6283420Z ##[endgroup]
+2026-05-11T20:50:18.6285040Z Secret source: Actions
+2026-05-11T20:50:18.6285460Z Prepare workflow directory
+2026-05-11T20:50:18.6663420Z Prepare all required actions
+2026-05-11T20:50:18.6721050Z Getting action download info
+2026-05-11T20:50:19.2147920Z Download action repository 'maxim-lobanov/setup-xcode@v1' (SHA:ed7a3b1fda3918c0306d1b724322adc0b8cc0a90)
+2026-05-11T20:50:19.7496840Z Download action repository 'actions/checkout@v6' (SHA:de0fac2e4500dabe0009e67214ff5f5447ce83dd)
+2026-05-11T20:50:19.8630820Z Download action repository 'actions/upload-artifact@v7' (SHA:043fb46d1a93c77aae656e7c1c64a875d1fc6a0a)
+2026-05-11T20:50:20.0641470Z Complete job name: Build using xcodebuild command
+2026-05-11T20:50:20.1270080Z ##[group]Run maxim-lobanov/setup-xcode@v1
+2026-05-11T20:50:20.1270840Z with:
+2026-05-11T20:50:20.1271160Z   xcode-version: 26.2
+2026-05-11T20:50:20.1271590Z env:
+2026-05-11T20:50:20.1271870Z   scheme: OpenParsec
+2026-05-11T20:50:20.1272210Z   archive_path: archive
+2026-05-11T20:50:20.1272560Z   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+2026-05-11T20:50:20.1272960Z ##[endgroup]
+2026-05-11T20:50:20.5535830Z Switching Xcode to version '26.2'...
+2026-05-11T20:50:20.6769740Z Xcode is set to 26.2.0 (17C52)
+2026-05-11T20:50:20.7156980Z ##[group]Run actions/checkout@v6
+2026-05-11T20:50:20.7159170Z with:
+2026-05-11T20:50:20.7160530Z   submodules: recursive
+2026-05-11T20:50:20.7161380Z   repository: TwhomeGH/OpenParsec
+2026-05-11T20:50:20.7162610Z   token: ***
+2026-05-11T20:50:20.7163250Z   ssh-strict: true
+2026-05-11T20:50:20.7163960Z   ssh-user: git
+2026-05-11T20:50:20.7164660Z   persist-credentials: true
+2026-05-11T20:50:20.7165410Z   clean: true
+2026-05-11T20:50:20.7166130Z   sparse-checkout-cone-mode: true
+2026-05-11T20:50:20.7166960Z   fetch-depth: 1
+2026-05-11T20:50:20.7167600Z   fetch-tags: false
+2026-05-11T20:50:20.7168260Z   show-progress: true
+2026-05-11T20:50:20.7168900Z   lfs: false
+2026-05-11T20:50:20.7170570Z   set-safe-directory: true
+2026-05-11T20:50:20.7171240Z env:
+2026-05-11T20:50:20.7171820Z   scheme: OpenParsec
+2026-05-11T20:50:20.7172460Z   archive_path: archive
+2026-05-11T20:50:20.7173970Z   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+2026-05-11T20:50:20.7175080Z   MD_APPLE_SDK_ROOT: /Applications/Xcode_26.2.app
+2026-05-11T20:50:20.7176320Z ##[endgroup]
+2026-05-11T20:50:20.9214480Z Syncing repository: TwhomeGH/OpenParsec
+2026-05-11T20:50:20.9216400Z ##[group]Getting Git version info
+2026-05-11T20:50:20.9217350Z Working directory is '/Users/runner/work/OpenParsec/OpenParsec'
+2026-05-11T20:50:20.9224750Z [command]/opt/homebrew/bin/git version
+2026-05-11T20:50:20.9954040Z git version 2.54.0
+2026-05-11T20:50:20.9980870Z ##[endgroup]
+2026-05-11T20:50:20.9996230Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/063ac909-98dd-4c33-9f5c-ef788b6a0022/.gitconfig'
+2026-05-11T20:50:21.0003410Z Temporarily overriding HOME='/Users/runner/work/_temp/063ac909-98dd-4c33-9f5c-ef788b6a0022' before making global git config changes
+2026-05-11T20:50:21.0006280Z Adding repository directory to the temporary git global config as a safe directory
+2026-05-11T20:50:21.0015720Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/OpenParsec/OpenParsec
+2026-05-11T20:50:21.0145310Z Deleting the contents of '/Users/runner/work/OpenParsec/OpenParsec'
+2026-05-11T20:50:21.0151750Z ##[group]Initializing the repository
+2026-05-11T20:50:21.0155350Z [command]/opt/homebrew/bin/git init /Users/runner/work/OpenParsec/OpenParsec
+2026-05-11T20:50:21.0429530Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-05-11T20:50:21.0437370Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-05-11T20:50:21.0439890Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-05-11T20:50:21.0440980Z hint: call:
+2026-05-11T20:50:21.0441470Z hint:
+2026-05-11T20:50:21.0442140Z hint: 	git config --global init.defaultBranch <name>
+2026-05-11T20:50:21.0443000Z hint:
+2026-05-11T20:50:21.0444580Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-05-11T20:50:21.0448460Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-05-11T20:50:21.0450990Z hint:
+2026-05-11T20:50:21.0452350Z hint: 	git branch -m <name>
+2026-05-11T20:50:21.0453870Z hint:
+2026-05-11T20:50:21.0456830Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-05-11T20:50:21.0459630Z Initialized empty Git repository in /Users/runner/work/OpenParsec/OpenParsec/.git/
+2026-05-11T20:50:21.0462210Z [command]/opt/homebrew/bin/git remote add origin https://github.com/TwhomeGH/OpenParsec
+2026-05-11T20:50:21.0550350Z ##[endgroup]
+2026-05-11T20:50:21.0551860Z ##[group]Disabling automatic garbage collection
+2026-05-11T20:50:21.0556950Z [command]/opt/homebrew/bin/git config --local gc.auto 0
+2026-05-11T20:50:21.0638940Z ##[endgroup]
+2026-05-11T20:50:21.0640850Z ##[group]Setting up auth
+2026-05-11T20:50:21.0643930Z Removing SSH command configuration
+2026-05-11T20:50:21.0645120Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-05-11T20:50:21.0721930Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-05-11T20:50:21.2209230Z Removing HTTP extra header
+2026-05-11T20:50:21.2213040Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-05-11T20:50:21.2299080Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-05-11T20:50:21.3801110Z Removing includeIf entries pointing to credentials config files
+2026-05-11T20:50:21.3942780Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-05-11T20:50:21.4250910Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-05-11T20:50:21.4950380Z [command]/opt/homebrew/bin/git config --file /Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-05-11T20:50:21.5067640Z [command]/opt/homebrew/bin/git config --local includeIf.gitdir:/Users/runner/work/OpenParsec/OpenParsec/.git.path /Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:50:21.5171180Z [command]/opt/homebrew/bin/git config --local includeIf.gitdir:/Users/runner/work/OpenParsec/OpenParsec/.git/worktrees/*.path /Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:50:21.5257870Z [command]/opt/homebrew/bin/git config --local includeIf.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:50:21.5347280Z [command]/opt/homebrew/bin/git config --local includeIf.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:50:21.5428300Z ##[endgroup]
+2026-05-11T20:50:21.5429450Z ##[group]Fetching the repository
+2026-05-11T20:50:21.5431560Z [command]/opt/homebrew/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +237028b41900322a89eee58825be4a65e9043310:refs/remotes/origin/patch-1
+2026-05-11T20:50:22.6829190Z From https://github.com/TwhomeGH/OpenParsec
+2026-05-11T20:50:22.6829880Z  * [new ref]         237028b41900322a89eee58825be4a65e9043310 -> origin/patch-1
+2026-05-11T20:50:22.6958660Z [command]/opt/homebrew/bin/git branch --list --remote origin/patch-1
+2026-05-11T20:50:22.7222460Z   origin/patch-1
+2026-05-11T20:50:22.7415380Z [command]/opt/homebrew/bin/git rev-parse refs/remotes/origin/patch-1
+2026-05-11T20:50:22.7439840Z 237028b41900322a89eee58825be4a65e9043310
+2026-05-11T20:50:22.7474280Z ##[endgroup]
+2026-05-11T20:50:22.7485960Z ##[group]Determining the checkout info
+2026-05-11T20:50:22.7515730Z ##[endgroup]
+2026-05-11T20:50:22.7528660Z [command]/opt/homebrew/bin/git sparse-checkout disable
+2026-05-11T20:50:22.7561150Z [command]/opt/homebrew/bin/git config --local --unset-all extensions.worktreeConfig
+2026-05-11T20:50:22.7582330Z ##[group]Checking out the ref
+2026-05-11T20:50:22.7610640Z [command]/opt/homebrew/bin/git checkout --progress --force -B patch-1 refs/remotes/origin/patch-1
+2026-05-11T20:50:22.8067170Z Switched to a new branch 'patch-1'
+2026-05-11T20:50:22.8088310Z branch 'patch-1' set up to track 'origin/patch-1'.
+2026-05-11T20:50:22.8095530Z ##[endgroup]
+2026-05-11T20:50:22.8096070Z ##[group]Setting up auth for fetching submodules
+2026-05-11T20:50:22.8099330Z [command]/opt/homebrew/bin/git config --file /Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-05-11T20:50:22.8226210Z [command]/opt/homebrew/bin/git config --global include.path /Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:50:22.8332540Z [command]/opt/homebrew/bin/git config --global --unset-all url.https://github.com/.insteadOf
+2026-05-11T20:50:22.8450030Z [command]/opt/homebrew/bin/git config --global --add url.https://github.com/.insteadOf git@github.com:
+2026-05-11T20:50:22.8523630Z [command]/opt/homebrew/bin/git config --global --add url.https://github.com/.insteadOf org-42139132@github.com:
+2026-05-11T20:50:22.8644230Z ##[endgroup]
+2026-05-11T20:50:22.8644950Z ##[group]Fetching submodules
+2026-05-11T20:50:22.8645600Z [command]/opt/homebrew/bin/git submodule sync --recursive
+2026-05-11T20:50:23.0753430Z [command]/opt/homebrew/bin/git -c protocol.version=2 submodule update --init --force --depth=1 --recursive
+2026-05-11T20:50:23.2374930Z Submodule 'Frameworks/ParsecSDK.framework' (https://github.com/AngelWyvern/parsec-sdk) registered for path 'Frameworks/ParsecSDK.framework'
+2026-05-11T20:50:23.2539560Z Cloning into '/Users/runner/work/OpenParsec/OpenParsec/Frameworks/ParsecSDK.framework'...
+2026-05-11T20:50:27.5812120Z From https://github.com/AngelWyvern/parsec-sdk
+2026-05-11T20:50:27.5813130Z  * branch            bb336699ee7acd7a4eb0c460410a65c23d7f3879 -> FETCH_HEAD
+2026-05-11T20:50:27.6201130Z Submodule path 'Frameworks/ParsecSDK.framework': checked out 'bb336699ee7acd7a4eb0c460410a65c23d7f3879'
+2026-05-11T20:50:27.6285050Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local gc.auto 0
+2026-05-11T20:50:27.7312730Z Entering 'Frameworks/ParsecSDK.framework'
+2026-05-11T20:50:27.7456700Z ##[endgroup]
+2026-05-11T20:50:27.7457200Z ##[group]Persisting credentials for submodules
+2026-05-11T20:50:27.7470890Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'url\.https\:\/\/github\.com\/\.insteadOf' && git config --local --unset-all 'url.https://github.com/.insteadOf' || :"
+2026-05-11T20:50:27.8288950Z Entering 'Frameworks/ParsecSDK.framework'
+2026-05-11T20:50:27.8630780Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-05-11T20:50:27.9338080Z Entering 'Frameworks/ParsecSDK.framework'
+2026-05-11T20:50:27.9425950Z file:/Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework/config	remote.origin.url
+2026-05-11T20:50:27.9493840Z [command]/opt/homebrew/bin/git config --file /Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework/config includeIf.gitdir:/Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework.path /Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:50:27.9563190Z [command]/opt/homebrew/bin/git config --file /Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework/config includeIf.gitdir:/github/workspace/.git/modules/Frameworks/ParsecSDK.framework.path /github/runner_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:50:27.9623960Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --add 'url.https://github.com/.insteadOf' 'git@github.com:'
+2026-05-11T20:50:28.0407190Z Entering 'Frameworks/ParsecSDK.framework'
+2026-05-11T20:50:28.0593640Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --add 'url.https://github.com/.insteadOf' 'org-42139132@github.com:'
+2026-05-11T20:50:28.1396180Z Entering 'Frameworks/ParsecSDK.framework'
+2026-05-11T20:50:28.1546190Z ##[endgroup]
+2026-05-11T20:50:28.1632010Z [command]/opt/homebrew/bin/git log -1 --format=%H
+2026-05-11T20:50:28.1784340Z 237028b41900322a89eee58825be4a65e9043310
+2026-05-11T20:50:28.2162340Z ##[group]Run if [ $scheme = default ]
+2026-05-11T20:50:28.2162690Z [36;1mif [ $scheme = default ][0m
+2026-05-11T20:50:28.2162990Z [36;1mthen[0m
+2026-05-11T20:50:28.2163270Z [36;1m  scheme_list=$(xcodebuild -list -json | tr -d "\n")[0m
+2026-05-11T20:50:28.2163750Z [36;1m  scheme=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")[0m
+2026-05-11T20:50:28.2164190Z [36;1m  echo Using default scheme: $scheme[0m
+2026-05-11T20:50:28.2164450Z [36;1melse[0m
+2026-05-11T20:50:28.2164680Z [36;1m  echo Using configured scheme: $scheme[0m
+2026-05-11T20:50:28.2164940Z [36;1mfi[0m
+2026-05-11T20:50:28.2165110Z [36;1mecho "scheme=$scheme" >> $GITHUB_OUTPUT[0m
+2026-05-11T20:50:28.2211550Z shell: /bin/bash -e {0}
+2026-05-11T20:50:28.2211770Z env:
+2026-05-11T20:50:28.2211960Z   scheme: OpenParsec
+2026-05-11T20:50:28.2212130Z   archive_path: archive
+2026-05-11T20:50:28.2212310Z   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+2026-05-11T20:50:28.2212630Z   MD_APPLE_SDK_ROOT: /Applications/Xcode_26.2.app
+2026-05-11T20:50:28.2212840Z ##[endgroup]
+2026-05-11T20:50:28.2647920Z Using configured scheme: OpenParsec
+2026-05-11T20:50:28.2695920Z ##[group]Run filetype_parameter=`ls -A | grep -i \\.xcworkspace\$ && echo workspace || echo project`
+2026-05-11T20:50:28.2696560Z [36;1mfiletype_parameter=`ls -A | grep -i \\.xcworkspace\$ && echo workspace || echo project`[0m
+2026-05-11T20:50:28.2697040Z [36;1mecho "filetype_parameter=$filetype_parameter" >> $GITHUB_OUTPUT[0m
+2026-05-11T20:50:28.2727770Z shell: /bin/bash -e {0}
+2026-05-11T20:50:28.2728020Z env:
+2026-05-11T20:50:28.2728220Z   scheme: OpenParsec
+2026-05-11T20:50:28.2728420Z   archive_path: archive
+2026-05-11T20:50:28.2728700Z   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+2026-05-11T20:50:28.2729000Z   MD_APPLE_SDK_ROOT: /Applications/Xcode_26.2.app
+2026-05-11T20:50:28.2729270Z ##[endgroup]
+2026-05-11T20:50:28.3114040Z ##[group]Run file_to_build=`ls -A | grep -i \\.xcworkspace\$ || ls -A | grep -i \\.xcodeproj\$`
+2026-05-11T20:50:28.3116270Z [36;1mfile_to_build=`ls -A | grep -i \\.xcworkspace\$ || ls -A | grep -i \\.xcodeproj\$`[0m
+2026-05-11T20:50:28.3116800Z [36;1mfile_to_build=`echo $file_to_build | awk '{$1=$1;print}'`[0m
+2026-05-11T20:50:28.3117140Z [36;1mecho "file_to_build=$file_to_build" >> $GITHUB_OUTPUT[0m
+2026-05-11T20:50:28.3178590Z shell: /bin/bash -e {0}
+2026-05-11T20:50:28.3179250Z env:
+2026-05-11T20:50:28.3179630Z   scheme: OpenParsec
+2026-05-11T20:50:28.3180200Z   archive_path: archive
+2026-05-11T20:50:28.3180780Z   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+2026-05-11T20:50:28.3181460Z   MD_APPLE_SDK_ROOT: /Applications/Xcode_26.2.app
+2026-05-11T20:50:28.3182300Z ##[endgroup]
+2026-05-11T20:50:28.3584360Z ##[group]Run xcodebuild archive -archivePath "$archive_path" -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -sdk iphoneos -arch arm64 -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO | xcpretty && exit ${PIPESTATUS[0]}
+2026-05-11T20:50:28.3585770Z [36;1mxcodebuild archive -archivePath "$archive_path" -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -sdk iphoneos -arch arm64 -configuration Release CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO | xcpretty && exit ${PIPESTATUS[0]}[0m
+2026-05-11T20:50:28.3617070Z shell: /bin/bash -e {0}
+2026-05-11T20:50:28.3617240Z env:
+2026-05-11T20:50:28.3617380Z   scheme: OpenParsec
+2026-05-11T20:50:28.3617540Z   archive_path: archive
+2026-05-11T20:50:28.3617730Z   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+2026-05-11T20:50:28.3617980Z   MD_APPLE_SDK_ROOT: /Applications/Xcode_26.2.app
+2026-05-11T20:50:28.3618230Z   filetype_parameter: project
+2026-05-11T20:50:28.3618490Z   file_to_build: OpenParsec.xcodeproj
+2026-05-11T20:50:28.3618680Z ##[endgroup]
+2026-05-11T20:50:44.2777650Z --- xcodebuild: WARNING: Using the first of multiple matching destinations:
+2026-05-11T20:50:44.2780730Z { platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device }
+2026-05-11T20:50:44.2781520Z { platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
+2026-05-11T20:50:44.2782510Z { platform:macOS, arch:arm64, variant:Designed for [iPad,iPhone], id:dad8385a565468ac2de1581bf8d76ec2d79f1b46, name:My Mac }
+2026-05-11T20:51:00.7862460Z ▸ Compiling LaunchScreen.storyboard
+2026-05-11T20:51:14.4738370Z ** ARCHIVE FAILED **
+2026-05-11T20:51:14.4842160Z 
+2026-05-11T20:51:14.4959410Z 
+2026-05-11T20:51:14.4976980Z The following build commands failed:
+2026-05-11T20:51:14.5048020Z 	SwiftCompile normal arm64 Compiling\ Shared.swift,\ GameController.swift,\ URLImage.swift,\ ParsecMetalViewController.swift,\ TouchHandlingView.swift,\ AppDelegate.swift,\ MainView.swift,\ ParsecGLKViewController.swift,\ SettingsView.swift,\ ViewContainerPatch.swift,\ ActivityIndicator.swift,\ ParsecGLKRenderer.swift,\ SceneDelegate.swift,\ SettingsHandler.swift,\ ExUI.swift,\ LoginView.swift,\ CParsec.swift,\ UIViewControllerWrapper.swift,\ ParsecViewController.swift,\ ParsecMetalRenderer.swift,\ ParsecUserData.swift,\ RenderCenter.swift,\ ContentView.swift,\ ParsecSDKBridge.swift,\ NetworkHandler.swift,\ KeyBoardTest.swift,\ KeyCodeTranslators.swift,\ ParsecView.swift,\ Logger.swift,\ LogViewController.swift,\ LogViewWrapper.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/Shared.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/GameController.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/URLImage.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/ParsecMetalViewController.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/TouchHandlingView.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/AppDelegate.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/MainView.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/ParsecGLKViewController.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/SettingsView.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/ViewContainerPatch.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/ActivityIndicator.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/ParsecGLKRenderer.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/SceneDelegate.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/SettingsHandler.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/ExUI.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/LoginView.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/CParsec.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/UIViewControllerWrapper.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/ParsecViewController.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/ParsecMetalRenderer.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/ParsecUserData.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/RenderCenter.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/ContentView.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/ParsecSDKBridge.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/NetworkHandler.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/KeyBoardTest.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/KeyCodeTranslators.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/ParsecView.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/Logger.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/LogViewController.swift /Users/runner/work/OpenParsec/OpenParsec/OpenParsec/LogViewWrapper.swift /Users/runner/Library/Developer/Xcode/DerivedData/OpenParsec-ccltkmrvxlujvpcfqhkcznptgjti/Build/Intermediates.noindex/ArchiveIntermediates/OpenParsec/IntermediateBuildFilesPath/OpenParsec.build/Release-iphoneos/OpenParsec.build/DerivedSources/GeneratedAssetSymbols.swift /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/System.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/CoreImage.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/FileProvider.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/UIKit.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/SwiftUI.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/_Builtin_float.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/Accessibility.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/Swift.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/Darwin.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/OSLog.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/ObjectiveC.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/ModelIO.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/_StringProcessing.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/Observation.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/XPC.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/Symbols.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/CoreText.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/os.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/QuartzCore.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/CoreFoundation.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/GameController.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/UniformTypeIdentifiers.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/simd.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/DataDetection.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/MetalKit.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/Metal.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/Spatial.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/_Concurrency.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/GLKit.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/DeveloperToolsSupport.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/Dispatch.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/SwiftUICore.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/Foundation.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/Combine.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/_DarwinFoundation3.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/CoreTransferable.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/_GameController_SwiftUI.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/CoreData.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/CoreGraphics.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/CoreVideo.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/_DarwinFoundation1.swiftmodule/arm64e-apple-ios.swiftmodule /Applications/Xcode_26.2.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos/prebuilt-modules/26.2/_DarwinFoundation2.swiftmodule/arm64e-apple-ios.swiftmodule /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdatomic-77F0Y6EV5SVQTWQJGR34QRDZ6.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftUI-6MITNVEHCYIH4UGGXSLKB8C33.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UIUtilities-F2P9K96R433WDO7WAF00IJV9L.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/simd-95LB4H62YH1ZSK81TK6998PN9.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/IOSurface-5RRP2202PJ08XBD4LGNU87GAV.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdarg-EIBBIUTF4M4EDSRUNB6I5U38W.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/XPC-7HNB0768T6PCRA0NQZ7J65TTU.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ObjectiveC-8R3JYEZ4GH09DLV6PJLLAVVBZ.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ImageIO-5FTNJNXJ4GQ70CRO58VZAU3A8.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/MetalKit-D7IJ0GY5HMMJWJJNOUGESQ3SE.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Foundation-BRJBN5WRDBYO0TRTTS7EDDLB7.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_float-3L7IK0E258YO4B42Q6BLS4RO0.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation3-BN9IC2GCJNMYK7E9D7BRIXMK.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_intrinsics-4LCVTACAV64OJ9O429BS1O5IB.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os-3PHVXNULA64R03EU05LSVS0PE.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ModelIO-AWAHBKB9JZ8SO1DR52KCOI6U5.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Dispatch-B4TWYT6Y7R9OEKLRKTHL9EEHA.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreTransferable-DXI99JIGU13K7L8G57E23CQN7.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Accessibility-BPJVNZCVYWWK5L6GQLT2QJH6Q.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stddef-CNEWLB22AR3C2HJRU6VRHHHS9.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/GameController-5A5ZKPM51I0F2IRD00SP0V6VO.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation1-DI9X7ZLEBZZTWGUB5N1ZPVJVA.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UserNotifications-79JG9TFOU4RXYTVRJG2YDM55B.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_limits-7PO0P89S3W6B6WBFIHBKLZRF8.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreImage-4S6GK2DBHGPPBHBHJ44JYCB9.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_tgmath-A25FGH6J0H63TMIJALZR19YS4.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreFoundation-EDM25B2X7N8585SAZZDHUTRCJ.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os_workgroup-76X0M1CODZLCWK2MY9NF03JM5.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Spatial-A5KSYRURAUVAHBEPBAYSXO05Z.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/GLKit-84L55CYOEA76U115ZLKYE2L2X.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_inttypes-XQDP5Z88Q1SN3MKMA7S0KXZM.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreGraphics-95KBGSDY4LW9HXLBAC4VDTVW.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftUICore-402UE3T1ATX7RHNCRNDOS53OW.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreServices-BFNBREK4M3TIDTCFKQ5ULJNBW.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/DeveloperToolsSupport-1CW62K06J9DJBO7LXSORT6CII.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/OSLog-A8SEM96YWBDHK1YFTHPG5TEDQ.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreData-675P13W4C1ZBT67KRH2O3VG5J.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/os_object-1LGQWAD9KN9E60HCR2WX39VMZ.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_DarwinFoundation2-AW80RWOQEQUXNNWFLKGYZNNTM.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/SwiftShims-7ZFGKTJYECASN4TX45V68LGTL.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/sys_types-3DEVMMAQNBYCZMZMFRCF8YEWA.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Metal-CI1KDNJJHT4CCCDQKN9VL3F5O.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CFNetwork-4P52GXSVRV295OUIDV3KMVX7V.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/MachO-37PLD3T3HKWS8UZU48C0FGJKT.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_AvailabilityInternal-320EQS5U5D5MUGC058SY6BTV5.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Symbols-14BDEEXG35SCPYP1UDBIH0L7P.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UniformTypeIdentifiers-DCNO3VF04ADNZYT1KDF4UCXWW.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdbool-CCIS4N9SBFORYUB1PHD51BNVL.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/DataDetection-3I2EGQHL6XIEYR6U4OAWKRKPR.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ptrauth-2BR1WY5RU3SO5XA8W1Y7KN2CB.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_Builtin_stdint-A2FOSV40C7FI6PM3VF6UTGQC9.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/OpenGLES-9V8OHF3Z5T9MEMCPOGJN1JY5J.pcm /Users/runner/Library/Developer/Xcode/DerivedData/OpenParsec-ccltkmrvxlujvpcfqhkcznptgjti/Build/Intermediates.noindex/ArchiveIntermediates/OpenParsec/IntermediateBuildFilesPath/SwiftExplicitPrecompiledModules/ParsecSDK-JR56ABZXEV164PKVV29H3VHQ.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreText-C4JAFWLL98H31LYXI2K2N531J.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Security-9539NH4G6CQMQ89VOSR95DB0.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Darwin-E1RDWG3B3WMYTEUSWK72DB6HA.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/FileProvider-7NTGT1XAS2RQ3JH924LNK7L1U.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/ptrcheck-7825SDE2C4V36SXEVEDT9U3LM.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/UIKit-1TREEGEGZTYY52POZ23AMJ525.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/CoreVideo-8J2TVOBLCWYAWV7ADVTCBKDL.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/_SwiftConcurrencyShims-6FWFPQMQAJTS1JPCLUXV55ZES.pcm /Users/runner/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/QuartzCore-8T6E7XCRMLSRY45JWDZRNI9TJ.pcm /Users/runner/Library/Developer/Xcode/DerivedData/OpenParsec-ccltkmrvxlujvpcfqhkcznptgjti/Build/Intermediates.noindex/ArchiveIntermediates/OpenParsec/IntermediateBuildFilesPath/OpenParsec.build/Release-iphoneos/OpenParsec.build/Objects-normal/arm64/OpenParsec-dependencies-1.json /Users/runner/Library/Developer/Xcode/DerivedData/OpenParsec-ccltkmrvxlujvpcfqhkcznptgjti/Build/Intermediates.noindex/ArchiveIntermediates/OpenParsec/IntermediateBuildFilesPath/OpenParsec.build/Release-iphoneos/OpenParsec.build/Objects-normal/arm64/OpenParsec-primary-Bridging-header.pch (in target 'OpenParsec' from project 'OpenParsec')
+2026-05-11T20:51:14.5148180Z 	CompileSwift normal arm64 (in target 'OpenParsec' from project 'OpenParsec')
+2026-05-11T20:51:14.5148610Z 	Archiving project OpenParsec with scheme OpenParsec
+2026-05-11T20:51:14.5148960Z (3 failures)
+2026-05-11T20:51:14.5337600Z ##[error]Process completed with exit code 65.
+2026-05-11T20:51:14.5681840Z Post job cleanup.
+2026-05-11T20:51:15.1130190Z [command]/opt/homebrew/bin/git version
+2026-05-11T20:51:15.1839110Z git version 2.54.0
+2026-05-11T20:51:15.1984930Z Copying '/Users/runner/.gitconfig' to '/Users/runner/work/_temp/1a212c52-0132-4561-8ee4-ee1d61af1d76/.gitconfig'
+2026-05-11T20:51:15.1998490Z Temporarily overriding HOME='/Users/runner/work/_temp/1a212c52-0132-4561-8ee4-ee1d61af1d76' before making global git config changes
+2026-05-11T20:51:15.2000770Z Adding repository directory to the temporary git global config as a safe directory
+2026-05-11T20:51:15.2001520Z [command]/opt/homebrew/bin/git config --global --add safe.directory /Users/runner/work/OpenParsec/OpenParsec
+2026-05-11T20:51:15.2092620Z Removing SSH command configuration
+2026-05-11T20:51:15.2100720Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-05-11T20:51:15.2216880Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-05-11T20:51:15.3530380Z Entering 'Frameworks/ParsecSDK.framework'
+2026-05-11T20:51:15.3771640Z Removing HTTP extra header
+2026-05-11T20:51:15.3775300Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-05-11T20:51:15.3839490Z [command]/opt/homebrew/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-05-11T20:51:15.4797830Z Entering 'Frameworks/ParsecSDK.framework'
+2026-05-11T20:51:15.5416390Z Removing includeIf entries pointing to credentials config files
+2026-05-11T20:51:15.5523170Z [command]/opt/homebrew/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-05-11T20:51:15.5624630Z includeif.gitdir:/Users/runner/work/OpenParsec/OpenParsec/.git.path
+2026-05-11T20:51:15.5727980Z includeif.gitdir:/Users/runner/work/OpenParsec/OpenParsec/.git/worktrees/*.path
+2026-05-11T20:51:15.5831630Z includeif.gitdir:/github/workspace/.git.path
+2026-05-11T20:51:15.5865590Z includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-05-11T20:51:15.5867220Z [command]/opt/homebrew/bin/git config --local --get-all includeif.gitdir:/Users/runner/work/OpenParsec/OpenParsec/.git.path
+2026-05-11T20:51:15.5868050Z /Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:51:15.5869490Z [command]/opt/homebrew/bin/git config --local --unset includeif.gitdir:/Users/runner/work/OpenParsec/OpenParsec/.git.path /Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:51:15.5871070Z [command]/opt/homebrew/bin/git config --local --get-all includeif.gitdir:/Users/runner/work/OpenParsec/OpenParsec/.git/worktrees/*.path
+2026-05-11T20:51:15.5871860Z /Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:51:15.5875120Z [command]/opt/homebrew/bin/git config --local --unset includeif.gitdir:/Users/runner/work/OpenParsec/OpenParsec/.git/worktrees/*.path /Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:51:15.5879360Z [command]/opt/homebrew/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git.path
+2026-05-11T20:51:15.5893530Z /github/runner_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:51:15.5898620Z [command]/opt/homebrew/bin/git config --local --unset includeif.gitdir:/github/workspace/.git.path /github/runner_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:51:15.5990580Z [command]/opt/homebrew/bin/git config --local --get-all includeif.gitdir:/github/workspace/.git/worktrees/*.path
+2026-05-11T20:51:15.6060390Z /github/runner_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:51:15.6081190Z [command]/opt/homebrew/bin/git config --local --unset includeif.gitdir:/github/workspace/.git/worktrees/*.path /github/runner_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:51:15.6164110Z [command]/opt/homebrew/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-05-11T20:51:15.7705850Z Entering 'Frameworks/ParsecSDK.framework'
+2026-05-11T20:51:15.7815450Z file:/Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework/config	remote.origin.url
+2026-05-11T20:51:15.8224040Z [command]/opt/homebrew/bin/git config --file /Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework/config --name-only --get-regexp ^includeIf\.gitdir:
+2026-05-11T20:51:15.8328060Z includeif.gitdir:/Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework.path
+2026-05-11T20:51:15.8429860Z includeif.gitdir:/github/workspace/.git/modules/Frameworks/ParsecSDK.framework.path
+2026-05-11T20:51:15.8573750Z [command]/opt/homebrew/bin/git config --file /Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework/config --get-all includeif.gitdir:/Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework.path
+2026-05-11T20:51:15.8574810Z /Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:51:15.8583550Z [command]/opt/homebrew/bin/git config --file /Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework/config --unset includeif.gitdir:/Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework.path /Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:51:15.8585880Z [command]/opt/homebrew/bin/git config --file /Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework/config --get-all includeif.gitdir:/github/workspace/.git/modules/Frameworks/ParsecSDK.framework.path
+2026-05-11T20:51:15.8586810Z /github/runner_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:51:15.8588710Z [command]/opt/homebrew/bin/git config --file /Users/runner/work/OpenParsec/OpenParsec/.git/modules/Frameworks/ParsecSDK.framework/config --unset includeif.gitdir:/github/workspace/.git/modules/Frameworks/ParsecSDK.framework.path /github/runner_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config
+2026-05-11T20:51:15.8590410Z Removing credentials config '/Users/runner/work/_temp/git-credentials-c8e1c16f-eb68-4091-a9c1-de9f3adddbe7.config'
+2026-05-11T20:51:15.8814070Z Evaluate and set job outputs
+2026-05-11T20:51:15.8821090Z Set output 'scheme'
+2026-05-11T20:51:15.8822180Z Set output 'archive_path'
+2026-05-11T20:51:15.8822780Z Cleaning up orphan processes
+2026-05-11T20:51:15.9825130Z Terminate orphan process: pid (2763) (ibtoold)
+2026-05-11T20:51:16.0083830Z Terminate orphan process: pid (2712) (ibtoold)

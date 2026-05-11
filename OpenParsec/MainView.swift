@@ -3,7 +3,7 @@ import ParsecSDK
 
 struct MainView: View
 {
-	var controller:ContentView?
+	@Binding var currentView: ViewType
 
 	@State private var page:Page = .hosts
 
@@ -38,9 +38,9 @@ struct MainView: View
 		isConnecting || isRefreshing || inSettings
 	}
 
-	init(_ controller:ContentView?)
+	init(currentView: Binding<ViewType>)
 	{
-		self.controller = controller
+		_currentView = currentView
 	}
 
 	var body: some View
@@ -332,6 +332,7 @@ struct MainView: View
 
 			// Settings screen
 			SettingsView(visible:$inSettings)
+			.environmentObject(SettingsHandler.shared)
 
 			// Loading elements
 			if isConnecting
@@ -397,14 +398,6 @@ struct MainView: View
 		refreshHosts()
 		refreshSelf()
 		refreshFriends()
-
-		ParsecBackgroundManager.shared.onShouldReconnect = { peerId in			
-			if let host = hosts.first(where: { $0.id == peerId }) {
-				connectTo(host)
-			} else {
-				refreshHosts()
-			}
-		}
 	}
 
 	func refreshHosts()
@@ -591,6 +584,7 @@ struct MainView: View
 	func connectTo(_ who:IdentifiableHostInfo)
 	{
 		CParsec.initialize()
+
 		connectingToName = who.hostname
 		withAnimation { isConnecting = true }
 
@@ -607,10 +601,10 @@ struct MainView: View
 
 			if status == PARSEC_OK
 			{
-				if let c = controller
-				{
-					c.setView(.parsec)
-				}
+				// 初始化 ParsecRenderCenter only after the SDK reports a live connection.
+				ParsecRenderCenter.shared.start()
+
+				setView(.parsec)
 			}
 			else
 			{
@@ -626,7 +620,10 @@ struct MainView: View
 	{
 		withAnimation { isConnecting = false }
 
-		CParsec.disconnect()
+		ParsecRenderCenter.shared.shutdown()
+
+		//CParsec.disconnect()
+
 
 		pollTimer!.invalidate()
 	}
@@ -635,10 +632,7 @@ struct MainView: View
 	{
 		removeFromKeychain(key:GLBDataModel.shared.SessionKeyChainKey)
 		NetworkHandler.clinfo = nil
-		if let c = controller
-		{
-			c.setView(.login)
-		}
+		setView(.login)
 	}
 
 	func removeFromKeychain(key: String)
@@ -650,13 +644,20 @@ struct MainView: View
 			print("Successfully removed data from keychain.")
 		}
 	}
+
+	private func setView(_ view: ViewType)
+	{
+		withAnimation(.easeInOut) {
+			currentView = view
+		}
+	}
 }
 
 struct MainView_Previews:PreviewProvider
 {
 	static var previews: some View
 	{
-		MainView(nil)
+		MainView(currentView: .constant(.main))
 	}
 }
 

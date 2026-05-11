@@ -317,9 +317,7 @@
 				271D14F9292E90EB00D7F1D6 /* ParsecView.swift in Sources */,
 				CE02CB082F14482F003714A3 /* shader.metal in Sources */,
 				
-				CE5A1F9B2D3C4E6F7A8B9C0D /* Logger.swift */,
-				D4F7E2A1B9C8D6E5F0A3B2C1 /* LogViewController.swift */,
-				A9B8C7D6E5F4A3B2C1D0E9F8 /* LogViewWrapper.swift */,
+				
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

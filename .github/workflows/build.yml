@@ -9,6 +9,7 @@ on:
         description: Create a nightly release
         type: boolean
         required: false
+        default: true
 
 jobs:
   build:
@@ -17,6 +18,9 @@ jobs:
     env:
       scheme: OpenParsec
       archive_path: archive
+      #使用Node24
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
     outputs:
       scheme: ${{ steps.scheme.outputs.scheme }}
       archive_path: ${{ env.archive_path }}
@@ -26,7 +30,7 @@ jobs:
         with:
           xcode-version: "26.2"
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           submodules: recursive
       - name: Set Scheme
@@ -61,7 +65,7 @@ jobs:
       - name: Tar Build Artifact
         run: tar -cvf "$archive_path.xcarchive.tar" "$archive_path.xcarchive"
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.archive_path }}.xcarchive.tar
           path: ${{ env.archive_path }}.xcarchive.tar
@@ -75,10 +79,11 @@ jobs:
       archive_path: ${{ needs.build.outputs.archive_path }}
     outputs:
       artifact: ${{ env.scheme }}.ipa
+      build_time: ${{ steps.timestamp.outputs.build_time }}
 
     steps:
       - name: Download a Build Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ env.archive_path }}.xcarchive.tar
       - name: Extract Build Artifact
@@ -102,16 +107,59 @@ jobs:
           mv "$archive_path.xcarchive/Products/Applications" Payload
           zip -r "$scheme.ipa" "Payload" -x "._*" -x ".DS_Store" -x "__MACOSX"
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.scheme }}.ipa
           path: ${{ env.scheme }}.ipa
+
+      - name: Set timestamp
+        id: timestamp
+        run: |
+
+          # 設定時區為台北
+          export TZ="Asia/Taipei"
+
+
+          # 取得當前日期與時間
+          YEAR=$(date +%Y)
+          MONTH=$(date +%-m)
+          DAY=$(date +%-d)
+          
+          HOUR=$(date +%-H)
+          MINUTE=$(date +%M)
+          
+          # 判斷上午/下午
+          if [ $HOUR -ge 12 ]; then
+            AP="下午"
+            HOUR=$((HOUR-12))
+            [ $HOUR -eq 0 ] && HOUR=12
+          else
+            AP="上午"
+            [ $HOUR -eq 0 ] && HOUR=12
+          fi
+          
+          # 星期轉換
+          WEEKDAY_NUM=$(date +%u) # 1 = Monday ... 7 = Sunday
+          case $WEEKDAY_NUM in
+            1) WEEKDAY="週一";;
+            2) WEEKDAY="週二";;
+            3) WEEKDAY="週三";;
+            4) WEEKDAY="週四";;
+            5) WEEKDAY="週五";;
+            6) WEEKDAY="週六";;
+            7) WEEKDAY="週日";;
+          esac
+
+          # 拼接最終字串
+          BUILD_TIME="${YEAR}/${MONTH}/${DAY} ${AP}${HOUR}:${MINUTE} ${WEEKDAY}"
+
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
 
   release__nightly:
     name: Nightly Release
     permissions:
       contents: write
-    if: inputs.release__nightly || github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    if: ${{ (github.event_name == 'workflow_dispatch' && inputs.release__nightly == 'true') || (github.event_name == 'push' && (github.ref == format('refs/heads/{0}', github.repository.default_branch) || github.ref == 'refs/heads/patch-1')) }}
     runs-on: ubuntu-latest
     needs: [package]
     concurrency:
@@ -120,9 +168,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Download a Build Artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6
         with:
           name: ${{ needs.package.outputs.artifact }}
       - name: Update AltStore source
@@ -139,8 +187,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          name: "Nightly Release @ ${{ needs.package.outputs.build_time }}"
+          
           body: |
-            This is a nightly release [created automatically with GitHub Actions workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}).
+            This is a nightly release created at ${{ needs.package.outputs.build_time }}.
+            [Workflow link](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}).
+
+          
           files: |
             ${{ needs.package.outputs.artifact }}
             altstore.json

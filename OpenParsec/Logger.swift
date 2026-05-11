@@ -1,7 +1,7 @@
 import Foundation
 
-final class Logger {
-    static let shared = Logger()
+final class OpenParsecLogger {
+    static let shared = OpenParsecLogger()
     private let fileURL: URL
     private let queue = DispatchQueue(label: "openparsec.logger")
 

@@ -22,13 +22,13 @@ class LogViewController: UIViewController {
     }
 
     @objc func clearLogs() {
-        Logger.shared.clear()
+        OpenParsecLogger.shared.clear()
         refresh()
     }
 
     func refresh() {
         DispatchQueue.global(qos: .userInitiated).async {
-            let s = Logger.shared.read()
+            let s = OpenParsecLogger.shared.read()
             DispatchQueue.main.async {
                 self.textView.text = s
                 if s.count > 0 {

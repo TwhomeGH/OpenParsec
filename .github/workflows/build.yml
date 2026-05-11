@@ -2,7 +2,11 @@ name: Xcode - Build
 
 on:
   push:
+    paths-ignore:
+      - 'Docs/**'
   pull_request:
+    paths-ignore:
+      - 'Docs/**'
   workflow_dispatch:
     inputs:
       release__nightly:

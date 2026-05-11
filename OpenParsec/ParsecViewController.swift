@@ -138,6 +138,7 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 			// UIKit 用 mouseY，GLK 需要乘上 scale 修正
 			let adjustedY = isGLK ? Int(Double(currentMouseY) / Double(scale)) : Int(currentMouseY)
 
+
 			let newFrame = CGRect(
 				x: Int(currentMouseX) - Int(Double(CParsec.mouseInfo.cursorHotX) * SettingsHandler.shared.cursorScale),
 				y: adjustedY - Int(Double(CParsec.mouseInfo.cursorHotY) * SettingsHandler.shared.cursorScale),

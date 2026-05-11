@@ -157,8 +157,8 @@ final class ParsecRenderCenter {
 
 		DataManager.model.constantFps = SettingsHandler.shared.savedConstantFps
 		
-		write_log_from_swift("muted", muted ? "true" : "false")
-		write_log_from_swift("constantFps", DataManager.model.constantFps ? "true" : "false")
+		write_log_from_swift("muted \(muted ? "true" : "false")")
+		write_log_from_swift("constantFps \(DataManager.model.constantFps ? "true" : "false")")
 
 
 		isInitialized = true

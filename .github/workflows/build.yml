@@ -60,6 +60,19 @@ jobs:
           file_to_build=`ls -A | grep -i \\.xcworkspace\$ || ls -A | grep -i \\.xcodeproj\$`
           file_to_build=`echo $file_to_build | awk '{$1=$1;print}'`
           echo "file_to_build=$file_to_build" >> $GITHUB_OUTPUT
+      - name: Fast compile (simulator)
+        env:
+          scheme: ${{ steps.scheme.outputs.scheme }}
+          filetype_parameter: ${{ steps.filetype_parameter.outputs.filetype_parameter }}
+          file_to_build: ${{ steps.file_to_build.outputs.file_to_build }}
+        run: |
+          set -o pipefail
+          echo "Running a fast build on iOS Simulator to surface compile errors quickly"
+          xcodebuild -scheme "$scheme" -"$filetype_parameter" "$file_to_build" -sdk iphonesimulator -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 14' clean build CODE_SIGNING_ALLOWED=NO | xcpretty || true
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "Fast build exit code: $EXIT_CODE"
+          # Do not fail the workflow here; the main Archive step will still run.
+
       - name: Archive
         env:
           scheme: ${{ steps.scheme.outputs.scheme }}

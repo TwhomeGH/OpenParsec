@@ -40,6 +40,10 @@ final class ParsecMetalTarget {
 final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecRenderController, MTKViewDelegate {
 
     // MARK: - Properties
+
+	@ObservedObject private var settings = SettingsHandler.shared
+    
+
     weak var viewController: UIViewController?
     var mtkView: MTKView!
 
@@ -90,6 +94,8 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 
 	var renderViewIfLoaded: UIView? { mtkView }
 
+	
+
     // MARK: - Setup
     func loadViewIfNeeded() {
 		guard mtkView == nil, let viewController = viewController else { return }
@@ -105,7 +111,7 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 
 
 		// Use configured FPS or device max (for ProMotion displays)
-		let fps = SettingsHandler.shared.preferredFramesPerSecond
+		let fps = settings.preferredFramesPerSecond
 
 		
 		if fps == 0 {

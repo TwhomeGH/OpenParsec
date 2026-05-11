@@ -8,6 +8,9 @@
 
 #define LOG_FILENAME "openparsec_logs.txt"
 #include <limits.h>
+
+// Logging control variables
+static bool logging_audio = false;
 static bool logging_enabled = true;
 
 static void write_log(const char *msg) {
@@ -37,11 +40,22 @@ void set_logging_enabled(bool enabled) {
     logging_enabled = enabled;
 }
 
+void set_audio_logging_enabled(bool enabled) {
+	logging_audio = enabled;
+}
+
 
 // non-static wrapper exposed to Swift via bridging header
 void write_log_from_swift(const char *msg) {
     write_log(msg);
 }
+
+void write_audio_log(const char *msg) {
+	if (logging_audio) {
+		write_log(msg);
+	}
+}
+
 
 #define NUM_AUDIO_BUF 16
 #define BUFFER_SIZE 4096
@@ -334,6 +348,8 @@ void audio_clear(struct audio **ctx_out)
 	silence_inqueue = silence_outqueue = 0;
 }
 
+
+
 void audio_cb(const int16_t *pcm, uint32_t frames, void *opaque)
 {
     if ( frames == 0 || opaque == NULL || isMuted )
@@ -341,7 +357,7 @@ void audio_cb(const int16_t *pcm, uint32_t frames, void *opaque)
 		printf("audio_cb: early return frames=%u opaque=%p isMuted=%d\n", frames, opaque, isMuted);
 		char tmp[256];
 		snprintf(tmp, sizeof(tmp), "audio_cb: early return frames=%u opaque=%p isMuted=%d\n", frames, opaque, isMuted);
-		write_log(tmp);
+		write_audio_log(tmp);
 		return;
 	}
 	
@@ -371,17 +387,19 @@ void audio_cb(const int16_t *pcm, uint32_t frames, void *opaque)
 	//ctx->rcm.last_use = find_idle;
 	
 	ctx->in_use += frames *4;
-	printf("audio_cb: frames=%u, in_use=%d, fail_num=%d\n", frames, ctx->in_use, ctx->fail_num);
+	//printf("audio_cb: frames=%u, in_use=%d, fail_num=%d\n", frames, ctx->in_use, ctx->fail_num);
 	char tmp2[128];
+	
 	snprintf(tmp2, sizeof(tmp2), "audio_cb: frames=%u, in_use=%d, fail_num=%d\n", frames, ctx->in_use, ctx->fail_num);
-	write_log(tmp2);
+	
+	write_audio_log(tmp2);
 
 	if (!isStart)
 	{
 		AudioQueueStart(ctx->q, NULL);
 		isStart = true;
-		printf("audio_cb: AudioQueueStart called\n");
-		write_log("audio_cb: AudioQueueStart called\n");
+		//printf("audio_cb: AudioQueueStart called\n");
+		write_audio_log("audio_cb: AudioQueueStart called\n");
 	}
 }
 

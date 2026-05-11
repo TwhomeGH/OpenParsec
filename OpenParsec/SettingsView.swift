@@ -195,14 +195,22 @@ struct SettingsView:View
 									.frame(width:80)
 							}
 							CatItem("Enable Logging")
-				{
-					Toggle("", isOn:$settings.enableLogging)
-						.frame(width:80)
-						.onChange(of: settings.enableLogging) { newValue in
-							set_logging_enabled(newValue)
-						}
-				}
-				CatItem("Remote Text Input")
+							{
+								Toggle("", isOn:$settings.enableLogging)
+									.frame(width:80)
+									.onChange(of: settings.enableLogging) { newValue in
+										set_logging_enabled(newValue)
+									}
+							}
+							CatItem("Enable Audio Logging")
+							{
+								Toggle("", isOn:$settings.enableAudioLogging)
+									.frame(width:80)
+									.onChange(of: settings.enableAudioLogging) { newValue in
+										set_audio_logging_enabled(newValue)
+									}
+							}
+							CatItem("Remote Text Input")
 							{
 								MultiPicker(selection: $settings.remoteTextInputMode, options:
 								[

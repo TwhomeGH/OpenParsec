@@ -16,6 +16,7 @@ final class SettingsHandler: ObservableObject {
 	private init() {
 		// Initialize C logging flag to current setting
 		set_logging_enabled(enableLogging)
+		set_audio_logging_enabled(enableAudioLogging)
 	}
 
 
@@ -42,6 +43,7 @@ final class SettingsHandler: ObservableObject {
 	@AppStorage("showKeyboardButton") public var showKeyboardButton: Bool = true
 	@AppStorage("remoteTextInputMode") public var remoteTextInputMode: RemoteTextInputMode = .keycodeOnly
 	@AppStorage("enableLogging") public var enableLogging: Bool = true
+	@AppStorage("enableAudioLogging") public var enableAudioLogging: Bool = false
 
 	// 識別是不是Metal分辨用的文本
 	@AppStorage("MetalText") public var MetalText: Bool = false

@@ -86,7 +86,9 @@ class ParsecSDKBridge: ParsecService
 	public var mediaContainer: Int32 = 0
 	public var pngCursor: Bool = false
 
-
+	// 觀察全局設定變更
+	@ObservedObject private var settings = SettingsHandler.shared
+    
 
 	private var audioWorkItem: DispatchWorkItem?
 	private var eventWorkItem: DispatchWorkItem?
@@ -157,12 +159,12 @@ class ParsecSDKBridge: ParsecService
 		var parsecClientCfg = ParsecClientConfig()
 
 		parsecClientCfg.video.0.decoderIndex = 1
-		parsecClientCfg.video.0.resolutionX = Int32(SettingsHandler.shared.resolution.width)
-		parsecClientCfg.video.0.resolutionY = Int32(SettingsHandler.shared.resolution.height)
+		parsecClientCfg.video.0.resolutionX = Int32(settings.resolution.width)
+		parsecClientCfg.video.0.resolutionY = Int32(settings.resolution.height)
 
-		parsecClientCfg.video.0.decoderCompatibility = SettingsHandler.shared.decoderCompatibility
-		parsecClientCfg.video.0.decoderH265 = SettingsHandler.shared.decoder == .h265
-		parsecClientCfg.video.0.decoder444 = SettingsHandler.shared.decoder444
+		parsecClientCfg.video.0.decoderCompatibility = settings.decoderCompatibility
+		parsecClientCfg.video.0.decoderH265 = settings.decoder == .h265
+		parsecClientCfg.video.0.decoder444 = settings.decoder444
 
 		parsecClientCfg.mediaContainer = mediaContainer
 		parsecClientCfg.protocol = netProtocol
@@ -360,15 +362,15 @@ class ParsecSDKBridge: ParsecService
 
 					if !self.didSetResolution {
 						self.didSetResolution = true
-						DataManager.model.resolutionX = SettingsHandler.shared.resolution.width
-						DataManager.model.resolutionY = SettingsHandler.shared.resolution.height
+						DataManager.model.resolutionX = settings.resolution.width
+						DataManager.model.resolutionY = settings.resolution.height
 
-						write_log_from_swift("Applying resolution from settings: \(SettingsHandler.shared.resolution.width)x\(SettingsHandler.shared.resolution.height)")
+						write_log_from_swift("Applying resolution from settings: \(settings.resolution.width)x\(settings.resolution.height)")
 
-						if SettingsHandler.shared.bitrate != 0 {
-							DataManager.model.bitrate = SettingsHandler.shared.bitrate
+						if settings.bitrate != 0 {
+							DataManager.model.bitrate = settings.bitrate
 
-							write_log_from_swift("Applying bitrate from settings: \(SettingsHandler.shared.bitrate) bps")
+							write_log_from_swift("Applying bitrate from settings: \(settings.bitrate) bps")
 						}
 
 						self.updateHostVideoConfig()
@@ -624,7 +626,7 @@ class ParsecSDKBridge: ParsecService
 	}
 
 	private func sendUnicodeScalar(_ scalar: UnicodeScalar) {
-		switch SettingsHandler.shared.remoteTextInputMode {
+		switch settings.remoteTextInputMode {
 		case .keycodeOnly:
 			os_log("Unsupported virtual keyboard text without unicode input mode: \(String(scalar))")
 		case .linuxUnicode:

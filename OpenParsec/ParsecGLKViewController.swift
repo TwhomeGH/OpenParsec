@@ -32,6 +32,9 @@ class ParsecGLKViewController : ParsecPlayground{
 	let glkViewController = GLKViewController()
 	var glkRenderer: ParsecGLKRenderer!
 	let updateImage:() -> Void
+
+	@ObservedObject private var settings = SettingsHandler.shared
+    
 	
 	let viewController: UIViewController
 	
@@ -74,7 +77,7 @@ class ParsecGLKViewController : ParsecPlayground{
 		glkView.contentScaleFactor = UIScreen.main.scale
 
 		// Use configured FPS or device max (for ProMotion displays)
-		let fps = SettingsHandler.shared.preferredFramesPerSecond
+		let fps = settings.preferredFramesPerSecond
 
 		
 		if fps == 0 {

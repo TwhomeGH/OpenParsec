@@ -15,6 +15,10 @@ struct ParsecStatusBar : View {
 
 	@State private var timerCancellable: AnyCancellable?
 
+	// 觀察全局設定變更
+	@ObservedObject private var settings = SettingsHandler.shared
+    
+
 	init(showMenu: Binding<Bool>, showDCAlert: Binding<Bool>, DCAlertText: Binding<String>, parsecViewController: ParsecViewController) {
 		_showMenu = showMenu
 		_showDCAlert = showDCAlert
@@ -96,7 +100,7 @@ struct ParsecStatusBar : View {
 			let decoderName = String.fromBuffer(&pcs.decoder.0.name.0, length: 16)
 			
 			// ✅ 新增 FPS 參數（舉例，你的 GLK FPS）
-			let glkFPS = SettingsHandler.shared.preferredFramesPerSecond
+			let glkFPS = settings.preferredFramesPerSecond
             let glkFPS_ACT = ParsecRenderCenter.shared.actualFPS()
 		
 			// 查增量實際 FPS（可每秒刷新）
@@ -176,6 +180,9 @@ struct ParsecView: View
     
     // Observer shared state for updates
     @ObservedObject var dataModel = DataManager.model
+
+	// 配置變更會觸發 ParsecRenderCenter 的更新，這裡直接觀察 SettingsHandler 的相關屬性即可。
+	@ObservedObject private var settings = SettingsHandler.shared
     
     // Computed property for convenience refactoring
     var parsecViewController: ParsecViewController {
@@ -249,7 +256,7 @@ struct ParsecView: View
 			}
 			Button(action: toggleMute)
 			{
-				Text("Sound: \(SettingsHandler.shared.savedMuted ? "OFF" : "ON")")
+				Text("Sound: \(settings.savedMuted ? "OFF" : "ON")")
 					.padding(8)
 					.frame(maxWidth:.infinity)
 					.multilineTextAlignment(.center)
@@ -310,21 +317,21 @@ struct ParsecView: View
 
 			Button(action: toggleH265)
 			{
-				Text("Codec: \(SettingsHandler.shared.decoder == .h264 ? "H264" : "H265")")
+				Text("Codec: \(settings.decoder == .h264 ? "H264" : "H265")")
 					.padding(8)
 					.frame(maxWidth:.infinity)
 					.multilineTextAlignment(.center)
 			}
 			Button(action: toggleConstantFps)
 			{
-				Text("Constant FPS: \(SettingsHandler.shared.savedConstantFps ? "ON" : "OFF")")
+				Text("Constant FPS: \(settings.savedConstantFps ? "ON" : "OFF")")
 					.padding(8)
 					.frame(maxWidth:.infinity)
 					.multilineTextAlignment(.center)
 			}
 			Button(action: toggleZoom)
 			{
-				Text("Zoom: \(SettingsHandler.shared.savedZoom ? "ON" : "OFF")")
+				Text("Zoom: \(settings.savedZoom ? "ON" : "OFF")")
 					.padding(8)
 					.frame(maxWidth:.infinity)
 					.multilineTextAlignment(.center)
@@ -369,7 +376,7 @@ struct ParsecView: View
 						// 主按鈕
 						mainButton
 
-						if SettingsHandler.shared.showKeyboardButton {
+						if settings.showKeyboardButton {
 							// 快速呼出keyboard
 							keyboardButton
 						}
@@ -391,7 +398,7 @@ struct ParsecView: View
 			.zIndex(2)
 
 		}
-		.statusBarHidden(SettingsHandler.shared.hideStatusBar)
+		.statusBarHidden(settings.hideStatusBar)
 		.alert(isPresented:$showDCAlert)
 		{
 			Alert(title: Text(DCAlertText), dismissButton:.default(Text("Close"), action:disconnect))
@@ -404,7 +411,7 @@ struct ParsecView: View
 	{
 
 	
-		hideOverlay = SettingsHandler.shared.noOverlay
+		hideOverlay = settings.noOverlay
 
         // Setup callback to update local state
         parsecViewController.onKeyboardVisibilityChanged = { visible in
@@ -423,10 +430,10 @@ struct ParsecView: View
 	
 	func toggleMute()
 	{
-		SettingsHandler.shared.savedMuted.toggle()
-		ParsecRenderCenter.shared.setMuted(SettingsHandler.shared.savedMuted)
+		settings.savedMuted.toggle()
+		ParsecRenderCenter.shared.setMuted(settings.savedMuted)
 
-		write_log_from_swift("muted \(SettingsHandler.shared.savedMuted ? "true" : "false")")
+		write_log_from_swift("muted \(settings.savedMuted ? "true" : "false")")
 
 	}
 	
@@ -497,9 +504,12 @@ struct ParsecView: View
 	
 	func toggleH265() {
 		DispatchQueue.main.async {
-			SettingsHandler.shared.decoder = SettingsHandler.shared.decoder == .h264 ? .h265 : .h264
+			settings.decoder = settings.decoder == .h264 ? .h265 : .h264
+
+			DataManager.model.decoder = settings.decoder
+
 			CParsec.updateHostVideoConfig()
-			write_log_from_swift("decoder \(SettingsHandler.shared.decoder == .h264 ? "H264" : "H265")")
+			write_log_from_swift("decoder \(settings.decoder == .h264 ? "H264" : "H265")")
 
 			// 這裡不需要直接調用 applyIfPossible，因為 updateHostVideoConfig 已經在內部處理了。
 		}
@@ -508,11 +518,11 @@ struct ParsecView: View
 
 	func toggleConstantFps() {
 		DispatchQueue.main.async {
-			SettingsHandler.shared.savedConstantFps.toggle()
-			DataManager.model.constantFps = SettingsHandler.shared.savedConstantFps
+			settings.savedConstantFps.toggle()
+			DataManager.model.constantFps = settings.savedConstantFps
 
 			CParsec.updateHostVideoConfig()
-			write_log_from_swift("constantFps \(SettingsHandler.shared.savedConstantFps ? "true" : "false")")
+			write_log_from_swift("constantFps \(settings.savedConstantFps ? "true" : "false")")
 			// 這裡不需要直接調用 applyIfPossible，因為 updateHostVideoConfig 已經在內部處理了。
 		}
 	}
@@ -528,11 +538,11 @@ struct ParsecView: View
 	
 	func toggleZoom() {
 		DispatchQueue.main.async {
-			SettingsHandler.shared.savedZoom.toggle()
-			parsecViewController.setZoomEnabled(SettingsHandler.shared.savedZoom)
+			settings.savedZoom.toggle()
+			parsecViewController.setZoomEnabled(settings.savedZoom)
 
-			write_log_from_swift("zoomEnabled \(SettingsHandler.shared.savedZoom ? "true" : "false")")
-		 }
+			write_log_from_swift("zoomEnabled \(settings.savedZoom ? "true" : "false")")
+		}
 	}
 	
 	func changeDisplay(displayId: String) {

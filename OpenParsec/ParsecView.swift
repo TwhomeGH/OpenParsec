@@ -92,7 +92,7 @@ struct ParsecStatusBar : View {
 				pipActive = PictureInPictureManager.shared.isPiPActive
 			}
 			if pipActive {
-				CParsec.disconnect(isBackgroundDisconnect: true)
+				CParsec.disconnect()
 				try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
 				ParsecBackgroundManager.shared.connectionDidEnd()
 				ParsecBackgroundManager.shared.markForReconnect()

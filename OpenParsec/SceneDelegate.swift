@@ -46,44 +46,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 		// Called when the scene has moved from an inactive state to an active state.
 		// Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
 
-		if #available(iOS 15.0, *) {
-
-			let pipManager = PictureInPictureManager.shared
-			if pipManager.isPiPActive || pipManager.isStarting {
-				pipManager.stopPiP()
-			}
-			
-		}
-
-		let RenderType = SettingsHandler.shared.renderer
-
-		if RenderType == .metal {
-			if let mtkView = ParsecRenderCenter.shared.getView() as? MTKView {
-
-				if mtkView.window != nil {
-					mtkView.isPaused = false
-				} else {
-					write_log_from_swift("⚠️ MTKView has no window, cannot unpause")
-					
-				}
-
-		} else {
-
-			if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
-
-				if glkView.view.window != nil {
-					glkView.isPaused = false
-				} else {
-					write_log_from_swift("⚠️ GLKView has no window, cannot unpause")
-				}
-				
-			}
-		}
-		
-		let RES = CParsec.resume()
-		write_log_from_swift("Resumed Parsec \(String(describing: RES))")
-
-
+		// 不要操作UI或PiP状态，iOS会在sceneWillResignActive时自动停止PiP并在sceneDidBecomeActive时自动恢复，无需我们手动干预。我们只需要在sceneWillResignActive发送释放消息即可。
 		ParsecBackgroundManager.shared.sceneDidBecomeActive()
 
 	}

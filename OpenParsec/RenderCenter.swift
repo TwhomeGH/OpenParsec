@@ -263,7 +263,7 @@ final class ParsecRenderCenter {
 	}
 
 	func getViewController() -> UIViewController? {
-		return renderController.viewController as? UIViewController
+		return renderController?.viewController as? UIViewController
 	}
 
 	func getView() -> UIView? {

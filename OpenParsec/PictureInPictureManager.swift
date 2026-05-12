@@ -279,69 +279,6 @@ class PictureInPictureManager: NSObject {
 
 
 
-	// MARK: - PiP Control
-
-	func startPiP() {
-		guard isSetup, let controller = pipController, !isPiPActive, !isStarting else { return }
-
-		isStarting = true
-		attemptStartPiP(controller: controller, retryCount: 0)
-	}
-
-	private func attemptStartPiP(controller: AVPictureInPictureController, retryCount: Int) {
-		if controller.isPictureInPicturePossible {
-			sampleBufferDisplayLayer?.flush()
-			controller.startPictureInPicture()
-		} else if retryCount < 5 {
-			DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-				guard let self = self, !self.isPiPActive, self.isStarting else {
-					self?.isStarting = false
-					return
-				}
-				self.attemptStartPiP(controller: controller, retryCount: retryCount + 1)
-			}
-		} else {
-			isStarting = false
-			onPiPStartFailed?()
-		}
-	}
-
-	func stopPiP() {
-		isStarting = false
-		guard isPiPActive else { return }
-		pipController?.stopPictureInPicture()
-	}
-
-	// MARK: - Cleanup
-
-	func teardown() {
-		stopPiP()
-		destroyCaptureSurface()
-
-		if let cache = textureCache {
-			CVOpenGLESTextureCacheFlush(cache, 0)
-		}
-		textureCache = nil
-		pipController = nil
-		sampleBufferDisplayLayer?.removeFromSuperlayer()
-		sampleBufferDisplayLayer = nil
-		pipSourceView?.removeFromSuperview()
-		pipSourceView = nil
-		glContext = nil
-		isSetup = false
-		isPiPActive = false
-		isStarting = false
-		lastValidStreamWidth = 0
-		lastValidStreamHeight = 0
-		cachedFormatDescription = nil
-		onPiPStopped = nil
-		onPiPStartFailed = nil
-		onRestoreUserInterface = nil
-
-		// Deactivate the audio session so iOS stops keeping the app alive
-		// for audio playback in the background
-		try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-	}
 
 
 // MARK: - AVPictureInPictureControllerDelegate

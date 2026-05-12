@@ -316,7 +316,7 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 				write_log_from_swift("Metal PiP setup complete🍫")
 				
 			} else if RenderType == .opengl, let parsecGLK = renderer!.renderViewIfLoaded {
-				if let vc = ParsecRenderCenter.shared.viewController,let renderer = vc.renderer ,let glContext = renderer.renderView?.eaglContext {
+				if let vc = ParsecRenderCenter.shared.viewController,let renderer = vc.renderer ,let glContext = renderer.eaglContext {
 					
 					let glProvider = GLCaptureSurfaceProvider(glContext: glContext)
 					PictureInPictureManager.shared.setup(

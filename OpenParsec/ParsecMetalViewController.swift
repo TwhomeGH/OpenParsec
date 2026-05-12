@@ -107,7 +107,7 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 
     // MARK: - Setup
     func loadViewIfNeeded() {
-		guard mtkView == nil, let viewController = viewController else { return }
+		guard mtkView == nil else { return }
 
         mtkView = MTKView(frame: viewController.view.bounds)
         mtkView.colorPixelFormat = .bgra8Unorm

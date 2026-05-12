@@ -98,7 +98,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 		if #available(iOS 15.0, *) {
 			
 			guard SettingsHandler.shared.enablePiP else {
-				write_log("PiP disabled in settings, not starting PiP.")
+				write_log_from_swift("PiP disabled in settings, not starting PiP.")
 				return
 			}
 

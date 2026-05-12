@@ -33,10 +33,7 @@ class ParsecGLKViewController : ParsecPlayground{
 	var glkRenderer: ParsecGLKRenderer!
 	let updateImage:() -> Void
 
-	var eaglContext: EAGLContext? {
-		return glkView?.context
-	}
-
+	
 	private var settings = SettingsHandler.shared
     
 	

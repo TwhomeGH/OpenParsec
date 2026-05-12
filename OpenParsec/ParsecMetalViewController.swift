@@ -53,6 +53,10 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
     private var renderer: ParsecMetalRenderer?
 
 	// MARK: - ParsecRenderController Metal FPS
+	var view: UIView {
+		get { mtkView }
+		set { mtkView = newValue as? MTKView }
+	}
 
 	var preferredFPS: Int {
         get { mtkView?.preferredFramesPerSecond ?? 0 }

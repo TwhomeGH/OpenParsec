@@ -293,14 +293,14 @@ extension PictureInPictureManager: AVPictureInPictureControllerDelegate {
 		let RenderType = SettingsHandler.shared.renderer
 
 		if RenderType == .metal {
-			if let vc = ParsecRenderCenter.shared.renderController,let glkView = vc.mtkView {
+			if let vc = ParsecRenderCenter.shared.renderController,let mtkView = vc.view as? MTKView {
 				mtkView.isPaused = false
-				
+
 			}
 
 		} else {
 
-			if let vc = ParsecRenderCenter.shared.renderController,let glkView = vc.glkView {
+			if let vc = ParsecRenderCenter.shared.renderController,let glkView = vc.view as? GLKView {
 				glkView.isPaused = false
 			}
 		}

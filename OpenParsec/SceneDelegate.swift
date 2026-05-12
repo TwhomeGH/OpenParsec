@@ -1,5 +1,7 @@
 import UIKit
 import SwiftUI
+import MetalKit
+import AVFoundation
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate
 {
@@ -57,12 +59,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 
 		} else {
 
-			if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
+			if let glkView = ParsecRenderCenter.shared.getViewController() as? UIViewController {
 				glkView.isPaused = false
 			}
 		}
 		
-		CParsec.resume()
+		let RES = CParsec.resume()
+		write_log_from_swift("Resumed Parsec \(String(describing: RES))")
 
 
 		ParsecBackgroundManager.shared.sceneDidBecomeActive()
@@ -122,7 +125,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 
 			} else {
 
-				if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
+				if let glkView = ParsecRenderCenter.shared.getViewController() as? UIViewController {
 					glkView.isPaused = false
 				}
 			}

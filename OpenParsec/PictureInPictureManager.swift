@@ -290,9 +290,21 @@ extension PictureInPictureManager: AVPictureInPictureControllerDelegate {
 		isStarting = false
 		// Keep GL render loop alive during PiP so frames keep updating
 
-		if let vc = ParsecRenderCenter.shared.viewController,let renderer = vc.renderer {
-			renderer.isPaused = false
+		let RenderType = SettingsHandler.shared.renderer
+		
+		if RenderType == .Metal {
+			if let vc = ParsecRenderCenter.shared.viewController,let renderer = vc.renderer as? ParsecMetalRenderer,let provider = renderer.captureProvider as? MetalCaptureSurfaceProvider {
+				provider.getMTLTexture()?.setPurgeableState(.nonVolatile)
+			}
+
+		} else {
+
+			if let vc = ParsecRenderCenter.shared.viewController,let renderer = vc.renderer as? ParsecGLKRenderer,let glkView = renderer.glkView {
+				glkView.isPaused = false
+			}
 		}
+
+		
 
 
 	}

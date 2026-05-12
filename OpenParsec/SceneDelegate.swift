@@ -97,34 +97,34 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 
 				let RenderType = SettingsHandler.shared.renderer
 
-			if RenderType == .metal {
-				if let mtkView = ParsecRenderCenter.shared.getView() as? MTKView {
-					if mtkView.window != nil {
-						mtkView.isPaused = true
-					} else {
-						write_log_from_swift("⚠️ MTKView has no window, cannot pause")
+				if RenderType == .metal {
+					if let mtkView = ParsecRenderCenter.shared.getView() as? MTKView {
+						if mtkView.window != nil {
+							mtkView.isPaused = true
+						} else {
+							write_log_from_swift("⚠️ MTKView has no window, cannot pause")
+						}
+				
 					}
-			
+
+				} else {
+
+					if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
+						if glkView.view.window != nil {
+							glkView.isPaused = true
+						} else {
+							write_log_from_swift("⚠️ GLKView has no window, cannot pause")
+						}
+					}
 				}
 
-			} else {
-
-				if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
-					if glkView.view.window != nil {
-						glkView.isPaused = true
-					} else {
-						write_log_from_swift("⚠️ GLKView has no window, cannot pause")
-					}
-				}
+				CParsec.sendReleaseMessage()
+				let RES = CParsec.pause()
+				
+				write_log_from_swift("App entered background without starting PiP, sent release message and paused Parsec \(String(describing: RES)).")
 			}
 
-			CParsec.sendReleaseMessage()
-			let RES = CParsec.pause()
-			
-			write_log_from_swift("App entered background without starting PiP, sent release message and paused Parsec \(String(describing: RES)).")
-		}
-
-		ParsecBackgroundManager.shared.sceneDidEnterBackground()
+			ParsecBackgroundManager.shared.sceneDidEnterBackground()
 
 		
 		
@@ -132,4 +132,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 
 }
 
-}
+

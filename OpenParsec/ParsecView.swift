@@ -50,7 +50,7 @@ struct ParsecStatusBar : View {
 			.edgesIgnoringSafeArea(.all)
 			.onAppear {
 				timerCancellable = Timer
-					.publish(every: 0.2, on: .main, in: .common)
+					.publish(every: settings.statusBarTimer, on: .main, in: .common)
 					.autoconnect()
 					.sink { _ in
 						poll()

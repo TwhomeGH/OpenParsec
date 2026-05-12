@@ -62,6 +62,8 @@ final class SettingsHandler: ObservableObject {
 
 	@AppStorage("enablePiP") public var enablePiP: Bool = false
 
+	@AppStorage("statusBarTimer") public var statusBarTimer: Double = 1.0
+
 
 
 }

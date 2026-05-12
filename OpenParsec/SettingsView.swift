@@ -226,8 +226,13 @@ struct SettingsView:View
 								Toggle("", isOn:$settings.enablePiP)
 									.frame(width:80)
 							}
+							CatItem("Status Bar Auto-Hide Timer")
+							{
+								Slider(value: $settings.statusBarTimer, in:0.1...100, step:0.1)
+									.frame(width: 200)
+								Text(String(format: "%.1f seconds", settings.statusBarTimer))
+							}
 						
-
 
 						}
 						Text("More options coming soon.")

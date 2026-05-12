@@ -30,8 +30,15 @@ static void write_log(const char *msg) {
     }
 
     FILE *f = fopen(path, "a");
+
+	time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+
+    char buf[64];
+    strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", t);
+
     if (f) {
-        fprintf(f, "%s", msg);
+        fprintf(f, "[%s] %s\n", buf, msg);
         fclose(f);
     }
 }

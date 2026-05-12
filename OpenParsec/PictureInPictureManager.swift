@@ -342,7 +342,7 @@ class PictureInPictureManager: NSObject {
 		// for audio playback in the background
 		try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
 	}
-}
+
 
 // MARK: - AVPictureInPictureControllerDelegate
 @available(iOS 15.0, *)

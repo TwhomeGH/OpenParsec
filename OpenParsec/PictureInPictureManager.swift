@@ -289,7 +289,11 @@ extension PictureInPictureManager: AVPictureInPictureControllerDelegate {
 		isPiPActive = true
 		isStarting = false
 		// Keep GL render loop alive during PiP so frames keep updating
-		ParsecRenderCenter.shared.viewController.renderer.isPaused = false
+
+		if let vc = ParsecRenderCenter.shared.viewController {
+			vc.renderer.isPaused = false
+		}
+
 
 	}
 

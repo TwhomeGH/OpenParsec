@@ -517,96 +517,95 @@ class KeyCodeTranslators {
 		
 		switch key {
 			// Non-shifted characters
-		case "-":
+		case "-", "－":
 			parsecKeycode = 45
-		case "=":
+		case "=", "＝":
 			parsecKeycode = 46
-		case "[":
+		case "[", "［":
 			parsecKeycode = 47
-		case "]":
+		case "]", "］":
 			parsecKeycode = 48
-		case "\\":
+		case "\\", "＼":
 			parsecKeycode = 49
-		case ";":
+		case ";", "；":
 			parsecKeycode = 51
-		case "’":
+		case "’", "＇":
 			parsecKeycode = 52
-		case "'":
+		case "'", "＇":
 			parsecKeycode = 52
-		case "`":
+		case "`", "｀":
 			parsecKeycode = 53
-		case ",":
+		case ",", "，":
 			parsecKeycode = 54
-		case ".":
+		case ".", "．":
 			parsecKeycode = 55
-		case "/":
+		case "/", "／":
 			parsecKeycode = 56
 			
 			// Shifted characters
-		case "_":
+		case "_", "＿":
 			parsecKeycode = 45
 			keyMod = true
-		case "+":
+		case "+", "＋":
 			parsecKeycode = 46
 			keyMod = true
-		case "{":
+		case "{", "｛":
 			parsecKeycode = 47
 			keyMod = true
-		case "}":
+		case "}", "｝":
 			parsecKeycode = 48
 			keyMod = true
-		case "|":
+		case "|", "｜":
 			parsecKeycode = 49
 			keyMod = true
-		case ":":
+		case ":", "：":
 			parsecKeycode = 51
 			keyMod = true
-		case "\"":
+		case "\"", "＂":
 			parsecKeycode = 52
 			keyMod = true
-		case "”":
-			parsecKeycode = 52
+		case "”", "〞":
 			keyMod = true
-		case "~":
+		case "~", "～":
 			parsecKeycode = 53
 			keyMod = true
-		case "<":
+		case "<", "＜":
 			parsecKeycode = 54
 			keyMod = true
-		case ">":
+		case ">", "＞":
 			parsecKeycode = 55
 			keyMod = true
-		case "?":
+		case "?", "？":
 			parsecKeycode = 56
 			keyMod = true
-		case "!":
+		case "!", "！":
 			parsecKeycode = 30
 			keyMod = true
-		case "@":
+		case "@", "＠":
 			parsecKeycode = 31
 			keyMod = true
-		case "#":
+		case "#", "＃":
 			parsecKeycode = 32
 			keyMod = true
-		case "$":
+		case "$", "＄":
 			parsecKeycode = 33
 			keyMod = true
-		case "%":
+		case "%", "％":
 			parsecKeycode = 34
 			keyMod = true
-		case "^":
+		case "^", "＾":
 			parsecKeycode = 35
 			keyMod = true
-		case "&":
+		case "&", "＆":
 			parsecKeycode = 36
 			keyMod = true
-		case "*":
+		case "*", "＊":
 			parsecKeycode = 37
 			keyMod = true
-		case "(":
+		case "(", "（":
 			parsecKeycode = 38
 			keyMod = true
-		case ")":
+		case ")", "）":
 			parsecKeycode = 39
 			keyMod = true
 			

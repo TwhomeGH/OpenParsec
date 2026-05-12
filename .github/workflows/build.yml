@@ -55,7 +55,7 @@ jobs:
         run: |
           filetype_parameter=`ls -A | grep -i \\.xcworkspace\$ && echo workspace || echo project`
           echo "filetype_parameter=$filetype_parameter" >> $GITHUB_OUTPUT
-      - name: Set file_to_build
+      - name: Set File_To_Build 檔案名稱
         id: file_to_build
         run: |
           file_to_build=`ls -A | grep -i \\.xcworkspace\$ || ls -A | grep -i \\.xcodeproj\$`

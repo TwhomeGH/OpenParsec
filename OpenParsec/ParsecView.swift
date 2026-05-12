@@ -505,7 +505,6 @@ struct ParsecView: View
 	func toggleH265() {
 		DispatchQueue.main.async {
 			SettingsHandler.shared.decoder = SettingsHandler.shared.decoder == DecoderPref.h264 ? DecoderPref.h265 : DecoderPref.h264
-			DataManager.model.decoder = SettingsHandler.shared.decoder == DecoderPref.h264
 
 			CParsec.updateHostVideoConfig()
 			write_log_from_swift("decoder \(SettingsHandler.shared.decoder == DecoderPref.h264 ? "H264" : "H265")")

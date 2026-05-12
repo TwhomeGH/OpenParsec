@@ -300,7 +300,7 @@ extension PictureInPictureManager: AVPictureInPictureControllerDelegate {
 
 		} else {
 
-			if let glkView = ParsecRenderCenter.shared.getView() as? GLKView {
+			if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
 				glkView.isPaused = false
 			}
 		}

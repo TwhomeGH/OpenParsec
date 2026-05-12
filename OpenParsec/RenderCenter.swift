@@ -15,6 +15,7 @@ protocol ParsecRenderController : AnyObject {
 	var preferredFPS: Int { get set }
 	var DebugMes: String { get set }
 	var view: UIView { get set }
+	var viewController: UIViewController { get set }
 
 	func getFramesDisplayed() -> Int
 
@@ -30,6 +31,12 @@ extension ParsecGLKViewController: ParsecRenderController {
 		get { glkView }
 		set { glkView = newValue as? GLKView }
 	}
+
+	var viewController: UIViewController {
+		get { glkViewController }
+		set { glkViewController.view = newValue.view }
+	}
+
 
 	var glContext: EAGLContext? {
 		return glkView?.context
@@ -260,10 +267,14 @@ final class ParsecRenderCenter {
 		renderController?.DebugMes = text
 	}
 
+	func getViewController() -> UIViewController? {
+		return renderController.viewController as? UIViewController
+	}
+
 	func getView() -> UIView? {
 		return renderController?.view
 	}
-	
+
 	func glContext() -> EAGLContext? {
 		if let glkVC = renderController as? ParsecGLKViewController {
 			return glkVC.glContext

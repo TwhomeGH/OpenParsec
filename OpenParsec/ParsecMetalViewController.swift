@@ -1,6 +1,8 @@
 
 import SwiftUI
 import MetalKit
+import GLKit
+
 import UIKit
 import ParsecSDK
 
@@ -56,6 +58,11 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 	var view: UIView {
 		get { mtkView }
 		set { mtkView = newValue as? MTKView }
+	}
+
+	var viewController: UIViewController {
+		get { viewController! }
+		set { viewController = newValue }
 	}
 
 	var preferredFPS: Int {

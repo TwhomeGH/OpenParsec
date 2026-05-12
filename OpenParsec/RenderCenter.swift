@@ -15,7 +15,7 @@ protocol ParsecRenderController : AnyObject {
 	var preferredFPS: Int { get set }
 	var DebugMes: String { get set }
 	var view: UIView { get set }
-	var viewController: UIViewController -> UIViewController? { get set }
+	var viewController: UIViewController { get set }
 
 	func getFramesDisplayed() -> Int
 

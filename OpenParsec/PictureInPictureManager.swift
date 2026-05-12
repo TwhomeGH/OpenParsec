@@ -160,16 +160,14 @@ class PictureInPictureManager: NSObject {
     private var cachedFormatDescription: CMVideoFormatDescription?
 
     private(set) var isPiPActive = false
-    private var isSetup = false
     private(set) var isStarting = false
+    private var isSetup = false
 
     var onPiPStopped: (() -> Void)?
     var onPiPStartFailed: (() -> Void)?
     var onRestoreUserInterface: (() -> Void)?
 
-    private override init() {
-        super.init()
-    }
+    private override init() { super.init() }
 
     // MARK: - Setup
     func setup(sourceView: UIView, provider: CaptureSurfaceProvider) {
@@ -206,61 +204,26 @@ class PictureInPictureManager: NSObject {
         isSetup = true
     }
 
-    // MARK: - Feed SampleBuffer
-    func feedSampleBuffer() {
-        guard let provider = captureProvider,
-              let pixelBuffer = provider.getPixelBuffer(),
-              let displayLayer = sampleBufferDisplayLayer,
-              displayLayer.isReadyForMoreMediaData else { return }
-
-        if cachedFormatDescription == nil {
-            CMVideoFormatDescriptionCreateForImageBuffer(
-                allocator: kCFAllocatorDefault,
-                imageBuffer: pixelBuffer,
-                formatDescriptionOut: &cachedFormatDescription
-            )
-        }
-        guard let format = cachedFormatDescription else { return }
-
-        let now = CMClockGetTime(CMClockGetHostTimeClock())
-        var timingInfo = CMSampleTimingInfo(
-            duration: CMTime(value: 1, timescale: 30),
-            presentationTimeStamp: now,
-            decodeTimeStamp: .invalid
-        )
-
-        var sampleBuffer: CMSampleBuffer?
-        CMSampleBufferCreateForImageBuffer(
-            allocator: kCFAllocatorDefault,
-            imageBuffer: pixelBuffer,
-            dataReady: true,
-            makeDataReadyCallback: nil,
-            refcon: nil,
-            formatDescription: format,
-            sampleTiming: &timingInfo,
-            sampleBufferOut: &sampleBuffer
-        )
-
-        guard let buffer = sampleBuffer else { return }
-        displayLayer.enqueue(buffer)
-    }
-
     // MARK: - PiP Control
     func startPiP() {
-        guard isSetup, let controller = pipController, !isPiPActive, !isStarting else { return }
+        guard isSetup, let controller = pipController,
+              !isPiPActive, !isStarting else { return }
         isStarting = true
         controller.startPictureInPicture()
     }
 
     func stopPiP() {
+        guard isSetup, let controller = pipController,
+              isPiPActive else { return }
         isStarting = false
-        guard isPiPActive else { return }
-        pipController?.stopPictureInPicture()
+        controller.stopPictureInPicture()
     }
 
     // MARK: - Cleanup
     func teardown() {
-        stopPiP()
+        if isPiPActive {
+            stopPiP()
+        }
         captureProvider?.destroy()
         captureProvider = nil
         pipController = nil
@@ -279,75 +242,49 @@ class PictureInPictureManager: NSObject {
     }
 }
 
-
-
-
-
-
-// MARK: - AVPictureInPictureControllerDelegate
+// MARK: - Delegate
 @available(iOS 15.0, *)
 extension PictureInPictureManager: AVPictureInPictureControllerDelegate {
+    func pictureInPictureControllerWillStartPictureInPicture(_ controller: AVPictureInPictureController) {
+        isPiPActive = true
+        isStarting = false
 
-	func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-		isPiPActive = true
-		isStarting = false
-		// Keep GL render loop alive during PiP so frames keep updating
+        let RenderType = SettingsHandler.shared.renderer
+        if RenderType == .metal {
+            if let mtkView = ParsecRenderCenter.shared.getView() as? MTKView,
+               mtkView.window != nil {
+                mtkView.isPaused = false
+            }
+        } else {
+            if let glkVC = ParsecRenderCenter.shared.getViewController() as? GLKViewController,
+               glkVC.view.window != nil {
+                glkVC.isPaused = false
+            }
+        }
+    }
 
-		let RenderType = SettingsHandler.shared.renderer
+    func pictureInPictureControllerDidStopPictureInPicture(_ controller: AVPictureInPictureController) {
+        isPiPActive = false
+        onPiPStopped?()
+    }
 
-		if RenderType == .metal {
-			if let mtkView = ParsecRenderCenter.shared.getView() as? MTKView {
+    func pictureInPictureController(_ controller: AVPictureInPictureController,
+                                    restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void) {
+        onRestoreUserInterface?()
+        completionHandler(true)
+    }
 
-                if mtkView.window != nil {
-                    mtkView.isPaused = false
-                } else {
-                    write_log_from_swift("⚠️ MTKView has no window, cannot resume")
-                }
-
-			}
-
-		} else {
-
-			if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
-
-                if glkView.view.window != nil {
-                    glkView.isPaused = false
-                } else {
-                    write_log_from_swift("⚠️ GLKView has no window, cannot resume")
-                }
-				
-			}
-		}
-
-		
-
-
-	}
-
-	func pictureInPictureControllerDidStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-	}
-
-	func pictureInPictureControllerWillStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-	}
-
-	func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-		isPiPActive = false
-		onPiPStopped?()
-	}
-
-	func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController,
-									restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void) {
-		onRestoreUserInterface?()
-		completionHandler(true)
-	}
-
-	func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController,
-									failedToStartPictureInPictureWithError error: Error) {
-		isPiPActive = false
-		isStarting = false
-		onPiPStartFailed?()
-	}
+    func pictureInPictureController(_ controller: AVPictureInPictureController,
+                                    failedToStartPictureInPictureWithError error: Error) {
+        isPiPActive = false
+        isStarting = false
+        onPiPStartFailed?()
+    }
 }
+
+
+
+
 
 // MARK: - AVPictureInPictureSampleBufferPlaybackDelegate
 @available(iOS 15.0, *)

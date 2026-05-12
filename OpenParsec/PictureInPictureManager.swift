@@ -204,7 +204,7 @@ class PictureInPictureManager: NSObject {
     }
 
     // MARK: - Feed SampleBuffer
-    private func feedSampleBuffer() {
+    func feedSampleBuffer() {
         guard let provider = captureProvider,
               let pixelBuffer = provider.getPixelBuffer(),
               let displayLayer = sampleBufferDisplayLayer,

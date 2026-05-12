@@ -557,13 +557,24 @@ class ParsecSDKBridge: ParsecService
 		return (keyCode, useShift)
 	}
 	
-	private func sendKeyboardCode(_ code: ParsecKeycode, pressed: Bool) {
+	public func sendKeyboardCode(_ code: ParsecKeycode, pressed: Bool) {
 		var keyboardMessage = ParsecMessage()
 		keyboardMessage.type = MESSAGE_KEYBOARD
 		keyboardMessage.keyboard.code = code
 		keyboardMessage.keyboard.pressed = pressed
 		ParsecClientSendMessage(_parsec, &keyboardMessage)
 	}
+
+	func sendKeyboardMessage(keyCode: UInt32, pressed: Bool)
+	{
+		var keyboardMessagePress = ParsecMessage()
+		keyboardMessagePress.type = MESSAGE_KEYBOARD
+		keyboardMessagePress.keyboard.code = ParsecKeycode(keyCode)
+		keyboardMessagePress.keyboard.pressed = pressed
+		ParsecClientSendMessage(_parsec, &keyboardMessagePress)
+	}
+
+	
 
 	private func tapKeyboardCode(_ code: ParsecKeycode, useShift: Bool = false, holdFor delay: TimeInterval = 0.02) {
 		if !isVirtualShiftOn && useShift {
@@ -625,6 +636,8 @@ class ParsecSDKBridge: ParsecService
 
 	private func sendWindowsHexNumpadScalar(_ scalar: UnicodeScalar) {
 		let hex = String(scalar.value, radix: 16, uppercase: false)
+
+		write_log_from_swift("Sending Windows hex numpad input for scalar: \(scalar) (hex: \(hex))")
 
 		sendKeyboardCode(ParsecKeycode(rawValue: 226), pressed: true)
 		tapKeyboardCode(ParsecKeycode(rawValue: 87))

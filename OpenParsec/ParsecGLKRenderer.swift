@@ -64,10 +64,7 @@ class ParsecGLKRenderer:NSObject, GLKViewDelegate, GLKViewControllerDelegate
 
 		CParsec.renderGLFrame(timeout: timeout)
 
-		if #available(iOS 15.0, *) {
-			// 在渲染迴圈或 frame callback 裡
-			PictureInPictureManager.shared.feedSampleBuffer()
-		}
+		
 
 		updateImage()
 	}

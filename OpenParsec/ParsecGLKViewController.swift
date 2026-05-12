@@ -33,6 +33,10 @@ class ParsecGLKViewController : ParsecPlayground{
 	var glkRenderer: ParsecGLKRenderer!
 	let updateImage:() -> Void
 
+	var eaglContext: EAGLContext? {
+		return glkView?.context
+	}
+
 	private var settings = SettingsHandler.shared
     
 	
@@ -68,9 +72,7 @@ class ParsecGLKViewController : ParsecPlayground{
 	var _debugMES: String = ""   // 真正存值的變數
 
 
-	var eaglContext: EAGLContext? {
-		return glkView?.context
-	}
+	
 
 
 

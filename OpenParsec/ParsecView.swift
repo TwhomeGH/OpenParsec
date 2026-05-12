@@ -317,21 +317,21 @@ struct ParsecView: View
 
 			Button(action: toggleH265)
 			{
-				Text("Codec: \(settings.decoder == .h264 ? "H264" : "H265")")
+				Text("Codec: \(SettingsHandler.shared.decoder == DecoderPref.h264 ? "H264" : "H265")")
 					.padding(8)
 					.frame(maxWidth:.infinity)
 					.multilineTextAlignment(.center)
 			}
 			Button(action: toggleConstantFps)
 			{
-				Text("Constant FPS: \(settings.savedConstantFps ? "ON" : "OFF")")
+				Text("Constant FPS: \(SettingsHandler.shared.savedConstantFps ? "ON" : "OFF")")
 					.padding(8)
 					.frame(maxWidth:.infinity)
 					.multilineTextAlignment(.center)
 			}
 			Button(action: toggleZoom)
 			{
-				Text("Zoom: \(settings.savedZoom ? "ON" : "OFF")")
+				Text("Zoom: \(SettingsHandler.shared.savedZoom ? "ON" : "OFF")")
 					.padding(8)
 					.frame(maxWidth:.infinity)
 					.multilineTextAlignment(.center)
@@ -504,11 +504,11 @@ struct ParsecView: View
 	
 	func toggleH265() {
 		DispatchQueue.main.async {
-			SettingsHandler.shared.decoder = SettingsHandler.shared.decoder == .h264 ? .h265 : .h264
+			SettingsHandler.shared.decoder = SettingsHandler.shared.decoder == DecoderPref.h264 ? DecoderPref.h265 : DecoderPref.h264
 			DataManager.model.decoder = SettingsHandler.shared.decoder
 
 			CParsec.updateHostVideoConfig()
-			write_log_from_swift("decoder \(SettingsHandler.shared.decoder == .h264 ? "H264" : "H265")")
+			write_log_from_swift("decoder \(SettingsHandler.shared.decoder == DecoderPref.h264 ? "H264" : "H265")")
 
 			// 這裡不需要直接調用 applyIfPossible，因為 updateHostVideoConfig 已經在內部處理了。
 		}

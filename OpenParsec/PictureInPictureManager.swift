@@ -297,14 +297,25 @@ extension PictureInPictureManager: AVPictureInPictureControllerDelegate {
 
 		if RenderType == .metal {
 			if let mtkView = ParsecRenderCenter.shared.getView() as? MTKView {
-				mtkView.isPaused = false
+
+                if mtkView.window != nil {
+                    mtkView.isPaused = false
+                } else {
+                    write_log_from_swift("⚠️ MTKView has no window, cannot resume")
+                }
 
 			}
 
 		} else {
 
 			if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
-				glkView.isPaused = false
+
+                if glkView.view.window != nil {
+                    glkView.isPaused = false
+                } else {
+                    write_log_from_swift("⚠️ GLKView has no window, cannot resume")
+                }
+				
 			}
 		}
 

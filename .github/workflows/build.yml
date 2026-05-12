@@ -117,7 +117,7 @@ jobs:
 
     steps:
       - name: Download a Build Artifact
-        uses: actions/download-artifact@v6
+        uses:  actions/download-artifact@v8
         with:
           name: ${{ env.archive_path }}.xcarchive.tar
       - name: Extract Build Artifact
@@ -141,7 +141,7 @@ jobs:
           mv "$archive_path.xcarchive/Products/Applications" Payload
           zip -r "$scheme.ipa" "Payload" -x "._*" -x ".DS_Store" -x "__MACOSX"
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ env.scheme }}.ipa
           path: ${{ env.scheme }}.ipa

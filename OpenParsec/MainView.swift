@@ -402,6 +402,15 @@ struct MainView: View
 		refreshHosts()
 		refreshSelf()
 		refreshFriends()
+
+		ParsecBackgroundManager.shared.onShouldReconnect = { peerId in			
+			if let host = hosts.first(where: { $0.id == peerId }) {
+				connectTo(host)
+			} else {
+				refreshHosts()
+			}
+		}
+		
 	}
 
 	func refreshHosts()

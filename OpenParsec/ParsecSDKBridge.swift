@@ -145,6 +145,10 @@ class ParsecSDKBridge: ParsecService
 
 		let status = ParsecClientConnect(_parsec, &cfg, NetworkHandler.clinfo?.session_id, peerID)
 
+		if status == PARSEC_OK || status == PARSEC_CONNECTING {
+			ParsecBackgroundManager.shared.connectionDidStart(peerId: peerID)
+		}
+
 		self.startBackgroundTask()
 
 		return status
@@ -199,6 +203,8 @@ class ParsecSDKBridge: ParsecService
 		audio_clear(&_audio)
 
 		ParsecClientDisconnect(_parsec)
+
+		ParsecBackgroundManager.shared.connectionDidEnd()
 
 
 	}
@@ -565,7 +571,7 @@ class ParsecSDKBridge: ParsecService
 		}
 
 		write_log_from_swift("Sending keycode: \(code.rawValue), pressed: true")
-		
+
 		sendKeyboardCode(code, pressed: true)
 		Thread.sleep(forTimeInterval: delay)
 		sendKeyboardCode(code, pressed: false)

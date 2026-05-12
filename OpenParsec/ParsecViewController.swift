@@ -304,6 +304,31 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 		ParsecRenderCenter.shared.attach(viewController: self)
 
 
+		if #available(iOS 15.0, *) {
+
+			if RenderType == .metal {
+				let device = MTLCreateSystemDefaultDevice()!
+
+				PictureInPictureManager.shared.setup(
+					sourceView: renderer!.renderViewIfLoaded!,
+					provider: MetalCaptureSurfaceProvider(device: device)
+				)
+				write_log_from_swift("Metal PiP setup complete🍫")
+				
+			} else if RenderType == .opengl, let parsecGLK = renderer!.renderViewIfLoaded as? ParsecGLKView {
+				let glProvider = GLCaptureSurfaceProvider(glContext: parsecGLK.eaglContext!)
+				PictureInPictureManager.shared.setup(
+					sourceView: parsecGLK,
+					provider: glProvider
+				)
+				
+				write_log_from_swift("OpenGL PiP setup complete🍫")
+			}
+
+		}
+
+
+
 
 		touchController.viewDidLoad()
 		gamePadController.viewDidLoad()

@@ -36,12 +36,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 	{
 		// Called when the scene has moved from an inactive state to an active state.
 		// Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
+
+		if #available(iOS 15.0, *) {
+			PictureInPictureManager.shared.stopPiP()
+		}
+		ParsecBackgroundManager.shared.sceneDidBecomeActive()
+
 	}
 
 	func sceneWillResignActive(_ scene: UIScene)
 	{
 		// Called when the scene will move from an active state to an inactive state.
 		// This may occur due to temporary interruptions (ex. an incoming phone call).
+
+		// Do NOT start PiP here — fires for app switcher gesture too. PiP starts in sceneDidEnterBackground.
+		ParsecBackgroundManager.shared.sceneWillResignActive()
 	}
 
 	func sceneWillEnterForeground(_ scene: UIScene)
@@ -55,5 +64,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 		// Called as the scene transitions from the foreground to the background.
 		// Use this method to save data, release shared resources, and store enough scene-specific state information
 		// to restore the scene back to its current state.
+
+		var pipAttempted = false
+		if #available(iOS 15.0, *) {
+			if ParsecBackgroundManager.shared.hasActiveConnection {
+				PictureInPictureManager.shared.startPiP()
+				pipAttempted = PictureInPictureManager.shared.isPiPActive || PictureInPictureManager.shared.isStarting
+			}
+		}
+
+		if !pipAttempted && ParsecBackgroundManager.shared.hasActiveConnection {
+			ParsecBackgroundManager.shared.onShouldDisconnect?()
+		}
+
+		ParsecBackgroundManager.shared.sceneDidEnterBackground()
+		
 	}
 }

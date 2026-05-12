@@ -92,7 +92,7 @@ struct ParsecStatusBar : View {
 				pipActive = PictureInPictureManager.shared.isPiPActive
 			}
 			if pipActive {
-				CParsec.disconnect()
+				CParsec.disconnect(isBackgroundDisconnect: true)
 				try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
 				ParsecBackgroundManager.shared.connectionDidEnd()
 				ParsecBackgroundManager.shared.markForReconnect()
@@ -382,7 +382,7 @@ struct ParsecView: View
 				.fill(Color("Foreground"))
 				.opacity(0.25)
 				.frame(height:1)
-			Button(action:disconnect(false))
+			Button(action:disconnect(isBackgroundDisconnect:false))
 			{
 				Text("Disconnect")
 					.foregroundColor(.red)
@@ -443,7 +443,7 @@ struct ParsecView: View
 		.statusBarHidden(settings.hideStatusBar)
 		.alert(isPresented:$showDCAlert)
 		{
-			Alert(title: Text(DCAlertText), dismissButton:.default(Text("Close"), action:disconnect(false)))
+			Alert(title: Text(DCAlertText), dismissButton:.default(Text("Close"), action:disconnect(isBackgroundDisconnect:false)))
 		}
 		.onAppear(perform:post)
 		.onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ParsecBackgroundDisconnect"))) { _ in
@@ -552,7 +552,7 @@ struct ParsecView: View
 		return ActionSheet(title: Text("Select a Display:"), buttons:buttons + [Alert.Button.cancel()])
 	}*/
 	
-	func disconnect(_ isBackgroundDisconnect: Bool = false)
+	func disconnect(isBackgroundDisconnect: Bool = false)
 	{
 
 

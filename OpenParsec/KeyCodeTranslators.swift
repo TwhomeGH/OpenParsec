@@ -529,8 +529,7 @@ class KeyCodeTranslators {
 			parsecKeycode = 49
 		case ";", "；":
 			parsecKeycode = 51
-		case "’", "＇":
-			parsecKeycode = 52
+		
 		case "'", "＇":
 			parsecKeycode = 52
 		case "`", "｀":

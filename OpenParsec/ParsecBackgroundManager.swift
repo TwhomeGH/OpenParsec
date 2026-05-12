@@ -2,76 +2,90 @@ import UIKit
 import AVFoundation
 
 class ParsecBackgroundManager {
-	static let shared = ParsecBackgroundManager()
+    static let shared = ParsecBackgroundManager()
 
-	private(set) var hasActiveConnection = false
-	private var lastPeerId: String?
-	private var didDisconnectDueToBackground = false
-	private(set) var isReconnecting = false
+    private(set) var hasActiveConnection = false
+    private var lastPeerId: String?
+    private var didDisconnectDueToBackground = false
+    private(set) var isReconnecting = false
 
-	var onShouldReconnect: ((String) -> Void)?
-	var onShouldDisconnect: (() -> Void)?
+    var onShouldReconnect: ((String) -> Void)?
+    var onShouldDisconnect: (() -> Void)?
 
-	var isMarkedForReconnect: Bool {
-		return didDisconnectDueToBackground || isReconnecting
-	}
+    var isMarkedForReconnect: Bool {
+        return didDisconnectDueToBackground || isReconnecting
+    }
 
-	var isPiPActive: Bool {
-		if #available(iOS 15.0, *) {
-			return PictureInPictureManager.shared.isPiPActive
-		}
-		return false
-	}
+    var isPiPActive: Bool {
+        if #available(iOS 15.0, *) {
+            return PictureInPictureManager.shared.isPiPActive
+        }
+        return false
+    }
 
-	private init() {
-	}
+    private init() {}
 
-	func connectionDidStart(peerId: String) {
-		hasActiveConnection = true
-		lastPeerId = peerId
-		didDisconnectDueToBackground = false
-		isReconnecting = false
-	}
+    func connectionDidStart(peerId: String) {
+        hasActiveConnection = true
+        lastPeerId = peerId
+        didDisconnectDueToBackground = false
+        isReconnecting = false
+    }
 
-	func connectionDidEnd() {
-		hasActiveConnection = false
-	}
+    func connectionDidEnd() {
+        hasActiveConnection = false
+        lastPeerId = nil
+        isReconnecting = false
+        didDisconnectDueToBackground = false
+    }
 
-	func sceneWillResignActive() {
-	}
+    func sceneWillResignActive() {
+        // 保留空間，必要時可加上暫停邏輯
+    }
 
-	func sceneDidBecomeActive() {
-		// Takes priority over isPiPActive check because stopPiP() is async
-		if didDisconnectDueToBackground, let peerId = lastPeerId {
-			didDisconnectDueToBackground = false
-			isReconnecting = true
+    func sceneDidBecomeActive() {
+        guard didDisconnectDueToBackground, let peerId = lastPeerId else { return }
 
-			DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-				self?.onShouldReconnect?(peerId)
-			}
-		}
-	}
+        // 如果 PiP 還在 active 或正在停止，延遲再檢查一次
+        if #available(iOS 15.0, *), PictureInPictureManager.shared.isPiPActive || PictureInPictureManager.shared.isStarting {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                self?.sceneDidBecomeActive()
+            }
+            return
+        }
 
-	func sceneDidEnterBackground() {
-		if hasActiveConnection {
-			var pipAttempted = false
-			if #available(iOS 15.0, *) {
-				pipAttempted = isPiPActive || PictureInPictureManager.shared.isStarting
-			}
-			if !pipAttempted {
-				didDisconnectDueToBackground = true
-			}
-		}
-	}
+        didDisconnectDueToBackground = false
+        isReconnecting = true
 
-	func markForReconnect() {
-		guard lastPeerId != nil else { return }
-		didDisconnectDueToBackground = true
-	}
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            guard let self = self, let peerId = self.lastPeerId else { return }
+            self.onShouldReconnect?(peerId)
+        }
+    }
 
-	func disableAutoReconnect() {
-		didDisconnectDueToBackground = false
-		isReconnecting = false
-		lastPeerId = nil
-	}
+    func sceneDidEnterBackground() {
+        guard hasActiveConnection else { return }
+
+        var pipAttempted = false
+        if #available(iOS 15.0, *) {
+            pipAttempted = PictureInPictureManager.shared.isPiPActive || PictureInPictureManager.shared.isStarting
+        }
+
+        // 如果沒有 PiP，才標記需要斷線
+        if !pipAttempted {
+            didDisconnectDueToBackground = true
+            onShouldDisconnect?()
+        }
+    }
+
+    func markForReconnect() {
+        guard lastPeerId != nil else { return }
+        didDisconnectDueToBackground = true
+    }
+
+    func disableAutoReconnect() {
+        didDisconnectDueToBackground = false
+        isReconnecting = false
+        lastPeerId = nil
+    }
 }

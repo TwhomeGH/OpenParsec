@@ -260,6 +260,17 @@ final class ParsecRenderCenter {
 		renderController?.DebugMes = text
 	}
 
+	func getView() -> UIView? {
+		return renderController?.view
+	}
+	
+	func glContext() -> EAGLContext? {
+		if let glkVC = renderController as? ParsecGLKViewController {
+			return glkVC.glContext
+		}
+		return nil
+	}
+
 
 	func updateFPS(_ fps: Int) {
 		renderController?.preferredFPS = fps

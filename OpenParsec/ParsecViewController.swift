@@ -317,7 +317,7 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 				
 			} else if RenderType == .opengl, let parsecGLK = renderer!.renderViewIfLoaded {
 				
-				if let vc = ParsecRenderCenter.shared.renderController,let glContext = vc.glContext {
+				if let glContext = ParsecRenderCenter.shared.glContext() {
 					
 					let glProvider = GLCaptureSurfaceProvider(glContext: glContext)
 					PictureInPictureManager.shared.setup(

@@ -426,7 +426,11 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 
 				// PiP setup 只能在 view 加入 window 後做，因為需要 snapshot
 				if #available(iOS 15.0, *) {
+				
+
 				if SettingsHandler.shared.enablePiP {
+
+					let RenderType = SettingsHandler.shared.renderer
 
 					write_log_from_swift("Attempting PiP setup🍫")
 
@@ -434,12 +438,12 @@ class ParsecViewController :UIViewController, UIScrollViewDelegate {
 						let device = MTLCreateSystemDefaultDevice()!
 
 						PictureInPictureManager.shared.setup(
-							sourceView: renderer!.renderViewIfLoaded!,
+							sourceView: renderer.renderViewIfLoaded!,
 							provider: MetalCaptureSurfaceProvider(device: device)
 						)
 						write_log_from_swift("Metal PiP setup complete🍫")
 						
-					} else if RenderType == .opengl, let parsecGLK = renderer!.renderViewIfLoaded {
+					} else if RenderType == .opengl, let parsecGLK = renderer.renderViewIfLoaded {
 						
 						if let glContext = ParsecRenderCenter.shared.glContext() {
 							

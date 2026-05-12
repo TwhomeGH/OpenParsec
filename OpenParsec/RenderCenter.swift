@@ -252,6 +252,7 @@ final class ParsecRenderCenter {
 
 	func updateFPS(_ fps: Int) {
 		renderController?.preferredFPS = fps
+		write_log_from_swift("更新FPS: \(fps)")
 	}
 
 	func currentFPS() -> Int {

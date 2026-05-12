@@ -163,6 +163,7 @@ struct SettingsView:View
 								[
 									Choice("Auto (Device Max)", 0),
 									Choice("120 FPS", 120),
+									Choice("90 FPS", 90),
 									Choice("60 FPS", 60),
 									Choice("30 FPS", 30)
 								])

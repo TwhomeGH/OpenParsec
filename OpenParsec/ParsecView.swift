@@ -322,6 +322,22 @@ struct ParsecView: View
 					.frame(maxWidth:.infinity)
 					.multilineTextAlignment(.center)
 			}
+			Text("FPS \(settings.preferredFramesPerSecond == 0 ? "Auto (\(UIScreen.main.maximumFramesPerSecond) max)" : String(settings.preferredFramesPerSecond))")
+				.padding(8)
+				.frame(maxWidth:.infinity)
+				.multilineTextAlignment(.center)
+			MultiPicker(selection: $settings.preferredFramesPerSecond, options:
+			[
+				Choice("Auto (Device Max)", 0),
+				Choice("120 FPS", 120),
+				Choice("90 FPS", 90),
+				Choice("60 FPS", 60),
+				Choice("30 FPS", 30)
+			])
+			.padding(8)
+			.frame(maxWidth:.infinity)
+			.multilineTextAlignment(.center)
+			
 			Button(action: toggleConstantFps)
 			{
 				Text("Constant FPS: \(SettingsHandler.shared.savedConstantFps ? "ON" : "OFF")")
@@ -501,7 +517,19 @@ struct ParsecView: View
 
 		ParsecRenderCenter.shared.requestBitrateUpdate()
 	}
-	
+	func updateFPS(_ fps: Int = 0) {
+
+		if fps == 0 {
+			// Use device's maximum refresh rate (120Hz on ProMotion iPads)
+			ParsecRenderCenter.shared.updateFPS(Int(UIScreen.main.maximumFramesPerSecond))
+		} else {
+			ParsecRenderCenter.shared.updateFPS(fps)
+		}
+
+		write_log_from_swift("preferredFramesPerSecond \(fps == 0 ? "Device max->\(UIScreen.main.maximumFramesPerSecond)" : String(fps))")
+
+	}
+
 	func toggleH265() {
 		DispatchQueue.main.async {
 			SettingsHandler.shared.decoder = SettingsHandler.shared.decoder == DecoderPref.h264 ? DecoderPref.h265 : DecoderPref.h264

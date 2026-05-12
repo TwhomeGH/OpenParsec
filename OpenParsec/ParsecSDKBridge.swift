@@ -564,6 +564,8 @@ class ParsecSDKBridge: ParsecService
 			sendKeyboardCode(ParsecKeycode(rawValue: 225), pressed: true)
 		}
 
+		write_log_from_swift("Sending keycode: \(code.rawValue), pressed: true")
+		
 		sendKeyboardCode(code, pressed: true)
 		Thread.sleep(forTimeInterval: delay)
 		sendKeyboardCode(code, pressed: false)

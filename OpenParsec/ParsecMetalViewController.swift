@@ -45,6 +45,9 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 
 	private var settings = SettingsHandler.shared
     
+
+    var viewController: UIViewController
+
     var mtkView: MTKView!
 
 	var updateImage: (() -> Void)?

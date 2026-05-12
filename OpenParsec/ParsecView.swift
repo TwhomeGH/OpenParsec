@@ -473,7 +473,9 @@ struct ParsecView: View
 			PictureInPictureManager.shared.onPiPStopped = { [self] in
 				if UIApplication.shared.applicationState != .active {
 					// Synchronous — DispatchQueue.main.async may never execute if iOS suspends the app
-					CParsec.disconnect()
+					CParsec.sendReleaseMessage()
+					CParsec.pause()
+					
 					try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
 					ParsecBackgroundManager.shared.markForReconnect()
 					DispatchQueue.main.async {
@@ -498,6 +500,10 @@ struct ParsecView: View
 			}
 			PictureInPictureManager.shared.onPiPStartFailed = { [self] in
 				if UIApplication.shared.applicationState != .active {
+
+					CParsec.sendReleaseMessage()
+					CParsec.pause()
+
 					ParsecBackgroundManager.shared.markForReconnect()
 					DispatchQueue.main.async {
 						self.disconnect(isBackgroundDisconnect: true)
@@ -569,7 +575,7 @@ struct ParsecView: View
 			PictureInPictureManager.shared.teardown()
 		}
 
-
+		// 包含ReleaseMessage和disconnect兩個步驟，確保完全斷開連接並釋放資源
 		ParsecRenderCenter.shared.shutdown()
 
 		parsecViewController.keyboardVisible = false

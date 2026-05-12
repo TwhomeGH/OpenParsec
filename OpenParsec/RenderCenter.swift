@@ -180,6 +180,7 @@ final class ParsecRenderCenter {
 
 	func shutdown() {
 
+		CParsec.sendReleaseMessage()
 		CParsec.disconnect()
 
 		viewController?.shutdownRenderer()
@@ -224,8 +225,13 @@ final class ParsecRenderCenter {
 
 	func initCParsec(muted: Bool) {
 
-			os_log("初始化客戶端")
+			write_log_from_swift("初始化客戶端 \(muted ? "靜音" : "有聲")")
+
 			CParsec.setMuted(muted)
+
+			muted ? CParsec.pause(video: false, audio: true) : CParsec.resume()
+
+
 			applyDefaultVideoSettings()
 			getHostUserData()
 

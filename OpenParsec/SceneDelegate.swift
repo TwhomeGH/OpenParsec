@@ -30,6 +30,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 		// This occurs shortly after the scene enters the background, or when its session is discarded.
 		// Release any resources associated with this scene that can be re-created the next time the scene connects.
 		// The scene may re-connect later, as its session was not necessarily discarded (see `application:didDiscardSceneSessions` instead).
+
+		if ParsecBackgroundManager.shared.hasActiveConnection {
+			CParsec.sendReleaseMessage()
+			CParsec.disconnect()
+		}
+
 	}
 
 	func sceneDidBecomeActive(_ scene: UIScene)
@@ -40,6 +46,25 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 		if #available(iOS 15.0, *) {
 			PictureInPictureManager.shared.stopPiP()
 		}
+
+		let RenderType = SettingsHandler.shared.renderer
+
+		if RenderType == .metal {
+			if let mtkView = ParsecRenderCenter.shared.getView() as? MTKView {
+				mtkView.isPaused = false
+
+			}
+
+		} else {
+
+			if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
+				glkView.isPaused = false
+			}
+		}
+		
+		CParsec.resume()
+
+
 		ParsecBackgroundManager.shared.sceneDidBecomeActive()
 
 	}
@@ -48,6 +73,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 	{
 		// Called when the scene will move from an active state to an inactive state.
 		// This may occur due to temporary interruptions (ex. an incoming phone call).
+
+		if ParsecBackgroundManager.shared.hasActiveConnection {
+			CParsec.sendReleaseMessage()
+		}
 
 		// Do NOT start PiP here — fires for app switcher gesture too. PiP starts in sceneDidEnterBackground.
 		ParsecBackgroundManager.shared.sceneWillResignActive()
@@ -67,14 +96,41 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 
 		var pipAttempted = false
 		if #available(iOS 15.0, *) {
+			
+			guard SettingsHandler.shared.enablePiP else {
+				write_log("PiP disabled in settings, not starting PiP.")
+				return
+			}
+
 			if ParsecBackgroundManager.shared.hasActiveConnection {
 				PictureInPictureManager.shared.startPiP()
 				pipAttempted = PictureInPictureManager.shared.isPiPActive || PictureInPictureManager.shared.isStarting
 			}
+
 		}
 
-		if !pipAttempted && ParsecBackgroundManager.shared.hasActiveConnection {
-			ParsecBackgroundManager.shared.onShouldDisconnect?()
+			if !pipAttempted && ParsecBackgroundManager.shared.hasActiveConnection {
+
+
+				let RenderType = SettingsHandler.shared.renderer
+
+			if RenderType == .metal {
+				if let mtkView = ParsecRenderCenter.shared.getView() as? MTKView {
+					mtkView.isPaused = false
+
+				}
+
+			} else {
+
+				if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
+					glkView.isPaused = false
+				}
+			}
+
+			CParsec.sendReleaseMessage()
+			CParsec.pause()
+			
+			write_log("App entered background without starting PiP, sent release message and paused Parsec.")
 		}
 
 		ParsecBackgroundManager.shared.sceneDidEnterBackground()

@@ -221,6 +221,14 @@ struct SettingsView:View
 									Choice("Windows Hex Numpad", RemoteTextInputMode.windowsHexNumpad)
 								])
 							}
+							CatItem("Enable PiP")
+							{
+								Toggle("", isOn:$settings.enablePiP)
+									.frame(width:80)
+							}
+						
+
+
 						}
 						Text("More options coming soon.")
 							.multilineTextAlignment(.center)

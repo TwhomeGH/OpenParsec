@@ -60,5 +60,8 @@ final class SettingsHandler: ObservableObject {
 	@AppStorage("savedZoom") public var savedZoom: Bool = false
 
 
+	@AppStorage("enablePiP") public var enablePiP: Bool = false
+
+
 
 }

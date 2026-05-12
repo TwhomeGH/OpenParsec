@@ -228,8 +228,14 @@ final class ParsecRenderCenter {
 			write_log_from_swift("初始化客戶端 \(muted ? "靜音" : "有聲")")
 
 			CParsec.setMuted(muted)
-
-			muted ? CParsec.pause(video: false, audio: true) : CParsec.resume()
+			
+			if muted {
+				let RES = CParsec.pause(video: false, audio: true)
+				write_log_from_swift("Initialized client with muted audio \(String(describing: RES))")
+			} else {
+				CParsec.resume()
+				write_log_from_swift("Initialized client with audio")
+			}
 
 
 			applyDefaultVideoSettings()

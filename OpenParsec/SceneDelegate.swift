@@ -128,9 +128,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 			}
 
 			CParsec.sendReleaseMessage()
-			CParsec.pause()
+			let RES = CParsec.pause()
 			
-			write_log_from_swift("App entered background without starting PiP, sent release message and paused Parsec.")
+			write_log_from_swift("App entered background without starting PiP, sent release message and paused Parsec \(String(describing: RES)).")
 		}
 
 		ParsecBackgroundManager.shared.sceneDidEnterBackground()

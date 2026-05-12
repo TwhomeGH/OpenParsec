@@ -474,8 +474,9 @@ struct ParsecView: View
 				if UIApplication.shared.applicationState != .active {
 					// Synchronous — DispatchQueue.main.async may never execute if iOS suspends the app
 					CParsec.sendReleaseMessage()
-					CParsec.pause()
-					
+					let RES = CParsec.pause()
+					write_log_from_swift("PiP stopped, disconnecting \(String(describing: RES))")
+
 					try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
 					ParsecBackgroundManager.shared.markForReconnect()
 					DispatchQueue.main.async {
@@ -502,7 +503,8 @@ struct ParsecView: View
 				if UIApplication.shared.applicationState != .active {
 
 					CParsec.sendReleaseMessage()
-					CParsec.pause()
+					let RES = CParsec.pause()
+					write_log_from_swift("PiP start failed, paused Parsec \(String(describing: RES))")
 
 					ParsecBackgroundManager.shared.markForReconnect()
 					DispatchQueue.main.async {

@@ -382,8 +382,9 @@ struct ParsecView: View
 				.fill(Color("Foreground"))
 				.opacity(0.25)
 				.frame(height:1)
-			Button(action:disconnect(isBackgroundDisconnect:false))
-			{
+			Button(action: {
+				disconnect(isBackgroundDisconnect:false)
+			}) {
 				Text("Disconnect")
 					.foregroundColor(.red)
 					.padding(8)
@@ -443,7 +444,11 @@ struct ParsecView: View
 		.statusBarHidden(settings.hideStatusBar)
 		.alert(isPresented:$showDCAlert)
 		{
-			Alert(title: Text(DCAlertText), dismissButton:.default(Text("Close"), action:disconnect(isBackgroundDisconnect:false)))
+			Alert(
+				title: Text(DCAlertText), dismissButton:.default(Text("Close"), action:{
+				disconnect(isBackgroundDisconnect:false)
+				})
+				)
 		}
 		.onAppear(perform:post)
 		.onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ParsecBackgroundDisconnect"))) { _ in

@@ -26,8 +26,12 @@ final class SettingsHandler: ObservableObject {
 	@AppStorage("bitrate") public var bitrate: Int = 0
 
 
-	@AppStorage("decoder") public var decoder: DecoderPref = .h264
-	
+	@AppStorage("decoder") private var decoderStorage: DecoderPref = .h264 {
+        didSet { decoder = decoderStorage }
+    }
+
+    @Published var decoder: DecoderPref = .h264
+
 	@AppStorage("decoder444") public var decoder444: Bool = true
 
 	@AppStorage("decoderCompatibility") public var decoderCompatibility: Bool = false // Enable for stutter issues on some devices

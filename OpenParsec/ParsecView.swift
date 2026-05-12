@@ -506,7 +506,8 @@ struct ParsecView: View
 		DispatchQueue.main.async {
 			SettingsHandler.shared.decoder = SettingsHandler.shared.decoder == DecoderPref.h264 ? DecoderPref.h265 : DecoderPref.h264
 
-			CParsec.updateHostVideoConfig()
+			// 套用配置變更
+			CParsec.applyConfig()
 			write_log_from_swift("decoder \(SettingsHandler.shared.decoder == DecoderPref.h264 ? "H264" : "H265")")
 
 			// 這裡不需要直接調用 applyIfPossible，因為 updateHostVideoConfig 已經在內部處理了。

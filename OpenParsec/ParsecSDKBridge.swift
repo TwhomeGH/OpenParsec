@@ -806,15 +806,9 @@ class ParsecSDKBridge: ParsecService
 		videoConfig.video[0].fullFPS = DataManager.model.constantFps
 		videoConfig.video[0].output = DataManager.model.output
 
-		videoConfig.video[0].decoder = SettingsHandler.shared.decoder == .h265 ? 1 : 0
-		videoConfig.video[0].decoderCompatibility = SettingsHandler.shared.decoderCompatibility
-		videoConfig.video[0].decoder444 = SettingsHandler.shared.decoder444 == true ? 1 : 0
-
-
 		write_log_from_swift("更新Host寬高: \(videoConfig.video[0].resolutionX)x\(videoConfig.video[0].resolutionY)")
 		write_log_from_swift("Bitrate \(videoConfig.video[0].encoderMaxBitrate) bps, constantFps: \(videoConfig.video[0].fullFPS ? "true" : "false"), output: \(videoConfig.video[0].output)")
-		write_log_from_swift("Decoder: \(videoConfig.video[0].decoder == 1 ? "H265" : "H264"), decoderCompatibility: \(videoConfig.video[0].decoderCompatibility), decoder444: \(videoConfig.video[0].decoder444)")
-
+	
 		let encoder = JSONEncoder()
 		let data = try! encoder.encode(videoConfig)
 		CParsec.sendUserData(type: .setVideoConfig, message: data)

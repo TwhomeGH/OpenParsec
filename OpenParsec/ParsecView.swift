@@ -552,7 +552,7 @@ struct ParsecView: View
 		return ActionSheet(title: Text("Select a Display:"), buttons:buttons + [Alert.Button.cancel()])
 	}*/
 	
-	func disconnect(isBackgroundDisconnect: Bool = false)
+	func disconnect(_ isBackgroundDisconnect: Bool = false)
 	{
 
 

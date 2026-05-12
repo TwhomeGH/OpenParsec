@@ -63,6 +63,7 @@ jobs:
           echo "file_to_build=$file_to_build" >> $GITHUB_OUTPUT
       
       - name: Fast compile (simulator)
+        id: fast_build
         env:
           scheme: ${{ steps.scheme.outputs.scheme }}
           filetype_parameter: ${{ steps.filetype_parameter.outputs.filetype_parameter }}
@@ -75,6 +76,16 @@ jobs:
             clean build CODE_SIGNING_ALLOWED=NO | xcpretty || true
           EXIT_CODE=${PIPESTATUS[0]}
           echo "Fast build exit code: $EXIT_CODE"
+
+          # 將 exit code 輸出到 GitHub Actions
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+          # 如果失敗，顯示警告而不是失敗
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "::warning::Fast build failed with exit code $EXIT_CODE"
+          else
+            echo "::notice::Fast build succeeded"
+          fi
 
 
 

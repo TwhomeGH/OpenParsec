@@ -289,7 +289,8 @@ extension PictureInPictureManager: AVPictureInPictureControllerDelegate {
 		isPiPActive = true
 		isStarting = false
 		// Keep GL render loop alive during PiP so frames keep updating
-		glkViewController?.isPaused = false
+		RenderCenter.shared.rendererView?.isPaused = false
+		
 	}
 
 	func pictureInPictureControllerDidStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {

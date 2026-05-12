@@ -140,6 +140,12 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
             timeout: 16,
             ) { frame, image in
             self.handleFrame(frame, image: image)
+            
+            if #available(iOS 15.0, *) {
+                // 在渲染迴圈或 frame callback 裡
+                PictureInPictureManager.shared.feedSampleBuffer()
+            }
+
         }
         print("PollFrame status:", status)
     }

@@ -348,13 +348,10 @@ struct ParsecView: View
 					.frame(maxWidth:.infinity)
 					.multilineTextAlignment(.center)
 			}
-			Text("FPS \(settings.preferredFramesPerSecond == 0 ? "Auto (\(UIScreen.main.maximumFramesPerSecond) max)" : String(settings.preferredFramesPerSecond))")
-				.padding(8)
-				.frame(maxWidth:.infinity)
-				.multilineTextAlignment(.center)
+			
 			MultiPicker(selection: $settings.preferredFramesPerSecond, options:
 			[
-				Choice("Auto (Device Max)", 0),
+				Choice("Auto \(UIScreen.main.maximumFramesPerSecond) FPS", 0),
 				Choice("120 FPS", 120),
 				Choice("90 FPS", 90),
 				Choice("60 FPS", 60),

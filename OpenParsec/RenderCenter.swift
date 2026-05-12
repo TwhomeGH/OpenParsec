@@ -233,8 +233,8 @@ final class ParsecRenderCenter {
 				let RES = CParsec.pause(video: false, audio: true)
 				write_log_from_swift("Initialized client with muted audio \(String(describing: RES))")
 			} else {
-				CParsec.resume()
-				write_log_from_swift("Initialized client with audio")
+				let RES = CParsec.resume()
+				write_log_from_swift("Initialized client with audio \(String(describing: RES))")
 			}
 
 

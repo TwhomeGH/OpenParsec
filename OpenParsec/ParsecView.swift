@@ -466,6 +466,7 @@ struct ParsecView: View
 		ParsecBackgroundManager.shared.onShouldDisconnect = {
 			NotificationCenter.default.post(name: NSNotification.Name("ParsecBackgroundDisconnect"), object: nil)
 		}
+
 		if #available(iOS 15.0, *) {
 			PictureInPictureManager.shared.onPiPStopped = { [self] in
 				if UIApplication.shared.applicationState != .active {
@@ -480,6 +481,7 @@ struct ParsecView: View
 						self.disconnect(isBackgroundDisconnect: true)
 					}
 				} else {
+					
 					if ParsecBackgroundManager.shared.isReconnecting {
 						return
 					}

@@ -122,6 +122,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 			}
 
 		}
+		
 
 			if !pipAttempted && ParsecBackgroundManager.shared.hasActiveConnection {
 
@@ -135,9 +136,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 					} else {
 						write_log_from_swift("⚠️ MTKView has no window, cannot pause")
 					}
-
-					
-
+			
 				}
 
 			} else {
@@ -158,6 +157,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 		}
 
 		ParsecBackgroundManager.shared.sceneDidEnterBackground()
+
+		
 		
 	}
+
+}
+
 }

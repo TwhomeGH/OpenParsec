@@ -60,10 +60,7 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 		set { mtkView = newValue as? MTKView }
 	}
 
-	var viewController: UIViewController {
-		get { viewController! }
-		set { viewController = newValue }
-	}
+	
 
 	var preferredFPS: Int {
         get { mtkView?.preferredFramesPerSecond ?? 0 }

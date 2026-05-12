@@ -36,9 +36,7 @@ class ParsecGLKViewController : ParsecPlayground{
 	
 	private var settings = SettingsHandler.shared
     
-	
-	let viewController: UIViewController
-	
+
 	required init(viewController: UIViewController, updateImage: @escaping () -> Void) {
 		self.viewController = viewController
 		self.updateImage = updateImage

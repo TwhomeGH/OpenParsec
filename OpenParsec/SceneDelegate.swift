@@ -1,5 +1,6 @@
 import UIKit
 import SwiftUI
+import GLKit
 import MetalKit
 import AVFoundation
 
@@ -59,7 +60,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 
 		} else {
 
-			if let glkView = ParsecRenderCenter.shared.getViewController() as? UIViewController {
+			if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
 				glkView.isPaused = false
 			}
 		}
@@ -125,7 +126,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 
 			} else {
 
-				if let glkView = ParsecRenderCenter.shared.getViewController() as? UIViewController {
+				if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
 					glkView.isPaused = false
 				}
 			}

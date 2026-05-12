@@ -47,7 +47,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 		// Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
 
 		if #available(iOS 15.0, *) {
-			PictureInPictureManager.shared.stopPiP()
+
+			let pipManager = PictureInPictureManager.shared
+			if pipManager.isPiPActive || pipManager.isStarting {
+				pipManager.stopPiP()
+			}
+			
 		}
 
 		let RenderType = SettingsHandler.shared.renderer

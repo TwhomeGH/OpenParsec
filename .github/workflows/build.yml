@@ -49,6 +49,7 @@ jobs:
             echo Using configured scheme: $scheme
           fi
           echo "scheme=$scheme" >> $GITHUB_OUTPUT
+          
       - name: Set filetype_parameter
         id: filetype_parameter
         run: |

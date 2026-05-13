@@ -44,6 +44,8 @@ class ParsecGLKViewController : ParsecPlayground {
 		self.updateImage = updateImage
 	}
 
+	var GLProvider:GLCaptureSurfaceProvider?
+
 	public func loadViewIfNeeded() {
 		guard glkView == nil else { return }
 
@@ -56,11 +58,17 @@ class ParsecGLKViewController : ParsecPlayground {
 		setupGLKViewController()
 
 		if #available(iOS 15.0, *) {
+			
+			GLProvider = GLCaptureSurfaceProvider(glContext: glkView.context)
+			GLProvider.setup(width: glkView.frame.width, height: glkView.frame.height)
+			
+			write_log_from_swift("GLProvider setup with width: \(glkView.frame.width), height: \(glkView.frame.height)")
+
 			if SettingsHandler.shared.enablePiP {
 				// ✅ PiP setup 設置
 				PictureInPictureManager.shared.setup(
 					sourceView: glkView,
-					provider: GLCaptureSurfaceProvider(glContext: glkView.context) // 你自己的 CaptureSurfaceProvider
+					provider: GLProvider // 你自己的 CaptureSurfaceProvider
 				)
 
 				write_log_from_swift("OpenGL PiP setup complete🍫")
@@ -152,6 +160,8 @@ class ParsecGLKViewController : ParsecPlayground {
 		glkView.removeFromSuperview()
 		self.glkView = nil
 
+
+		GLProvider = nil
 		CParsec.clearGL()
 		
 		print("🧹 GLK cleanUp done")

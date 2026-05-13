@@ -159,6 +159,9 @@ class PictureInPictureManager: NSObject {
     private var captureProvider: CaptureSurfaceProvider?
     private var cachedFormatDescription: CMVideoFormatDescription?
 
+    private var displayLink: CADisplayLink?
+    private var currentPTS: CMTime = .zero
+
     private(set) var isPiPActive = false
     private(set) var isStarting = false
     private var isSetup = false
@@ -184,7 +187,9 @@ class PictureInPictureManager: NSObject {
 
         let containerView = UIView(frame: sourceView.bounds)
         containerView.isUserInteractionEnabled = false
-        containerView.alpha = 0
+
+        containerView.frame = CGRect(x: -9999, y: -9999, width: 1, height: 1)
+
         containerView.layer.addSublayer(layer)
         layer.frame = containerView.bounds
         sourceView.addSubview(containerView)
@@ -201,15 +206,96 @@ class PictureInPictureManager: NSObject {
         controller.canStartPictureInPictureAutomaticallyFromInline = false
         self.pipController = controller
 
+        startFramePump()
         isSetup = true
+
     }
 
     // MARK: - PiP Control
+
+    private func startFramePump() {
+        stopFramePump()
+
+        currentPTS = .zero
+
+        let link = CADisplayLink(target: self, selector: #selector(renderFrame))
+        link.preferredFramesPerSecond = 30
+        link.add(to: .main, forMode: .common)
+
+        displayLink = link
+    }
+
+    private func stopFramePump() {
+        displayLink?.invalidate()
+        displayLink = nil
+    }
+
+
+    // MARK: PIP 繪製
+    @objc
+    private func renderFrame() {
+        guard let pixelBuffer = captureProvider?.getPixelBuffer(),
+            let layer = sampleBufferDisplayLayer else {
+            return
+        }
+
+        // 建立 format description
+        if cachedFormatDescription == nil {
+            CMVideoFormatDescriptionCreateForImageBuffer(
+                allocator: kCFAllocatorDefault,
+                imageBuffer: pixelBuffer,
+                formatDescriptionOut: &cachedFormatDescription
+            )
+        }
+
+        guard let format = cachedFormatDescription else {
+            return
+        }
+
+        var timing = CMSampleTimingInfo(
+            duration: CMTime(value: 1, timescale: 30),
+            presentationTimeStamp: currentPTS,
+            decodeTimeStamp: .invalid
+        )
+
+        var sampleBuffer: CMSampleBuffer?
+
+        let status = CMSampleBufferCreateReadyWithImageBuffer(
+            allocator: kCFAllocatorDefault,
+            imageBuffer: pixelBuffer,
+            formatDescription: format,
+            sampleTiming: &timing,
+            sampleBufferOut: &sampleBuffer
+        )
+
+        guard status == noErr,
+            let sb = sampleBuffer else {
+            return
+        }
+
+        if layer.status == .failed {
+            layer.flush()
+        }
+
+        layer.enqueue(sb)
+
+        currentPTS = CMTimeAdd(
+            currentPTS,
+            CMTime(value: 1, timescale: 30)
+        )
+    }
+
+
+
     func startPiP() {
         guard isSetup, let controller = pipController,
               !isPiPActive, !isStarting else { return }
         isStarting = true
-        controller.startPictureInPicture()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            controller.startPictureInPicture()
+        }
+
     }
 
     func stopPiP() {
@@ -224,6 +310,9 @@ class PictureInPictureManager: NSObject {
         if isPiPActive {
             stopPiP()
         }
+
+        stopFramePump()
+
         captureProvider?.destroy()
         captureProvider = nil
         pipController = nil
@@ -245,11 +334,18 @@ class PictureInPictureManager: NSObject {
 // MARK: - Delegate
 @available(iOS 15.0, *)
 extension PictureInPictureManager: AVPictureInPictureControllerDelegate {
-    func pictureInPictureControllerWillStartPictureInPicture(_ controller: AVPictureInPictureController) {
+
+    func pictureInPictureControllerDidStartPictureInPicture(_ controller: AVPictureInPictureController) {
         isPiPActive = true
         isStarting = false
 
-        write_log_from_swift("PiP will start")
+        write_log_from_swift("PiP 正在開始 (Delegate 回調)")
+    }
+
+
+    func pictureInPictureControllerWillStartPictureInPicture(_ controller: AVPictureInPictureController) {
+
+        write_log_from_swift("PiP將開始 (Delegate 回調)")
     }
 
     func pictureInPictureControllerDidStopPictureInPicture(_ controller: AVPictureInPictureController) {

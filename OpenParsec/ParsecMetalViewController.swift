@@ -103,7 +103,7 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 
 	var renderViewIfLoaded: UIView? { mtkView }
 
-	
+	var MetalProvider: MetalCaptureSurfaceProvider?
 
     // MARK: - Setup
     func loadViewIfNeeded() {
@@ -145,12 +145,15 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 		if #available(iOS 15.0, *) {
 			if SettingsHandler.shared.enablePiP {
 
+				MetalProvider = MetalCaptureSurfaceProvider(device: metalDevice)
+				MetalProvider.setup(width: mtkView.frame.width, height: mtkView.frame.height)
+				
 				write_log_from_swift("Attempting PiP setup Metal🍫")
 				// ✅ 在這裡加上 PiP setup
 				if let mtkView = self.mtkView {
 					PictureInPictureManager.shared.setup(
 						sourceView: mtkView,
-						provider: MetalCaptureSurfaceProvider(device: metalDevice) // 你自己的 CaptureSurfaceProvider
+						provider: MetalProvider // 你自己的 CaptureSurfaceProvider
 					)
 				}
 
@@ -206,6 +209,8 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 		}
 
 		ParsecMetalTarget.shared.reset()
+
+		MetalProvider = nil
 
 		print("🧹 Metal cleanUp done")
     }

@@ -249,29 +249,22 @@ extension PictureInPictureManager: AVPictureInPictureControllerDelegate {
         isPiPActive = true
         isStarting = false
 
-        let RenderType = SettingsHandler.shared.renderer
-        if RenderType == .metal {
-            if let mtkView = ParsecRenderCenter.shared.getView() as? MTKView,
-               mtkView.window != nil {
-                mtkView.isPaused = false
-            }
-        } else {
-            if let glkVC = ParsecRenderCenter.shared.getViewController() as? GLKViewController,
-               glkVC.view.window != nil {
-                glkVC.isPaused = false
-            }
-        }
+        write_log_from_swift("PiP will start")
     }
 
     func pictureInPictureControllerDidStopPictureInPicture(_ controller: AVPictureInPictureController) {
         isPiPActive = false
         onPiPStopped?()
+
+        write_log_from_swift("PiP did stop")
     }
 
     func pictureInPictureController(_ controller: AVPictureInPictureController,
                                     restoreUserInterfaceForPictureInPictureStopWithCompletionHandler completionHandler: @escaping (Bool) -> Void) {
         onRestoreUserInterface?()
         completionHandler(true)
+
+        write_log_from_swift("Restoring UI for PiP stop")
     }
 
     func pictureInPictureController(_ controller: AVPictureInPictureController,
@@ -279,6 +272,8 @@ extension PictureInPictureManager: AVPictureInPictureControllerDelegate {
         isPiPActive = false
         isStarting = false
         onPiPStartFailed?()
+
+        write_log_from_swift("PiP failed to start: \(error.localizedDescription)")
     }
 }
 

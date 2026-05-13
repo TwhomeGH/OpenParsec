@@ -87,41 +87,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate
 			if ParsecBackgroundManager.shared.hasActiveConnection {
 				PictureInPictureManager.shared.startPiP()
 				pipAttempted = PictureInPictureManager.shared.isPiPActive || PictureInPictureManager.shared.isStarting
+
+				write_log_from_swift("Attempted PiP start: \(pipAttempted ? "success" : "failure")")
+				if pipAttempted {
+					write_log_from_swift("PiP started successfully.")
+				} else {
+					write_log_from_swift("PiP failed to start.")
+				}
+
+
 			}
 
 		}
 		
 
 			if !pipAttempted && ParsecBackgroundManager.shared.hasActiveConnection {
-
-
-				let RenderType = SettingsHandler.shared.renderer
-
-				if RenderType == .metal {
-					if let mtkView = ParsecRenderCenter.shared.getView() as? MTKView {
-						if mtkView.window != nil {
-							mtkView.isPaused = true
-						} else {
-							write_log_from_swift("⚠️ MTKView has no window, cannot pause")
-						}
-				
-					}
-
-				} else {
-
-					if let glkView = ParsecRenderCenter.shared.getViewController() as? GLKViewController {
-						if glkView.view.window != nil {
-							glkView.isPaused = true
-						} else {
-							write_log_from_swift("⚠️ GLKView has no window, cannot pause")
-						}
-					}
-				}
-
-				CParsec.sendReleaseMessage()
-				let RES = CParsec.pause()
-				
-				write_log_from_swift("App entered background without starting PiP, sent release message and paused Parsec \(String(describing: RES)).")
+				write_log_from_swift("PiP not attempted, sending release message for background state.")
 			}
 
 			ParsecBackgroundManager.shared.sceneDidEnterBackground()

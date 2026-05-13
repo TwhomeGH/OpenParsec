@@ -59,7 +59,7 @@ class ParsecGLKViewController : ParsecPlayground {
 
 		if #available(iOS 15.0, *) {
 			
-			GLProvider = GLCaptureSurfaceProvider(glContext: glkView.context)
+			GLProvider = GLCaptureSurfaceProvider(glContext: glContext)
 
 			if let glProvider = GLProvider {
 				glProvider.setup(width: Int(glkView.frame.width), height:Int(glkView.frame.height))
@@ -100,6 +100,9 @@ class ParsecGLKViewController : ParsecPlayground {
 	
 
 
+	var glContext: EAGLContext? {
+		glkView?.context
+	}
 
 	private func setupGLKViewController() {
 		glkView.context = EAGLContext(api: .openGLES3)!

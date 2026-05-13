@@ -26,7 +26,7 @@
 import UIKit
 import GLKit
 
-class ParsecGLKViewController : ParsecPlayground{
+class ParsecGLKViewController : ParsecPlayground {
 
 	var glkView: GLKView!
 	let glkViewController = GLKViewController()
@@ -67,8 +67,8 @@ class ParsecGLKViewController : ParsecPlayground{
 					
 				}
 			}
-			
-		}
+
+		
 
 	}
 	

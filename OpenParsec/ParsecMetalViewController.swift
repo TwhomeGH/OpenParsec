@@ -103,7 +103,7 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 
 	var renderViewIfLoaded: UIView? { mtkView }
 
-	var MetalProvider: (any CaptureSurfaceProvider)?
+	var MetalProvider: CaptureSurfaceProvider?
 
     // MARK: - Setup
     func loadViewIfNeeded() {

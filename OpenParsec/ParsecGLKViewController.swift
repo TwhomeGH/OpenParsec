@@ -44,7 +44,7 @@ class ParsecGLKViewController : ParsecPlayground {
 		self.updateImage = updateImage
 	}
 
-	var GLProvider: (any CaptureSurfaceProvider)?
+	var GLProvider: CaptureSurfaceProvider?
 
 	public func loadViewIfNeeded() {
 		guard glkView == nil else { return }

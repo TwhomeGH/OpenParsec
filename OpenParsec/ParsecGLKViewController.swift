@@ -61,23 +61,25 @@ class ParsecGLKViewController : ParsecPlayground {
 			
 			GLProvider = GLCaptureSurfaceProvider(glContext: glkView.context)
 
+			if let glProvider = GLProvider {
+				glProvider.setup(width: Int(glkView.frame.width), height:Int(glkView.frame.height))
 			
-			GLProvider.setup(width: Int(glkView.frame.width), height:Int(glkView.frame.height))
-				
 			
 
-			write_log_from_swift("GLProvider setup with width: \(glkView.frame.width), height: \(glkView.frame.height)")
+				write_log_from_swift("GLProvider setup with width: \(glkView.frame.width), height: \(glkView.frame.height)")
 
-			if SettingsHandler.shared.enablePiP {
-				// ✅ PiP setup 設置
-				PictureInPictureManager.shared.setup(
-					sourceView: glkView,
-					provider: GLProvider // 你自己的 CaptureSurfaceProvider
-				)
+				if SettingsHandler.shared.enablePiP {
+					// ✅ PiP setup 設置
+					PictureInPictureManager.shared.setup(
+						sourceView: glkView,
+						provider: GLProvider // 你自己的 CaptureSurfaceProvider
+					)
 
-				write_log_from_swift("OpenGL PiP setup complete🍫")
-					
+					write_log_from_swift("OpenGL PiP setup complete🍫")
+						
+					}
 				}
+
 			}
 
 		

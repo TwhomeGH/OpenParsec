@@ -252,49 +252,6 @@ final class ParsecRenderCenter {
 	func attach(viewController vc: ParsecViewController) {
 		self.viewController = vc
 
-		// PiP setup 只能在 view 加入 window 後做，因為需要 snapshot
-		if #available(iOS 15.0, *) {
-		
-			if SettingsHandler.shared.enablePiP {
-
-				let RenderType = SettingsHandler.shared.renderer
-
-				write_log_from_swift("Attempting PiP setup🍫")
-
-				if RenderType == .metal {
-					let device = MTLCreateSystemDefaultDevice()!
-
-					PictureInPictureManager.shared.setup(
-						sourceView: renderer.renderViewIfLoaded!,
-						provider: MetalCaptureSurfaceProvider(device: device)
-					)
-					write_log_from_swift("Metal PiP setup complete🍫")
-					
-				} else if RenderType == .opengl, let parsecGLK = renderer.renderViewIfLoaded {
-					
-					if let glContext = ParsecRenderCenter.shared.glContext() {
-						
-						let glProvider = GLCaptureSurfaceProvider(glContext: glContext)
-						PictureInPictureManager.shared.setup(
-							sourceView: parsecGLK,
-							provider: glProvider
-						)
-						write_log_from_swift("OpenGL PiP setup complete🍫")
-
-					} else {
-						print("❌ Failed to get GL context for PiP setup")
-					}
-					
-				}
-
-
-			} else {
-				write_log_from_swift("PiP disabled in settings, skipping setup🍫")
-			}
-			
-
-		}
-
 	}
 
 	func switchRenderer(to type: RendererType) {

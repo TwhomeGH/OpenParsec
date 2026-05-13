@@ -141,6 +141,22 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
             mtkView.contentScaleFactor = viewController.view.window?.screen.nativeScale ?? UIScreen.main.nativeScale
         }
 
+
+		if #available(iOS 15.0, *) {
+			if SettingsHandler.shared.enablePiP {
+
+				write_log_from_swift("Attempting PiP setup Metal🍫")
+				// ✅ 在這裡加上 PiP setup
+				if let mtkView = self.mtkView {
+					PictureInPictureManager.shared.setup(
+						sourceView: mtkView,
+						provider: MetalCaptureSurfaceProvider(device: metalDevice) // 你自己的 CaptureSurfaceProvider
+					)
+				}
+
+			}
+		}
+
         ParsecMetalViewControllerWrapper.sharedWrapper = self
     }
 

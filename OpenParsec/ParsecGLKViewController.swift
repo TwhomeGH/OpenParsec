@@ -62,7 +62,7 @@ class ParsecGLKViewController : ParsecPlayground {
 			GLProvider = GLCaptureSurfaceProvider(glContext: glkView.context)
 
 			
-			GLProvider?.setup(width: Int(glkView.frame.width), height:Int(glkView.frame.height))
+			GLProvider.setup(width: Int(glkView.frame.width), height:Int(glkView.frame.height))
 				
 			
 

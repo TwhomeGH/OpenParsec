@@ -147,10 +147,9 @@ final class ParsecMetalViewControllerWrapper: NSObject, ParsecPlayground,ParsecR
 
 				MetalProvider = MetalCaptureSurfaceProvider(device: metalDevice)
 
-				if let MetalProvider = MetalProvider {
-					MetalProvider.setup(width: Int(mtkView.frame.width), height: Int(mtkView.frame.height))
-				}
-
+				
+				MetalProvider?.setup(width: Int(mtkView.frame.width), height: Int(mtkView.frame.height))
+				
 				write_log_from_swift("Attempting PiP setup Metal🍫")
 				// ✅ 在這裡加上 PiP setup
 				if let mtkView = self.mtkView {

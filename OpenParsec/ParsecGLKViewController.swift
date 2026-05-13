@@ -55,14 +55,20 @@ class ParsecGLKViewController : ParsecPlayground{
 
 		setupGLKViewController()
 
-		// ✅ PiP setup 設置
-		PictureInPictureManager.shared.setup(
-			sourceView: glkView,
-			provider: GLCaptureSurfaceProvider(glContext: glkView.context) // 你自己的 CaptureSurfaceProvider
-		)
+		if #available(iOS 15.0, *) {
+			if SettingsHandler.shared.enablePiP {
+				// ✅ PiP setup 設置
+				PictureInPictureManager.shared.setup(
+					sourceView: glkView,
+					provider: GLCaptureSurfaceProvider(glContext: glkView.context) // 你自己的 CaptureSurfaceProvider
+				)
 
-		write_log_from_swift("OpenGL PiP setup complete🍫")
+				write_log_from_swift("OpenGL PiP setup complete🍫")
+					
+				}
+			}
 			
+		}
 
 	}
 	

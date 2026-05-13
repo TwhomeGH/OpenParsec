@@ -190,9 +190,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     }
 
 
-    // var eaglContext: EAGLContext? {
-	// 	return glkView?.context
-	// }
+    
 
     // MTKViewDelegate
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {

@@ -96,13 +96,12 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
 
     init(_ view: MTKView, updateImage: @escaping () -> Void) {
+        guard let device = view.device else { fatalError("Metal device not found") }
         self.mtkView = view
         self.updateImage = updateImage
+        self.metalDevice = device
         super.init()
 
-
-        guard let device = view.device else { fatalError("Metal device not found") }
-        self.metalDevice = device
         commandQueue = device.makeCommandQueue()
 
 
@@ -333,7 +332,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     private func renderPipFrameInBackground() {
         guard let pipTex = PictureInPictureManager.shared.metalCaptureTexture() else { return }
 
-        CParsec.renderMetalFrame(timeout: 1) { [weak self] frame, image in
+        _ = CParsec.renderMetalFrame(timeout: 1) { [weak self] frame, image in
             self?.handleFrame(frame, image: image)
         }
 

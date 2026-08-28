@@ -1,4 +1,5 @@
 import UIKit
+import AVFoundation
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate
@@ -7,6 +8,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 	{
 		// Override point for customization after application launch.
 		//UTMViewControllerPatches.patchAll()
+
+		// 統一在啟動時設定音訊 session：`.playback` 允許背景播放（PiP／遠端音訊），
+		// `.mixWithOthers` 讓遠端音訊與用戶正在播的其他音訊（音樂、影片）並存，
+		// 不會在連線開始播放時打斷它們。
+		try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
+
 		return true
 	}
 

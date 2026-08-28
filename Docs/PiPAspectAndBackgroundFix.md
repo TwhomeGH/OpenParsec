@@ -1,7 +1,7 @@
 # PiP 小窗比例與背景更新修復說明
 
 > 日期：2026-08-29
-> 涉及檔案：`PictureInPictureManager.swift`、`ParsecMetalRenderer.swift`、`ParsecGLKRenderer.swift`
+> 涉及檔案：`PictureInPictureManager.swift`、`ParsecMetalRenderer.swift`、`ParsecGLKRenderer.swift`、`AppDelegate.swift`
 
 ---
 
@@ -54,12 +54,20 @@ buffer 不再有新內容；既有的 GCD frame pump 只是重複把**同一個�
 
 ## 三、音訊不中斷用戶正在播的內容
 
-PiP 的 AVAudioSession 加上 `.mixWithOthers`，啟用 PiP 時不會打斷
-用戶正在聽的音樂或看的影片：
+遠端音訊用 `AudioQueue` 播放，但 App 原本沒有設定音訊 session —— 預設的
+`.soloAmbient` 會在連線開始播放音訊時**中斷**用戶正在聽的音樂/看的影片。
+
+### 修法（`AppDelegate.swift`）
+在 **App 啟動時**統一設定，連線（含 PiP）都套用：
 
 ```swift
 setCategory(.playback, mode: .default, options: [.mixWithOthers])
 ```
+
+- `.playback`：允許背景播放（PiP／遠端音訊需要）
+- `.mixWithOthers`：與用戶正在播的其他音訊並存，不中斷它們
+
+`PictureInPictureManager.setup` 內仍會重設一次相同設定，保持 PiP 路徑獨立正確。
 
 ---
 

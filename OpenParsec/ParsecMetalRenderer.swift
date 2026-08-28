@@ -10,6 +10,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
     weak var mtkView: MTKView?
     var updateImage: (() -> Void)?
 
+    private let metalDevice: MTLDevice
     private var commandQueue: MTLCommandQueue?
     private var pipelineState: MTLRenderPipelineState?
 
@@ -101,6 +102,7 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
 
 
         guard let device = view.device else { fatalError("Metal device not found") }
+        self.metalDevice = device
         commandQueue = device.makeCommandQueue()
 
 
@@ -132,6 +134,14 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         view.isPaused = false
         view.framebufferOnly = false
         view.colorPixelFormat = .bgra8Unorm
+
+        // 背景時 MTKView 的 display link 會被系統停止，PiP 只能靠 pump
+        // 呼叫這個 closure 自行拉幀＋繪製，才不會凍結。
+        if #available(iOS 15.0, *) {
+            PictureInPictureManager.shared.captureSourceRenderer = { [weak self] in
+                self?.renderPipFrameInBackground()
+            }
+        }
     }
 
     // PollFrame → 取得最新畫面
@@ -154,6 +164,11 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         let height = Int(frame.height)
 
         guard let device = mtkView?.device else { return }
+
+        // PiP 擷取面要對齊實際視訊尺寸（比例），而非裝置螢幕
+        if #available(iOS 15.0, *) {
+            PictureInPictureManager.shared.updateVideoSize(width: width, height: height)
+        }
 
         // Y 平面大小 = width * height
         let ySize = width * height
@@ -251,37 +266,10 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         encoder.endEncoding()
 
         if #available(iOS 15.0, *) {
-            if let pipTex = PictureInPictureManager.shared.metalCaptureTexture() {
-                let pipPass = MTLRenderPassDescriptor()
-                pipPass.colorAttachments[0].texture = pipTex
-                pipPass.colorAttachments[0].loadAction = .clear
-                pipPass.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 1)
-                pipPass.colorAttachments[0].storeAction = .store
-
-                if let pipEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: pipPass) {
-                    pipEncoder.setRenderPipelineState(pipelineState)
-
-                    var pipSize = SIMD2<Float>(Float(pipTex.width), Float(pipTex.height))
-                    let pipSizeBuffer = view.device!.makeBuffer(bytes: &pipSize,
-                                                                length: MemoryLayout<SIMD2<Float>>.stride,
-                                                                options: [])
-                    pipEncoder.setVertexBuffer(pipSizeBuffer, offset: 0, index: 0)
-
-                    // PiP 需要垂直翻轉（AVSampleBufferDisplayLayer 是左上原點）
-                    var pipFlip: UInt32 = 1
-                    let pipFlipBuffer = view.device!.makeBuffer(bytes: &pipFlip,
-                                                                length: MemoryLayout<UInt32>.stride,
-                                                                options: [])
-                    pipEncoder.setVertexBuffer(pipFlipBuffer, offset: 0, index: 1)
-
-                    pipEncoder.setFragmentBuffer(showTextBuffer, offset: 0, index: 1)
-                    pipEncoder.setFragmentTexture(yTex, index: 0)
-                    pipEncoder.setFragmentTexture(uvTex, index: 1)
-                    pipEncoder.setFragmentTexture(textTex, index: 2)
-
-                    pipEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-                    pipEncoder.endEncoding()
-                }
+            if let pipTex = PictureInPictureManager.shared.metalCaptureTexture(),
+               let pipEncoder = makePipEncoder(commandBuffer: commandBuffer, texture: pipTex) {
+                pipEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+                pipEncoder.endEncoding()
             }
         }
 
@@ -299,6 +287,65 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         updateImage?()
     }
 
+    /// 建立畫進 PiP 擷取 texture 的 render encoder（前景主 pass 與背景 pump 共用）
+    private func makePipEncoder(commandBuffer: MTLCommandBuffer,
+                                texture: MTLTexture) -> MTLRenderCommandEncoder? {
+        guard let pipelineState = pipelineState else { return nil }
+
+        let pipPass = MTLRenderPassDescriptor()
+        pipPass.colorAttachments[0].texture = texture
+        pipPass.colorAttachments[0].loadAction = .clear
+        pipPass.colorAttachments[0].clearColor = MTLClearColor(red: 0, green: 0, blue: 0, alpha: 1)
+        pipPass.colorAttachments[0].storeAction = .store
+
+        guard let pipEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: pipPass) else { return nil }
+        pipEncoder.setRenderPipelineState(pipelineState)
+
+        var pipSize = SIMD2<Float>(Float(texture.width), Float(texture.height))
+        let pipSizeBuffer = metalDevice.makeBuffer(bytes: &pipSize,
+                                                   length: MemoryLayout<SIMD2<Float>>.stride,
+                                                   options: [])
+        pipEncoder.setVertexBuffer(pipSizeBuffer, offset: 0, index: 0)
+
+        // PiP 需要垂直翻轉（AVSampleBufferDisplayLayer 是左上原點）
+        var pipFlip: UInt32 = 1
+        let pipFlipBuffer = metalDevice.makeBuffer(bytes: &pipFlip,
+                                                   length: MemoryLayout<UInt32>.stride,
+                                                   options: [])
+        pipEncoder.setVertexBuffer(pipFlipBuffer, offset: 0, index: 1)
+
+        var showText: UInt32 = SettingsHandler.shared.MetalText ? 1 : 0
+        let showTextBuffer = metalDevice.makeBuffer(bytes: &showText,
+                                                    length: MemoryLayout<UInt32>.stride,
+                                                    options: [])
+        pipEncoder.setFragmentBuffer(showTextBuffer, offset: 0, index: 1)
+
+        pipEncoder.setFragmentTexture(yTexture, index: 0)
+        pipEncoder.setFragmentTexture(uvTexture, index: 1)
+        pipEncoder.setFragmentTexture(textTexture, index: 2)
+
+        return pipEncoder
+    }
+
+    /// 背景時由 frame pump 呼叫：解碼最新幀並畫進 PiP 擷取 texture。
+    /// 不使用 MTKView 的 currentDrawable（背景時不可用），只寫 capture texture。
+    @available(iOS 15.0, *)
+    private func renderPipFrameInBackground() {
+        guard let pipTex = PictureInPictureManager.shared.metalCaptureTexture() else { return }
+
+        CParsec.renderMetalFrame(timeout: 1) { [weak self] frame, image in
+            self?.handleFrame(frame, image: image)
+        }
+
+        guard yTexture != nil, uvTexture != nil, textTexture != nil,
+              let commandBuffer = commandQueue?.makeCommandBuffer(),
+              let pipEncoder = makePipEncoder(commandBuffer: commandBuffer, texture: pipTex) else { return }
+
+        pipEncoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
+        pipEncoder.endEncoding()
+        commandBuffer.commit()
+    }
+
     func cleanUp() {
         if let view = mtkView, (view.delegate as AnyObject?) === self {
             view.delegate = nil
@@ -312,6 +359,10 @@ class ParsecMetalRenderer: NSObject, MTKViewDelegate {
         textDebugImage = nil
         pipelineState = nil
         commandQueue = nil
+
+        if #available(iOS 15.0, *) {
+            PictureInPictureManager.shared.captureSourceRenderer = nil
+        }
     }
 
     deinit {

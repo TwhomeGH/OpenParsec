@@ -6,6 +6,8 @@ import GLKit
 import MetalKit
 import CoreMedia
 import IOSurface
+import UIKit
+import ParsecSDK
 
 
 
@@ -15,6 +17,7 @@ protocol CaptureSurfaceProvider {
     func setup(width: Int, height: Int)
     func destroy()
     func getPixelBuffer() -> CVPixelBuffer?
+    var captureSize: CGSize { get }
 }
 
 // MARK: - Picture in Picture Manager for OpenGL
@@ -26,6 +29,8 @@ final class GLCaptureSurfaceProvider: CaptureSurfaceProvider {
     private var glContext: EAGLContext
     private var prevFramebuffer: GLint = 0
     private var prevViewport: [GLint] = [0, 0, 0, 0]
+    private(set) var captureWidth = 0
+    private(set) var captureHeight = 0
 
     init(glContext: EAGLContext) {
         self.glContext = glContext
@@ -34,6 +39,12 @@ final class GLCaptureSurfaceProvider: CaptureSurfaceProvider {
 
     func setup(width: Int, height: Int) {
         destroy()
+
+        // texture/FBO 必須建立在正確的 GL context 上
+        EAGLContext.setCurrent(glContext)
+
+        var savedFBO: GLint = 0
+        glGetIntegerv(GLenum(GL_FRAMEBUFFER_BINDING), &savedFBO)
 
         let attrs: [String: Any] = [
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA,
@@ -74,9 +85,16 @@ final class GLCaptureSurfaceProvider: CaptureSurfaceProvider {
                                GLenum(GL_COLOR_ATTACHMENT0),
                                GLenum(GL_TEXTURE_2D),
                                textureName, 0)
+
+        // 還原原本綁定的 FBO，避免 resize 發生在 draw 中途時污染 render loop
+        glBindFramebuffer(GLenum(GL_FRAMEBUFFER), GLuint(savedFBO))
+
+        captureWidth = width
+        captureHeight = height
     }
 
     func destroy() {
+        EAGLContext.setCurrent(glContext)
         if captureFBO != 0 {
             glDeleteFramebuffers(1, &captureFBO)
             captureFBO = 0
@@ -87,6 +105,10 @@ final class GLCaptureSurfaceProvider: CaptureSurfaceProvider {
 
     func getPixelBuffer() -> CVPixelBuffer? {
         return pixelBuffer
+    }
+
+    var captureSize: CGSize {
+        return CGSize(width: captureWidth, height: captureHeight)
     }
 
     /// Binds the capture FBO (must be called on the GL render context).
@@ -113,6 +135,8 @@ final class MetalCaptureSurfaceProvider: CaptureSurfaceProvider {
     private var pixelBuffer: CVPixelBuffer?
     private var mtlTexture: MTLTexture?
     private var device: MTLDevice
+    private(set) var captureWidth = 0
+    private(set) var captureHeight = 0
 
     init(device: MTLDevice) {
         self.device = device
@@ -147,6 +171,9 @@ final class MetalCaptureSurfaceProvider: CaptureSurfaceProvider {
         desc.usage = [.shaderRead, .renderTarget]
         desc.storageMode = .shared
         self.mtlTexture = device.makeTexture(descriptor: desc, iosurface: ioSurface, plane: 0)
+
+        captureWidth = width
+        captureHeight = height
     }
 
     func destroy() {
@@ -156,6 +183,10 @@ final class MetalCaptureSurfaceProvider: CaptureSurfaceProvider {
 
     func getPixelBuffer() -> CVPixelBuffer? {
         return pixelBuffer
+    }
+
+    var captureSize: CGSize {
+        return CGSize(width: captureWidth, height: captureHeight)
     }
 
     func getMTLTexture() -> MTLTexture? {
@@ -180,6 +211,11 @@ class PictureInPictureManager: NSObject {
     private var currentPTS: CMTime = .zero
     private var lastFormattedBuffer: CVPixelBuffer?
 
+    /// 由 renderer 註冊：把最新一幀畫進擷取面。
+    /// 前景時 display link 會負責填內容；App 背景化後 display link 停止，
+    /// frame pump 必須改用這個 closure 自行拉幀＋繪製，PiP 才不會凍結。
+    var captureSourceRenderer: (() -> Void)?
+
     private(set) var isPiPActive = false
     private(set) var isStarting = false
     private var isSetup = false
@@ -190,6 +226,33 @@ class PictureInPictureManager: NSObject {
 
     private override init() { super.init() }
 
+    /// 目前擷取面的尺寸（pixel buffer 尺寸，決定 PiP 小窗比例）
+    var captureSize: CGSize? {
+        return captureProvider?.captureSize
+    }
+
+    /// 依實際視訊尺寸調整擷取面。
+    /// PiP 小窗比例由 buffer 決定，必須對齊影片比例（如 16:9），
+    /// 而非裝置螢幕比例（iPad 常為 4:3）——否則小窗會是 4:3 加上 letterbox。
+    func updateVideoSize(width: Int, height: Int) {
+        guard isPiPActive || isStarting else { return }
+        guard width > 0, height > 0 else { return }
+        guard let provider = captureProvider else { return }
+
+        let current = provider.captureSize
+        guard Int(current.width) != width || Int(current.height) != height else { return }
+
+        provider.setup(width: width, height: height)
+        write_log_from_swift("PiP 擷取面調整為 \(width)x\(height)")
+    }
+
+    /// 啟動 PiP 前先以目前視訊尺寸重建擷取面，讓小窗第一次出現就是正確比例
+    private func refreshCaptureSizeFromVideoStatus() {
+        var pcs = ParsecClientStatus()
+        guard CParsec.getStatusEx(&pcs) == PARSEC_OK else { return }
+        updateVideoSize(width: Int(pcs.decoder.0.width), height: Int(pcs.decoder.0.height))
+    }
+
     // MARK: - Setup
     func setup(sourceView: UIView, provider: CaptureSurfaceProvider) {
         guard !isSetup else { return }
@@ -197,7 +260,8 @@ class PictureInPictureManager: NSObject {
 
         self.captureProvider = provider
 
-        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        // mixWithOthers：啟用 PiP 時不要打斷用戶正在播的其他音訊（音樂、影片等）
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default, options: [.mixWithOthers])
         try? AVAudioSession.sharedInstance().setActive(true)
 
         let layer = AVSampleBufferDisplayLayer()
@@ -252,6 +316,12 @@ class PictureInPictureManager: NSObject {
 
     // MARK: PIP 繪製
     private func renderFrame() {
+        // 前景時 display link 已把畫面畫進擷取面；背景時 display link 停止，
+        // 由 pump 自己拉最新幀並繪製，否則 PiP 小窗會凍結在最後一幀。
+        if UIApplication.shared.applicationState != .active {
+            captureSourceRenderer?()
+        }
+
         guard let pixelBuffer = captureProvider?.getPixelBuffer(),
             let layer = sampleBufferDisplayLayer else {
             return
@@ -317,6 +387,7 @@ class PictureInPictureManager: NSObject {
         }
 
         isStarting = true
+        refreshCaptureSizeFromVideoStatus()
         startFramePump()
         controller.startPictureInPicture()
     }
@@ -366,6 +437,7 @@ class PictureInPictureManager: NSObject {
         onPiPStopped = nil
         onPiPStartFailed = nil
         onRestoreUserInterface = nil
+        captureSourceRenderer = nil
         try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 }

@@ -24,12 +24,22 @@ class ParsecGLKRenderer:NSObject, GLKViewDelegate, GLKViewControllerDelegate
 		glkView.delegate = self
 		glkViewController.delegate = self
 
+		// 背景時 GLKViewController 的 display link 會被系統停止，PiP 只能靠
+		// pump 呼叫這個 closure 自行拉幀＋繪製，才不會凍結。
+		if #available(iOS 15.0, *) {
+			PictureInPictureManager.shared.captureSourceRenderer = { [weak self] in
+				self?.renderPipFrameInBackground()
+			}
+		}
 	}
 
 	deinit
 	{
 		glkView.delegate = nil
 		glkViewController.delegate = nil
+		if #available(iOS 15.0, *) {
+			PictureInPictureManager.shared.captureSourceRenderer = nil
+		}
 	}
 
 	func glkView(_ view: GLKView, drawIn rect: CGRect) {
@@ -65,26 +75,55 @@ class ParsecGLKRenderer:NSObject, GLKViewDelegate, GLKViewControllerDelegate
 		CParsec.renderGLFrame(timeout: timeout)
 
 		if #available(iOS 15.0, *) {
+			updatePipCaptureSize()
+
 			if PictureInPictureManager.shared.beginOpenGLCaptureFrame() {
 				CParsec.renderGLFrame(timeout: 0)
 
 				// 翻轉 FBO 內容：AVSampleBufferDisplayLayer 是左上原點，OpenGL 是左下原點
-				var captureFBO: GLint = 0
-				glGetIntegerv(GLenum(GL_FRAMEBUFFER_BINDING), &captureFBO)
-				let w = GLint(view.drawableWidth)
-				let h = GLint(view.drawableHeight)
-				glBindFramebuffer(GLenum(GL_READ_FRAMEBUFFER), GLuint(captureFBO))
-				glBindFramebuffer(GLenum(GL_DRAW_FRAMEBUFFER), GLuint(captureFBO))
-				glBlitFramebuffer(0, 0, w, h,
-								  0, h, w, 0,
-								  GLbitfield(GL_COLOR_BUFFER_BIT),
-								  GLenum(GL_LINEAR))
+				flipPipCapture()
 
 				PictureInPictureManager.shared.endOpenGLCaptureFrame()
 			}
 		}
 
 		updateImage()
+	}
+
+
+	// 依實際視訊尺寸重建 PiP 擷取面（比例要對齊影片 16:9，而非螢幕 4:3）
+	@available(iOS 15.0, *)
+	private func updatePipCaptureSize() {
+		guard PictureInPictureManager.shared.isPiPActive || PictureInPictureManager.shared.isStarting else { return }
+		var pcs = ParsecClientStatus()
+		guard CParsec.getStatusEx(&pcs) == PARSEC_OK else { return }
+		PictureInPictureManager.shared.updateVideoSize(width: Int(pcs.decoder.0.width), height: Int(pcs.decoder.0.height))
+	}
+
+	@available(iOS 15.0, *)
+	private func flipPipCapture() {
+		var captureFBO: GLint = 0
+		glGetIntegerv(GLenum(GL_FRAMEBUFFER_BINDING), &captureFBO)
+		guard let size = PictureInPictureManager.shared.captureSize else { return }
+		let w = GLint(size.width)
+		let h = GLint(size.height)
+		glBindFramebuffer(GLenum(GL_READ_FRAMEBUFFER), GLuint(captureFBO))
+		glBindFramebuffer(GLenum(GL_DRAW_FRAMEBUFFER), GLuint(captureFBO))
+		glBlitFramebuffer(0, 0, w, h,
+						  0, h, w, 0,
+						  GLbitfield(GL_COLOR_BUFFER_BIT),
+						  GLenum(GL_LINEAR))
+	}
+
+	// 背景時由 frame pump 呼叫：直接把最新幀 render 進 PiP 擷取 FBO
+	@available(iOS 15.0, *)
+	private func renderPipFrameInBackground() {
+		EAGLContext.setCurrent(glkView.context)
+
+		guard PictureInPictureManager.shared.beginOpenGLCaptureFrame() else { return }
+		CParsec.renderGLFrame(timeout: 0)
+		flipPipCapture()
+		PictureInPictureManager.shared.endOpenGLCaptureFrame()
 	}
 
 

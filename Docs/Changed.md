@@ -23,4 +23,5 @@
 
 - [近期改動部分說明](./New.md)
 - [輸入修復與子母畫面行為更新](./PiPAndKeyboardFixes.md)
+- [PiP 小窗比例與背景更新修復](./PiPAspectAndBackgroundFix.md)
 - [日誌功能模塊](./Logger.md)
